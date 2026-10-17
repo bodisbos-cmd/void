@@ -1985,6 +1985,25 @@ html body:has(.login-layout){
 
 html body main.app-shell>aside.sidebar .nav-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important;line-height:1!important;color:rgba(222,224,230,.78)!important}
 html body main.app-shell>aside.sidebar .nav-icon svg{display:block!important;width:17px!important;height:17px!important;stroke:currentColor!important;fill:none!important;stroke-width:1.55!important;stroke-linecap:round!important;stroke-linejoin:round!important;flex:0 0 17px!important}
+
+/* Tighten the login eclipse scale and keep the form itself free of a duplicate wordmark. */
+html body:has(.login-layout) .login-visual .visual-orbit{
+ top:12%!important;left:9%!important;width:min(20vw,280px)!important;
+ opacity:.2!important;
+}
+html body:has(.login-layout) .login-visual .visual-eyebrow{
+ top:calc(12% + min(20vw,280px) + 8px)!important;
+ left:9%!important;width:min(20vw,280px)!important;
+ font-size:21px!important;letter-spacing:.15em!important;
+}
+html body:has(.login-layout) .login-visual h2{
+ top:calc(12% + min(20vw,280px) + 39px)!important;
+ left:9%!important;width:min(20vw,280px)!important;
+}
+html body .login-layout>.card .login-brand{display:none!important}
+@media(max-width:850px){
+ html body:has(.login-layout) .login-visual .visual-orbit{width:72vw!important;top:4%!important;left:14%!important}
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
