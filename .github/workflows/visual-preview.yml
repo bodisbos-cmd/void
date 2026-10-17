@@ -177,6 +177,19 @@ jobs:
                       raise SystemExit("Missing navigation item: " + nav)
                   locator.click()
                   assert_active_section(nav)
+                  if nav == "create":
+                      tabs = page.locator('#createServiceCard .creation-tab[role="tab"]')
+                      if tabs.count() != 3:
+                          raise SystemExit("Create service page must expose the three reference tabs")
+                      page.locator('#creationTabLimits').click()
+                      if not page.locator('#creationPanelLimits').is_visible() or page.locator('#creationPanelGeneral').is_visible():
+                          raise SystemExit("Create service limits tab did not switch panels")
+                      page.locator('#creationTabProfiles').click()
+                      if not page.locator('#creationPanelProfiles').is_visible() or page.locator('#clientProfileChoices input[name="clientProfile"]').count() < 1:
+                          raise SystemExit("Create service protocol tab has no profile checkboxes")
+                      page.locator('#creationTabGeneral').click()
+                      if not page.locator('#creationPanelGeneral').is_visible() or page.locator('#creationTabGeneral').get_attribute('aria-selected') != 'true':
+                          raise SystemExit("Create service general tab did not restore correctly")
                   if nav == "servers":
                       page.wait_for_function("""() => {
                         const e=document.getElementById('serverStatusGrid');
