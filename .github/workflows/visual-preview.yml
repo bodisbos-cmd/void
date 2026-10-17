@@ -79,6 +79,23 @@ jobs:
               page.on("pageerror", lambda e: errors.append(str(e) + " | " + str(getattr(e, "stack", ""))))
               page.goto(base + "/login", wait_until="domcontentloaded")
               print("LOGIN_LAYOUT=" + str(page.locator(".login-layout").evaluate("(e) => ({grid:getComputedStyle(e).gridTemplateColumns,display:getComputedStyle(e).display,visual:getComputedStyle(e.querySelector('.login-visual')).display,repairText:(document.getElementById('abyss-layout-repair')||{}).textContent?.includes('Reference correction'),repairCount:document.querySelectorAll('#abyss-layout-repair').length,repairStyles:[...document.querySelectorAll('style')].filter(s=>s.id==='abyss-layout-repair').map(s=>({len:s.textContent.length,grid:s.textContent.includes('grid-template-columns:minmax(0,1fr)!important')}))})")))
+              login_geometry = page.evaluate("""() => {
+                const box=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,display:getComputedStyle(e).display}};
+                const overlap=(a,b)=>!(a.right<=b.x||b.right<=a.x||a.bottom<=b.y||b.bottom<=a.y);
+                const orbit=box(document.querySelector('.login-visual .visual-orbit'));
+                const wordmark=box(document.querySelector('.login-visual .visual-eyebrow'));
+                const subtitle=box(document.querySelector('.login-visual h2'));
+                const card=box(document.querySelector('.login-layout>.card'));
+                return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,orbit,wordmark,subtitle,card,
+                  orbitCardOverlap:orbit&&card?overlap(orbit,card):true,
+                  wordmarkCardOverlap:wordmark&&card?overlap(wordmark,card):true,
+                  brandVisible:!!wordmark&&!!subtitle&&wordmark.display!=='none'&&subtitle.display!=='none'};
+              }""")
+              print("LOGIN_GEOMETRY=" + repr(login_geometry))
+              if login_geometry["documentWidth"] > login_geometry["viewport"] + 1:
+                  raise SystemExit("Login has horizontal overflow: " + repr(login_geometry))
+              if not login_geometry["brandVisible"] or login_geometry["orbitCardOverlap"] or login_geometry["wordmarkCardOverlap"]:
+                  raise SystemExit("Login brand/orbit overlaps the form or is hidden: " + repr(login_geometry))
               page.screenshot(path=str(out / "01-login-desktop.png"), full_page=False, animations="disabled")
               page.locator('input[name="username"]').fill("admin")
               page.locator('input[name="password"]').fill("admin")
