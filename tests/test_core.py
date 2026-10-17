@@ -24,9 +24,9 @@ class CoreTests(unittest.TestCase):
         self.assertFalse(mod.verify_password("wrong-password", hashed))
 
     def test_production_install_rejects_missing_or_default_bootstrap_password(self):
-        previous_env = {key: os.environ.get(key) for key in ("APP_ENV", "ENVIRONMENT", "RAILWAY_ENVIRONMENT_NAME", "ABYSS_INITIAL_ADMIN_PASSWORD")}
+        previous_env = {key: os.environ.get(key) for key in ("APP_ENV", "ENVIRONMENT", "RAILWAY_ENVIRONMENT_NAME", "RAILWAY_PROJECT_ID", "RAILWAY_SERVICE_ID", "ABYSS_INITIAL_ADMIN_PASSWORD")}
         try:
-            for key in ("APP_ENV", "ENVIRONMENT", "RAILWAY_ENVIRONMENT_NAME"):
+            for key in ("APP_ENV", "ENVIRONMENT", "RAILWAY_ENVIRONMENT_NAME", "RAILWAY_PROJECT_ID", "RAILWAY_SERVICE_ID"):
                 os.environ.pop(key, None)
             os.environ["APP_ENV"] = "production"
             with mod.db() as conn:
