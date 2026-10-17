@@ -107,6 +107,19 @@ jobs:
                 return e && e.querySelectorAll('.dashboard-component').length === 4;
               }""", timeout=45000)
               page.wait_for_timeout(16000)
+              chart_history = page.evaluate("""async () => {
+                const response=await fetch('/api/system/metrics',{cache:'no-store'});
+                const data=await response.json();
+                const canvas=document.getElementById('usageSparkline');
+                const label=canvas?.getAttribute('aria-label')||'';
+                const match=label.match(/(\\d+)$/);
+                return {httpStatus:response.status,apiSamples:Array.isArray(data.history)?data.history.length:0,renderedSamples:match?Number(match[1]):0,canvasWidth:canvas?.width||0};
+              }""")
+              print("CHART_HISTORY=" + repr(chart_history))
+              if chart_history["httpStatus"] != 200 or chart_history["renderedSamples"] < 1 or chart_history["canvasWidth"] < 100:
+                  raise SystemExit("Dashboard resource chart did not render actual metrics: " + repr(chart_history))
+              if chart_history["apiSamples"] > 2 and chart_history["renderedSamples"] < min(24, chart_history["apiSamples"]) - 1:
+                  raise SystemExit("Dashboard chart ignored the API metrics history: " + repr(chart_history))
               def visible_sections(target):
                   return target.locator("[data-section-page]").evaluate_all("(els) => els.filter(e => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 0).map(e => e.dataset.sectionPage)")
               def assert_active_section(name):
