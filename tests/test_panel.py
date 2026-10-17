@@ -80,7 +80,7 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "no-store" in response.headers.get("cache-control", "")
-    assert '/dashboard.js?v=20261016-layoutfix1' in response.text
+    assert '/dashboard.js?v=20261018-chart-stallfix1' in response.text
     assert 'id="abyss-theme-system"' in response.text
     assert 'id="abyss-theme-polish"' in response.text
     assert 'id="abyss-theme-controller"' in response.text
@@ -127,6 +127,11 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "function loadServerStatus()" in dashboard_script.text
     assert "function loadReports()" in dashboard_script.text
     assert "function renderProtocolCatalog(profiles)" in dashboard_script.text
+    assert "setTimeout(()=>controller.abort(),20000)" in dashboard_script.text
+    assert "metricsRequestPending" in dashboard_script.text
+    assert "drawUsageSparkline(m,d.history)" in dashboard_script.text
+    assert "دریافت آمار نمودار ناموفق بود" in dashboard_script.text
+    assert "درخواست API پس از ۲۰ ثانیه پاسخ نداد." in dashboard_script.text
     assert response.text.count('id="name"') == 1
     assert response.text.count('id="clientProfileChoices"') == 1
     assert 'data-section-page="clients"' in response.text
@@ -167,6 +172,17 @@ def test_dashboard_requires_login(client):
     assert response.status_code == 303
     assert response.headers["location"] == "/login"
     assert client.get("/api/overview").status_code == 401
+
+
+def test_system_metrics_exposes_history_samples_for_chart(client):
+    admin_client(client)
+    response = client.get("/api/system/metrics")
+    assert response.status_code == 200
+    payload = response.json()
+    history = payload.get("history")
+    assert isinstance(history, list)
+    assert history
+    assert {"at", "cpu_percent", "memory_used_percent", "traffic_bytes_per_second"} <= set(history[-1])
 
 
 def test_create_pause_subscription_and_revoke(client):
