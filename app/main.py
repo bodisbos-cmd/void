@@ -2511,7 +2511,7 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
 @media(min-width:851px){
  html body main.app-shell>.workspace>#dashboardUsageCard>.stats{display:none!important}
  html body main.app-shell>.workspace>#dashboardUsageCard{height:220px!important;min-height:220px!important;max-height:220px!important;padding:12px 13px!important;overflow:hidden!important}
- html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:138px!important;max-height:138px!important;margin-top:6px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:108px!important;max-height:108px!important;margin-top:6px!important}
  html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:3px!important}
  html body main.app-shell>.workspace>#panelHealthCard{height:auto!important;min-height:220px!important;max-height:none!important;overflow:visible!important;padding:12px!important}
  html body main.app-shell>.workspace>#dashboardQuickCard{height:auto!important;min-height:220px!important;max-height:none!important;overflow:visible!important;padding:12px!important}
