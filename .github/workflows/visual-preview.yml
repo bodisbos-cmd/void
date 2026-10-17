@@ -203,6 +203,10 @@ jobs:
                       page.locator('#creationTabGeneral').click()
                       if not page.locator('#creationPanelGeneral').is_visible() or page.locator('#creationTabGeneral').get_attribute('aria-selected') != 'true':
                           raise SystemExit("Create service general tab did not restore correctly")
+                      # Capture the protocol-choice state that matches the supplied reference, not the temporary tab used for the interaction test.
+                      page.locator('#creationTabProfiles').click()
+                      if not page.locator('#creationPanelProfiles').is_visible():
+                          raise SystemExit("Create service preview did not return to the reference protocol-choice panel")
                   if nav == "servers":
                       page.wait_for_function("""() => {
                         const e=document.getElementById('serverStatusGrid');
