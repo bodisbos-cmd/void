@@ -23,6 +23,31 @@ class CoreTests(unittest.TestCase):
         self.assertTrue(mod.verify_password("a-strong-test-password-123", hashed))
         self.assertFalse(mod.verify_password("wrong-password", hashed))
 
+    def test_production_install_rejects_missing_or_default_bootstrap_password(self):
+        previous_env = {key: os.environ.get(key) for key in ("APP_ENV", "ENVIRONMENT", "RAILWAY_ENVIRONMENT_NAME", "ABYSS_INITIAL_ADMIN_PASSWORD")}
+        try:
+            for key in ("APP_ENV", "ENVIRONMENT", "RAILWAY_ENVIRONMENT_NAME"):
+                os.environ.pop(key, None)
+            os.environ["APP_ENV"] = "production"
+            with mod.db() as conn:
+                conn.execute("DELETE FROM panel_admins WHERE username='admin'")
+                conn.execute("DELETE FROM admins WHERE id=1")
+            for password in ("", "admin", "password", "12345678", "changeme"):
+                if password:
+                    os.environ["ABYSS_INITIAL_ADMIN_PASSWORD"] = password
+                else:
+                    os.environ.pop("ABYSS_INITIAL_ADMIN_PASSWORD", None)
+                with self.subTest(password=password or "<missing>"):
+                    with self.assertRaisesRegex(RuntimeError, "strong, unique ABYSS_INITIAL_ADMIN_PASSWORD"):
+                        mod.init_db()
+        finally:
+            for key, value in previous_env.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+            mod.init_db()
+
     def test_xray_config_has_loopback_only_inbounds(self):
         config = mod.make_xray_config()
         self.assertEqual(len(config["inbounds"]), 10)
