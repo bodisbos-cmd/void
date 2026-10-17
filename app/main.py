@@ -2086,6 +2086,17 @@ html body .login-layout>.card .login-brand{display:none!important}
 .protocol-table-toggle{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;color:var(--ab-muted);font-size:10px}
 .protocol-table-toggle input{accent-color:#aeb8b2;width:15px;height:15px}
 @media(max-width:850px){.protocol-table th,.protocol-table td{padding:10px 8px!important}}
+
+/* Native table formatting must override the legacy global table{display:block} rule. */
+html body main.app-shell .clients-table,
+html body main.app-shell .protocol-table{
+ display:table!important;width:100%!important;max-width:none!important;
+ overflow:visible!important;border-collapse:separate!important;
+}
+html body main.app-shell .clients-table-scroll,
+html body main.app-shell .protocol-table-scroll{
+ display:block!important;width:100%!important;max-width:none!important;
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
