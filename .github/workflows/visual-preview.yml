@@ -134,6 +134,9 @@ jobs:
                   raise SystemExit("Dashboard cards do not match the reference row order (chart left, health center, quick details right): " + repr(dashboard_layout))
               if any(dashboard_layout[k] for k in ("chartHealthOverlap","chartQuickOverlap","healthQuickOverlap")):
                   raise SystemExit("Dashboard cards overlap: " + repr(dashboard_layout))
+              recent_activity = page.locator("#recentActivityList").inner_text()
+              if "Administrator signed in as" in recent_activity or "Visual preview:" in recent_activity:
+                  raise SystemExit("Dashboard recent activity contains untranslated English messages: " + recent_activity)
               page.screenshot(path=str(out / "02-dashboard-desktop.png"), full_page=False, animations="disabled")
               for nav, filename in [("clients","03-users-desktop.png"),("create","04-create-desktop.png"),("servers","05-servers-desktop.png"),("protocols","06-protocols-desktop.png"),("reports","07-reports-desktop.png"),("settings","08-settings-desktop.png")]:
                   locator = page.locator('[data-nav="' + nav + '"]').first
