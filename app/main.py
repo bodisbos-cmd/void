@@ -1928,6 +1928,20 @@ html body main.app-shell{background-image:radial-gradient(1px 1px at 7% 13%,rgba
 
 
 @media(min-width:851px){html body main.app-shell>.workspace>.top>.section-heading{justify-self:end!important;text-align:left!important}}
+
+@media(max-width:850px){
+ html body main.app-shell>.workspace>.top{grid-template-rows:auto auto auto!important}
+ html body main.app-shell>.workspace>.top>.abyss-brand-row{
+   display:flex!important;grid-row:1!important;grid-column:1!important;justify-self:center!important;
+   align-items:center!important;gap:6px!important;margin:0 auto 2px!important;
+   font-size:10px!important;letter-spacing:.12em!important;max-width:100%!important;
+ }
+ html body main.app-shell>.workspace>.top>.abyss-brand-row .abyss-logo-mark{width:23px!important;height:23px!important;flex:0 0 23px!important}
+ html body main.app-shell>.workspace>.top>.abyss-brand-row .brand-name{font-size:10px!important;line-height:1.2!important}
+ html body main.app-shell>.workspace>.top>.abyss-brand-row .brand-name small{font-size:8px!important}
+ html body main.app-shell>.workspace>.top>.section-heading{grid-row:2!important}
+ html body main.app-shell>.workspace>.top>.tools{grid-row:3!important}
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
