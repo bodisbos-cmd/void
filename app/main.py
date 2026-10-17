@@ -76,6 +76,13 @@ def init_db():
         CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT,at TEXT NOT NULL,level TEXT NOT NULL,message TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS profile_feedback(id INTEGER PRIMARY KEY AUTOINCREMENT,client_id TEXT NOT NULL,carrier TEXT NOT NULL,profile_key TEXT NOT NULL,result TEXT NOT NULL CHECK(result IN ('ok','fail')),created_at TEXT NOT NULL,user_agent TEXT NOT NULL DEFAULT '',UNIQUE(client_id,carrier,profile_key));
+        CREATE TABLE IF NOT EXISTS metrics_history(
+            sampled_at INTEGER PRIMARY KEY,
+            recorded_traffic_bytes INTEGER NOT NULL DEFAULT 0,
+            cpu_percent REAL,
+            memory_used_percent REAL
+        );
+        CREATE INDEX IF NOT EXISTS idx_metrics_history_sampled_at ON metrics_history(sampled_at DESC);
         CREATE INDEX IF NOT EXISTS idx_profile_feedback_carrier ON profile_feedback(carrier,profile_key,created_at DESC);
         CREATE INDEX IF NOT EXISTS idx_clients_created ON clients(created_at DESC);
         """)
