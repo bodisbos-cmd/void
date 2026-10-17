@@ -598,7 +598,7 @@ function drawUsageSparkline(metrics){
   ctx.beginPath();ctx.arc(right,ny,2.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
  }
  const note=document.getElementById('chartNote');
- if(note)note.textContent=usageHistory.length<3?'در حال جمع‌آوری نمونه‌های واقعی؛ نمودار با نمونه‌های بعدی کامل می‌شود.':'تاریخچهٔ واقعی ۲۴ نمونهٔ اخیر · به‌روزرسانی هر ۱۵ ثانیه';
+ if(note)note.textContent=usageHistory.length<3?'در حال جمع‌آوری نمونه‌های واقعی؛ نمودار با نمونه‌های بعدی کامل می‌شود.':'تاریخچهٔ واقعی ۲۴ نمونهٔ اخیر · نمونه‌برداری هر ۱۰ ثانیه';
  c.setAttribute('aria-label','نمودار واقعی CPU، RAM و نرخ ترافیک؛ تعداد نمونه‌ها: '+usageHistory.length);
 }
 async function runDiagnostics(){const summary=document.getElementById('diagnosticSummary'),out=document.getElementById('diagnosticResults');if(summary)summary.textContent='در حال بررسی تنظیمات، Xray، Nginx و همه مسیرها…';if(out)out.innerHTML='';try{const carrier=document.getElementById('diagnosticCarrier')?.value||'mci';const d=await api('/api/system/diagnostics?carrier='+encodeURIComponent(carrier));if(summary)summary.textContent=d.summary+' · اپراتور: '+d.carrier_label+' · مسیر داخلی است، نه پینگ واقعی تونل.';if(out)out.innerHTML=(d.profiles||[]).map(p=>'<div class="diag-item"><b>'+esc(p.label)+'</b><div class="small">حالت: '+esc(p.mode||p.network)+' · HTTP '+esc(p.http_status??'—')+' · '+esc(p.latency_ms??'—')+' ms · گزارش: '+esc(p.feedback_reports??0)+' · موفقیت: '+(p.feedback_success_rate==null?'—':esc(p.feedback_success_rate)+'%')+'</div><div class="'+(p.route_ok?'diag-ok':'diag-bad')+'">'+esc(p.status_text||p.hint||p.status)+'</div><div class="small">پیشنهاد: '+esc(p.recommendation||p.hint||'—')+'</div></div>').join('')}catch(e){if(summary)summary.textContent='خطای عیب‌یابی: '+e.message}}
