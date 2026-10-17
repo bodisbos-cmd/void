@@ -2540,6 +2540,33 @@ html body main.app-shell>.workspace>#dashboardUsageCard .stats{display:none!impo
 html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{margin-top:12px!important}
 html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6px!important}
  @media(min-width:561px){html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:72px!important;max-height:72px!important;margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{display:none!important}}
+/* Reference match pass: tighten the header-to-metrics gap and deepen the raised black-glass finish. */
+@media(min-width:851px){
+ html body main.app-shell>.workspace{padding-top:34px!important}
+ html body main.app-shell>.workspace>#overviewStats{margin-top:0!important;margin-bottom:10px!important}
+ html body main.app-shell>.workspace>#overviewStats>.card{
+  background:linear-gradient(145deg,rgba(255,255,255,.052),rgba(255,255,255,.012) 54%,rgba(0,0,0,.18))!important;
+  border-color:rgba(210,214,222,.14)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),inset 0 -1px 0 rgba(0,0,0,.55),0 9px 24px rgba(0,0,0,.24)!important;
+ }
+ html body main.app-shell>.workspace>#dashboardUsageCard,
+ html body main.app-shell>.workspace>#panelHealthCard,
+ html body main.app-shell>.workspace>#dashboardQuickCard{
+  background:linear-gradient(145deg,rgba(20,20,22,.96),rgba(9,9,10,.985) 72%)!important;
+  border-color:rgba(205,209,218,.15)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),inset 0 -1px 0 rgba(0,0,0,.65),0 12px 28px rgba(0,0,0,.2)!important;
+ }
+}
+@media(min-width:851px) and (max-height:800px){html body main.app-shell>.workspace{padding-top:30px!important}}
+@media(max-width:850px){
+ html body main.app-shell>.workspace>#overviewStats>.card,
+ html body main.app-shell>.workspace>#dashboardUsageCard,
+ html body main.app-shell>.workspace>#panelHealthCard,
+ html body main.app-shell>.workspace>#dashboardQuickCard{
+  border-color:rgba(205,209,218,.15)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 20px rgba(0,0,0,.18)!important;
+ }
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
