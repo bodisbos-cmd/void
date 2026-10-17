@@ -592,11 +592,16 @@ function showSection(name){document.querySelectorAll('[data-section-page]').forE
 function toggleSidebar(){const side=document.getElementById('sidebar');if(side)side.classList.toggle('open')}
 function rootOnly(show){document.querySelectorAll('[data-owner-only]').forEach(el=>el.classList.toggle('hidden',!show))}
 let trafficChartPeriod='24h';
+let trafficMetricsRequestId=0;
 async function loadMetrics(period=trafficChartPeriod){
+ if(!['24h','7d','30d'].includes(period))period='24h';
+ const requestId=++trafficMetricsRequestId;
+ trafficChartPeriod=period;
  try{
-  if(!['24h','7d','30d'].includes(period))period='24h';
-  trafficChartPeriod=period;
-  const d=await api('/api/system/metrics?period='+encodeURIComponent(period)),m=d.current||{};
+  const d=await api('/api/system/metrics?period='+encodeURIComponent(period));
+  // A slower response for an older period must never overwrite the current chart.
+  if(requestId!==trafficMetricsRequestId||period!==trafficChartPeriod)return;
+  const m=d.current||{};
   const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
   set('metricCpu',m.cpu_percent==null?'—':m.cpu_percent+'%');
   set('metricRam',m.memory_used_percent==null?'—':m.memory_used_percent+'%');
@@ -613,7 +618,11 @@ async function loadMetrics(period=trafficChartPeriod){
    button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));
   });
   drawUsageSparkline(d.traffic_history||[],period,Number(d.traffic_history_count)||0);
- }catch(e){const el=document.getElementById('profileChecks');if(el)el.textContent='خطای پایش: '+e.message}
+ }catch(e){
+  if(requestId!==trafficMetricsRequestId)return;
+  const el=document.getElementById('profileChecks');
+  if(el)el.textContent='خطای پایش: '+e.message;
+ }
 }
 function setTrafficChartPeriod(period){
  if(!['24h','7d','30d'].includes(period))return;
