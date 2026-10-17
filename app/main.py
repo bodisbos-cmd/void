@@ -11,6 +11,7 @@ from qrcode.image.svg import SvgPathImage
 from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from itsdangerous import BadSignature
+from starlette.background import BackgroundTask
 from starlette.datastructures import MutableHeaders
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -2294,13 +2295,16 @@ async def subscription_page(token:str,r:Request):
 @app.get("/api/backup/sqlite")
 async def backup_database(r:Request):
     require_root(r)
-    target=DATA_DIR/("abyss-backup-"+datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")+".sqlite3")
+    stamp=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    target=DATA_DIR/("abyss-backup-"+stamp+"-"+uuid.uuid4().hex[:8]+".sqlite3")
     with db() as source:
         dest=sqlite3.connect(target)
         try: source.backup(dest)
         finally: dest.close()
     event("INFO","Administrator created a database backup.")
-    return FileResponse(target,media_type="application/vnd.sqlite3",filename=target.name,headers={"Cache-Control":"no-store","X-Robots-Tag":"noindex, nofollow"})
+    return FileResponse(target,media_type="application/vnd.sqlite3",filename=target.name,
+        headers={"Cache-Control":"no-store","X-Robots-Tag":"noindex, nofollow"},
+        background=BackgroundTask(target.unlink,missing_ok=True))
 
 @app.post("/api/restore")
 async def restore_database(r:Request):
