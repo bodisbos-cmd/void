@@ -2159,6 +2159,13 @@ html body main.app-shell>.workspace>#dashboardQuickCard .dashboard-status-sr-onl
  overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;
  white-space:nowrap!important;border:0!important;opacity:0!important;pointer-events:none!important;
 }
+
+/* Desktop rail proportion from the supplied reference panels. */
+@media(min-width:1151px){
+ html body main.app-shell{grid-template-columns:220px minmax(0,1fr)!important}
+ html body main.app-shell>aside.sidebar{width:220px!important;padding:16px 10px!important}
+ html body main.app-shell>.workspace{min-width:0!important}
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
