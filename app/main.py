@@ -2097,6 +2097,49 @@ html body main.app-shell .clients-table-scroll,
 html body main.app-shell .protocol-table-scroll{
  display:block!important;width:100%!important;max-width:none!important;
 }
+
+/* Reference fidelity: repeat a sparse, irregular starfield across the page instead of a few isolated dots. */
+html body main.app-shell>.workspace{
+ background-color:transparent!important;
+ background-image:
+  radial-gradient(1px 1px at 12px 19px,rgba(238,240,245,.24) 98%,transparent),
+  radial-gradient(1px 1px at 82px 104px,rgba(238,240,245,.17) 98%,transparent),
+  radial-gradient(1.4px 1.4px at 156px 53px,rgba(238,240,245,.2) 98%,transparent),
+  radial-gradient(1px 1px at 221px 168px,rgba(238,240,245,.16) 98%,transparent),
+  radial-gradient(1px 1px at 279px 77px,rgba(238,240,245,.18) 98%,transparent),
+  radial-gradient(1px 1px at 47px 202px,rgba(238,240,245,.13) 98%,transparent),
+  radial-gradient(1.5px 1.5px at 197px 232px,rgba(238,240,245,.2) 98%,transparent),
+  radial-gradient(ellipse at 16% 28%,rgba(190,194,203,.025),transparent 38%)!important;
+ background-size:310px 260px,310px 260px,310px 260px,310px 260px,310px 260px,310px 260px,310px 260px,100% 100%!important;
+ background-repeat:repeat,repeat,repeat,repeat,repeat,repeat,repeat,no-repeat!important;
+}
+@media(min-width:851px) and (max-width:1150px){
+ html body main.app-shell>.workspace>.top>.tools{
+  flex-wrap:wrap!important;overflow:visible!important;overflow-x:visible!important;
+  white-space:normal!important;align-content:center!important;row-gap:7px!important;
+ }
+ html body main.app-shell>.workspace>.top>.tools>*{flex:0 1 auto!important;max-width:100%!important}
+ html body main.app-shell>.workspace>.top>.tools>.top-tools-search{flex:1 1 150px!important;min-width:140px!important}
+ html body main.app-shell>.workspace>.top>.tools>#abyssThemeDock{max-width:100%!important}
+}
+@media(max-width:850px){
+ html body main.app-shell>.workspace{
+  background-size:240px 220px,240px 220px,240px 220px,240px 220px,240px 220px,240px 220px,240px 220px,100% 100%!important;
+ }
+}
+/* Match the login reference's denser star field while keeping the central eclipse understated. */
+html body:has(.login-layout) .login-layout:after{
+ content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.58;
+ background-image:
+  radial-gradient(1px 1px at 18px 27px,rgba(245,246,249,.55) 98%,transparent),
+  radial-gradient(1px 1px at 93px 119px,rgba(245,246,249,.3) 98%,transparent),
+  radial-gradient(1.5px 1.5px at 177px 68px,rgba(245,246,249,.38) 98%,transparent),
+  radial-gradient(1px 1px at 244px 189px,rgba(245,246,249,.32) 98%,transparent),
+  radial-gradient(1px 1px at 286px 34px,rgba(245,246,249,.35) 98%,transparent),
+  radial-gradient(1px 1px at 56px 214px,rgba(245,246,249,.24) 98%,transparent);
+ background-size:320px 250px!important;background-repeat:repeat!important;
+}
+html body:has(.login-layout) .login-layout>.card{z-index:2!important}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
