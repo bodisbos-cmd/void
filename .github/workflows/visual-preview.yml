@@ -53,8 +53,9 @@ jobs:
                    json.dumps(["ws","httpupgrade","xhttp_auto"]))
               )
               event_at = (now - timedelta(days=5-i)).isoformat(timespec="seconds")
+              message = f"Created client '{name}' (visual-{i+1:02d})." if i == 5 else f"Visual preview: service created for {name}"
               db.execute("INSERT INTO events(at,level,message) VALUES(?,?,?)",
-                         (event_at, "INFO", f"Visual preview: service created for {name}"))
+                         (event_at, "INFO", message))
           db.commit()
           db.close()
           print("Seeded 6 isolated visual-preview clients and events.")
@@ -135,7 +136,7 @@ jobs:
               if any(dashboard_layout[k] for k in ("chartHealthOverlap","chartQuickOverlap","healthQuickOverlap")):
                   raise SystemExit("Dashboard cards overlap: " + repr(dashboard_layout))
               recent_activity = page.locator("#recentActivityList").inner_text()
-              if "Administrator signed in as" in recent_activity or "Visual preview:" in recent_activity:
+              if "Administrator signed in as" in recent_activity or "Created client " in recent_activity or "Visual preview:" in recent_activity:
                   raise SystemExit("Dashboard recent activity contains untranslated English messages: " + recent_activity)
               xray_state = page.evaluate("""async () => {
                 const r=await fetch('/api/overview',{cache:'no-store'}), d=await r.json();
