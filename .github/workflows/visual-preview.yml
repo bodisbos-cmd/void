@@ -216,7 +216,7 @@ jobs:
                       }""", timeout=45000)
                       protocol_view=page.evaluate("""() => ({rows:document.querySelectorAll('#protocolCatalog .protocol-table tbody tr').length,toggles:document.querySelectorAll('#protocolCatalog .protocol-table-toggle input[type=checkbox]').length})""")
                       print("PROTOCOL_TABLE_VIEW=" + repr(protocol_view))
-                      if protocol_view["rows"]<1 or protocol_view["toggles"]!==protocol_view["rows"]:
+                      if protocol_view["rows"]<1 or protocol_view["toggles"] != protocol_view["rows"]:
                           raise SystemExit("Protocol table/toggles are incomplete: " + repr(protocol_view))
                   page.screenshot(path=str(out / filename), full_page=False, animations="disabled")
               page.locator('[data-nav="dashboard"]').first.click()
