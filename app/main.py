@@ -1142,12 +1142,12 @@ html[data-abyss-theme="angel"] .top-tools-search,html[data-abyss-theme="angel"] 
  .workspace{width:100%!important;max-width:none!important;margin:0!important}
 }
 @media(prefers-reduced-motion:reduce){.sidebar,#menuToggle,#abyssMenuShade{transition:none!important}}
-</style>
+
 /* Keep the usage chart focused on traffic only; system resource metrics belong on the diagnostics page, not inside this dashboard card. */
 html body main.app-shell>.workspace>#dashboardUsageCard>.stats{display:none!important}
 html body main.app-shell>.workspace>#dashboardUsageCard>#usageSparkline{margin-top:12px!important}
 html body main.app-shell>.workspace>#dashboardUsageCard>#chartNote{margin-top:6px!important}
-"""
+</style>"""
 ABYSS_LAYOUT_REPAIR_JS = r"""<script id="abyss-layout-repair-js">
 (()=> {
   const init=()=>{
