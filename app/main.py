@@ -2425,6 +2425,17 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
 
 
 
+
+/* Prevent the desktop activity feed from cutting off its last visible event. */
+@media(min-width:1151px){
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList{
+  max-height:none!important;height:auto!important;overflow:visible!important
+ }
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event{
+  padding:8px 10px!important;margin-top:6px!important
+ }
+}
+
 /* Final desktop reference pass: compact dashboard rhythm and tighter top offset. */
 @media(min-width:851px){
  html body main.app-shell>.workspace{padding-top:56px!important}
