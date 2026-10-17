@@ -89,13 +89,14 @@ jobs:
                 return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,orbit,wordmark,subtitle,card,
                   orbitCardOverlap:orbit&&card?overlap(orbit,card):true,
                   wordmarkCardOverlap:wordmark&&card?overlap(wordmark,card):true,
-                  brandVisible:!!wordmark&&!!subtitle&&wordmark.display!=='none'&&subtitle.display!=='none'};
+                  brandVisible:!!wordmark&&!!subtitle&&wordmark.display!=='none'&&subtitle.display!=='none',
+                  brandAboveCard:!!subtitle&&subtitle.bottom<=card.y+1};
               }""")
               print("LOGIN_GEOMETRY=" + repr(login_geometry))
               if login_geometry["documentWidth"] > login_geometry["viewport"] + 1:
                   raise SystemExit("Login has horizontal overflow: " + repr(login_geometry))
-              if not login_geometry["brandVisible"] or login_geometry["orbitCardOverlap"] or login_geometry["wordmarkCardOverlap"]:
-                  raise SystemExit("Login brand/orbit overlaps the form or is hidden: " + repr(login_geometry))
+              if not login_geometry["brandVisible"] or login_geometry["orbitCardOverlap"] or login_geometry["wordmarkCardOverlap"] or not login_geometry["brandAboveCard"]:
+                  raise SystemExit("Login brand/orbit is hidden, overlaps the form, or sits below it: " + repr(login_geometry))
               page.screenshot(path=str(out / "01-login-desktop.png"), full_page=False, animations="disabled")
               page.locator('input[name="username"]').fill("admin")
               page.locator('input[name="password"]').fill("admin")
