@@ -2279,6 +2279,9 @@ html body .login-layout>.card .login-password-toggle{width:30px!important;min-wi
 html body:has(.login-layout) .login-visual .visual-orbit{top:4%!important;left:7%!important;width:min(20vw,180px)!important;opacity:.38!important}
 html body:has(.login-layout) .login-visual .visual-eyebrow{top:calc(4% + min(20vw,180px) + 8px)!important;left:7%!important;width:min(20vw,280px)!important;font-size:21px!important}
 html body:has(.login-layout) .login-visual h2{top:calc(4% + min(20vw,180px) + 39px)!important;left:7%!important;width:min(20vw,280px)!important}
+/* Four-column profile choices mirror the compact protocol matrix in the reference. */
+@media(min-width:1151px){html body main.app-shell>.workspace>#createServiceCard #clientProfileChoices.profile-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important}}
+
 
 
 @media(max-width:700px){
