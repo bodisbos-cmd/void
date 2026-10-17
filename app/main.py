@@ -2257,6 +2257,17 @@ html body #createServiceCard .profile-setting{min-height:58px!important;padding:
 html body #createServiceCard .profile-setting:has(input:checked){border-color:rgba(220,228,232,.32)!important;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.02))!important}
 @media(max-width:850px){html body #createServiceCard .profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:560px){html body #createServiceCard .creation-tabs{gap:4px!important}html body #createServiceCard .creation-tab{flex-basis:calc(50% - 4px)!important}html body #createServiceCard .creation-fields-general,html body #createServiceCard .creation-fields-limits{grid-template-columns:minmax(0,1fr)!important}html body #createServiceCard .profile-grid{grid-template-columns:minmax(0,1fr)!important}html body #createServiceCard .creation-submit-row{align-items:stretch!important;flex-direction:column!important}html body #createServiceCard .creation-submit-row button{width:100%!important}}
+/* Restore the reference eclipse/radial-ray mark; keep the starfield quiet and monochrome. */
+html body:has(.login-layout) .login-visual .visual-orbit{
+ opacity:.31!important;border-color:rgba(205,208,215,.22)!important;
+ background-image:radial-gradient(circle at 50% 50%,#020202 0 11.5%,rgba(3,3,4,.96) 12% 13.5%,transparent 14.2%),repeating-conic-gradient(from 0deg,rgba(205,208,215,.28) 0deg .38deg,transparent .42deg 2.4deg)!important;
+ background-size:100% 100%!important;
+ box-shadow:0 0 76px rgba(190,193,200,.045),inset 0 0 35px rgba(190,193,200,.035)!important;
+}
+html body:has(.login-layout) .login-visual .visual-orbit:before{border-color:rgba(215,217,223,.24)!important}
+html body:has(.login-layout) .login-visual .visual-orbit:after{border-color:rgba(226,228,232,.32)!important}
+@media(max-width:700px){html body:has(.login-layout) .login-visual .visual-orbit{opacity:.22!important}}
+
 /* Metric cards borrow the reference's compact, embossed icon medallions without inventing metrics. */
 html body main.app-shell>.workspace>#overviewStats>.card{
  position:relative!important;isolation:isolate!important;padding-left:64px!important;
