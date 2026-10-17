@@ -2372,6 +2372,35 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
  html body main.app-shell>.workspace>#overviewStats>.card:before{left:9px!important;width:28px!important;height:28px!important;background-size:15px 15px!important}
 }
 
+/* Desktop login visual scale and spacing: align the eclipse/wordmark as one left-column brand block. */
+@media(min-width:851px){
+ html body:has(.login-layout) .login-visual .visual-orbit{
+  top:10%!important;left:50%!important;transform:translateX(-50%)!important;
+  width:min(43vw,320px)!important;max-width:320px!important;opacity:.62!important;
+ }
+ html body:has(.login-layout) .login-visual .visual-eyebrow{
+  display:block!important;position:absolute!important;z-index:2!important;
+  top:calc(10% + min(43vw,320px) + 10px)!important;left:50%!important;
+  transform:translateX(-50%)!important;width:min(43vw,520px)!important;
+  text-align:center!important;font-size:23px!important;letter-spacing:.24em!important;
+ }
+ html body:has(.login-layout) .login-visual h2{
+  display:block!important;position:absolute!important;z-index:2!important;
+  top:calc(10% + min(43vw,320px) + 43px)!important;left:50%!important;
+  transform:translateX(-50%)!important;width:min(43vw,520px)!important;
+  text-align:center!important;font-size:11px!important;letter-spacing:.32em!important;
+ }
+ html body:has(.login-layout) .login-layout>.card{
+  width:min(100%,520px)!important;max-width:520px!important;
+  padding:40px 38px!important;
+ }
+ html body:has(.login-layout) .login-layout>.card h1{font-size:31px!important;line-height:1.42!important}
+ html body:has(.login-layout) .login-layout>.card form{margin-top:19px!important}
+ html body:has(.login-layout) .login-layout>.card input{min-height:45px!important}
+ html body:has(.login-layout) .login-layout>.card form>button:not(.login-password-toggle){min-height:44px!important}
+}
+
+
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
