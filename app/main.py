@@ -1942,6 +1942,46 @@ html body main.app-shell{background-image:radial-gradient(1px 1px at 7% 13%,rgba
  html body main.app-shell>.workspace>.top>.section-heading{grid-row:2!important}
  html body main.app-shell>.workspace>.top>.tools{grid-row:3!important}
 }
+
+/* Restore the wordmark beneath the eclipse, as shown in the supplied login reference. */
+html body:has(.login-layout) .login-visual .visual-eyebrow{
+ display:block!important;position:absolute!important;z-index:2!important;
+ top:calc(18% + min(31vw,400px) + 12px)!important;left:9%!important;
+ width:min(31vw,400px)!important;text-align:center!important;
+ color:rgba(238,239,242,.92)!important;font-size:23px!important;
+ font-weight:500!important;letter-spacing:.22em!important;line-height:1.5!important;
+}
+html body:has(.login-layout) .login-visual h2{
+ display:block!important;position:absolute!important;z-index:2!important;
+ top:calc(18% + min(31vw,400px) + 47px)!important;left:9%!important;
+ width:min(31vw,400px)!important;text-align:center!important;
+ color:rgba(211,213,219,.76)!important;font-size:10px!important;
+ font-weight:500!important;letter-spacing:.32em!important;line-height:1.5!important;margin:0!important;
+}
+html body:has(.login-layout) .login-visual p{display:none!important}
+html body:has(.login-layout){
+ background-color:#030304!important;
+ background-image:
+ radial-gradient(1px 1px at 4% 12%,rgba(237,239,244,.62) 98%,transparent),
+ radial-gradient(1px 1px at 9% 69%,rgba(237,239,244,.38) 98%,transparent),
+ radial-gradient(1px 1px at 16% 28%,rgba(237,239,244,.48) 98%,transparent),
+ radial-gradient(1px 1px at 22% 84%,rgba(237,239,244,.3) 98%,transparent),
+ radial-gradient(1px 1px at 29% 11%,rgba(237,239,244,.42) 98%,transparent),
+ radial-gradient(1px 1px at 37% 57%,rgba(237,239,244,.34) 98%,transparent),
+ radial-gradient(1px 1px at 44% 23%,rgba(237,239,244,.32) 98%,transparent),
+ radial-gradient(1px 1px at 51% 91%,rgba(237,239,244,.3) 98%,transparent),
+ radial-gradient(1px 1px at 63% 13%,rgba(237,239,244,.48) 98%,transparent),
+ radial-gradient(1px 1px at 72% 73%,rgba(237,239,244,.36) 98%,transparent),
+ radial-gradient(1px 1px at 82% 36%,rgba(237,239,244,.4) 98%,transparent),
+ radial-gradient(1px 1px at 94% 18%,rgba(237,239,244,.5) 98%,transparent),
+ radial-gradient(1px 1px at 96% 86%,rgba(237,239,244,.3) 98%,transparent),
+ linear-gradient(128deg,transparent 0 24%,rgba(190,193,200,.035) 24.08%,transparent 24.22% 68%,rgba(190,193,200,.025) 68.08%,transparent 68.24%),#030304!important;
+ background-size:100% 100%!important;background-repeat:no-repeat!important;
+}
+@media(max-width:850px){
+ html body:has(.login-layout) .login-visual .visual-eyebrow,
+ html body:has(.login-layout) .login-visual h2{display:none!important}
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
