@@ -3179,3 +3179,13 @@ async def protected_openapi_schema(r:Request):
     require_admin(r)
     return app.openapi()
 
+
+/* Final desktop dashboard alignment: keep the recent-activity card level with its neighbors without hiding any of its four entries. */
+@media(min-width:851px){
+ html body main.app-shell>.workspace>#dashboardQuickCard{height:220px!important;min-height:220px!important;max-height:220px!important;overflow:hidden!important;padding:12px!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList{gap:2px!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event{padding:3px 7px!important;margin-top:2px!important;min-height:0!important;height:auto!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event *{font-size:9px!important;line-height:1.08!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event strong,
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event b{font-size:10px!important;line-height:1.1!important}
+}
