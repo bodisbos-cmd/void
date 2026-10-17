@@ -1876,6 +1876,14 @@ html body main.app-shell>aside.sidebar>.abyss-utility-links{
  }
 }
 
+/* Keep the toolbar's visual order aligned with the reference: search at left, status/actions at right. */
+@media(min-width:851px){
+ html body main.app-shell>.workspace>.top>.tools{direction:ltr!important}
+ html body main.app-shell>.workspace>.top>.tools>*{direction:rtl!important}
+ html body main.app-shell>.workspace>.top>.section-heading{justify-self:end!important;text-align:left!important}
+ html body main.app-shell>.workspace>#overviewStats>.card:has(#dashboardTraffic){grid-column:3!important;grid-row:1!important}
+ html body main.app-shell>.workspace>#overviewStats>.card:has(#xray){grid-column:4!important;grid-row:1!important}
+}
 /* Reference-matching pass: simplify the rail and compact the header/cards without removing controls. */
 @media(min-width:851px){
  html body main.app-shell>.workspace>.top{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto!important;align-items:center!important;gap:7px!important;padding:4px 0 8px!important}
