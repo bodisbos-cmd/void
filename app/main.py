@@ -82,7 +82,10 @@ def init_db():
             # Preserve admin/admin for local development, but fail closed on production installs.
             # A public deployment must provide its own non-default bootstrap secret.
             env_names=("APP_ENV","ENVIRONMENT","RAILWAY_ENVIRONMENT_NAME")
-            production_mode=any(os.getenv(k,"").strip().lower() in ("production","prod") for k in env_names)
+            production_mode=(
+                any(os.getenv(k,"").strip().lower() in ("production","prod") for k in env_names)
+                or bool(os.getenv("RAILWAY_PROJECT_ID") and os.getenv("RAILWAY_SERVICE_ID"))
+            )
             pw=os.getenv("ABYSS_INITIAL_ADMIN_PASSWORD","").strip()
             if production_mode and (not pw or pw.lower() in ("admin","password","12345678","changeme")):
                 raise RuntimeError("Set a strong, unique ABYSS_INITIAL_ADMIN_PASSWORD before starting a production installation.")
