@@ -79,9 +79,15 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_clients_created ON clients(created_at DESC);
         """)
         if not c.execute("SELECT id FROM admins WHERE id=1").fetchone():
-            # First login intentionally uses admin/admin as requested. Change it immediately after setup.
-            # Never print credentials to logs; the bootstrap file is restricted to the owner.
-            pw=os.getenv("ABYSS_INITIAL_ADMIN_PASSWORD","admin").strip() or "admin"
+            # Preserve admin/admin for local development, but fail closed on production installs.
+            # A public deployment must provide its own non-default bootstrap secret.
+            env_names=("APP_ENV","ENVIRONMENT","RAILWAY_ENVIRONMENT_NAME")
+            production_mode=any(os.getenv(k,"").strip().lower() in ("production","prod") for k in env_names)
+            pw=os.getenv("ABYSS_INITIAL_ADMIN_PASSWORD","").strip()
+            if production_mode and (not pw or pw.lower() in ("admin","password","12345678","changeme")):
+                raise RuntimeError("Set a strong, unique ABYSS_INITIAL_ADMIN_PASSWORD before starting a production installation.")
+            if not pw:
+                pw="admin"
             changed=utc_now()
             c.execute("INSERT INTO admins VALUES(1,?,?)",(password_hash(pw),changed))
             p=DATA_DIR/"INITIAL_ADMIN_PASSWORD.txt"; p.write_text(f"Username: admin\nPassword: {pw}\n",encoding="utf-8")
