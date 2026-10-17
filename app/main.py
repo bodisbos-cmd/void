@@ -2501,6 +2501,20 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
  html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:118px!important;max-height:118px!important}
 }
 
+
+/* Match the reference dashboard chart: title and trend graph, without a second row of CPU/RAM/disk mini-cards. */
+@media(min-width:851px){
+ html body main.app-shell>.workspace>#dashboardUsageCard>.stats{display:none!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard{height:190px!important;min-height:190px!important;max-height:190px!important;padding:12px 13px!important;overflow:hidden!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:116px!important;max-height:116px!important;margin-top:6px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:3px!important}
+ html body main.app-shell>.workspace>#panelHealthCard{height:190px!important;min-height:190px!important;max-height:190px!important;overflow:hidden!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard{height:190px!important;min-height:190px!important;max-height:190px!important;overflow:hidden!important}
+}
+@media(min-width:851px) and (max-height:800px){
+ html body main.app-shell>.workspace>#dashboardUsageCard{height:178px!important;min-height:178px!important;max-height:178px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:104px!important;max-height:104px!important}
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
