@@ -2436,6 +2436,33 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
  }
 }
 
+
+/* Reference-proportion correction: compact metrics and keep the chart/status row dense. */
+@media(min-width:851px){
+ html body main.app-shell>.workspace>#overviewStats>.card{
+  height:64px!important;min-height:64px!important;max-height:64px!important;
+  padding:8px 12px!important;display:flex!important;align-items:center!important
+ }
+ html body main.app-shell>.workspace>#dashboardUsageCard{
+  padding:13px!important;min-height:0!important
+ }
+ html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{
+  height:105px!important;max-height:105px!important
+ }
+ html body main.app-shell>.workspace>#panelHealthCard,
+ html body main.app-shell>.workspace>#dashboardQuickCard{
+  padding:13px!important;min-height:0!important
+ }
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event{
+  min-height:0!important;padding:7px 9px!important;margin-top:5px!important
+ }
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event *{
+  line-height:1.3!important
+ }
+}
+@media(min-width:851px) and (max-height:800px){
+ html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:92px!important;max-height:92px!important}
+}
 /* Final desktop reference pass: compact dashboard rhythm and tighter top offset. */
 @media(min-width:851px){
  html body main.app-shell>.workspace{padding-top:56px!important}
