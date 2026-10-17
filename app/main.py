@@ -2267,6 +2267,19 @@ html body:has(.login-layout) .login-visual .visual-orbit{
 html body:has(.login-layout) .login-visual .visual-orbit:before{border-color:rgba(215,217,223,.24)!important}
 html body:has(.login-layout) .login-visual .visual-orbit:after{border-color:rgba(226,228,232,.32)!important}
 @media(max-width:700px){html body:has(.login-layout) .login-visual .visual-orbit{opacity:.22!important}}
+/* Compact the sign-in panel to the proportions of the approved reference. */
+html body .login-layout>.card{padding:28px 30px!important;border-radius:22px!important}
+html body .login-layout>.card h1{font-size:clamp(24px,2.1vw,27px)!important;line-height:1.42!important;margin:0 0 7px!important}
+html body .login-layout>.card p{font-size:12px!important;line-height:1.8!important;margin:0!important}
+html body .login-layout>.card form{margin-top:15px!important}
+html body .login-layout>.card input{min-height:39px!important;padding-block:8px!important}
+html body .login-layout>.card button{min-height:40px!important;padding-block:8px!important}
+@media(max-width:700px){
+ html body .login-layout>.card{padding:22px 18px!important;border-radius:20px!important}
+ html body .login-layout>.card h1{font-size:23px!important}
+ html body .login-layout>.card input{min-height:42px!important}
+}
+
 
 /* Metric cards borrow the reference's compact, embossed icon medallions without inventing metrics. */
 html body main.app-shell>.workspace>#overviewStats>.card{
