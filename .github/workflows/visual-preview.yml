@@ -56,9 +56,17 @@ jobs:
               message = f"Created client '{name}' (visual-{i+1:02d})." if i == 5 else f"Visual preview: service created for {name}"
               db.execute("INSERT INTO events(at,level,message) VALUES(?,?,?)",
                          (event_at, "INFO", message))
+          # Seed isolated synthetic chart history for deterministic visual regression tests.
+          for sample_index in range(31):
+              sampled_at = int(now.timestamp()) - sample_index * 3600
+              traffic_bytes = int((sample_index + 1) * 0.37 * 1024**3)
+              db.execute(
+                  "INSERT OR REPLACE INTO metrics_history(sampled_at,recorded_traffic_bytes,cpu_percent,memory_used_percent) VALUES(?,?,?,?)",
+                  (sampled_at, traffic_bytes, 18 + sample_index % 23, 31 + sample_index % 17),
+              )
           db.commit()
           db.close()
-          print("Seeded 6 isolated visual-preview clients and events.")
+          print("Seeded 6 isolated visual-preview clients, events, and 31 synthetic traffic samples.")
           PY
       - name: Install browser for real screenshots
         run: |
