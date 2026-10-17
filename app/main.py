@@ -2539,6 +2539,7 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
 html body main.app-shell>.workspace>#dashboardUsageCard .stats{display:none!important}
 html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{margin-top:12px!important}
 html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6px!important}
+ @media(min-width:561px){html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:72px!important;max-height:72px!important;margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{display:none!important}}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
