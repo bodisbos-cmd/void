@@ -120,11 +120,15 @@ jobs:
                 const e=document.getElementById('dashboardComponentStatus');
                 return e && e.querySelectorAll('.dashboard-component').length === 4;
               }""", timeout=45000)
-              # Wait for the first real telemetry history sample instead of sleeping a fixed 16 seconds.
-              page.wait_for_function("""() => {
-                const note=document.getElementById('chartNote');
+              # Wait for the chart API to return history; the isolated preview seeds deterministic
+              # synthetic samples, so the check must not depend on live minute-based telemetry.
+              page.wait_for_function("""async () => {
                 const canvas=document.getElementById('usageSparkline');
-                return note && canvas && /نمونهٔ واقعی/.test(note.textContent);
+                if (!canvas) return false;
+                const response=await fetch('/api/system/metrics?period=24h',{cache:'no-store'});
+                if (!response.ok) return false;
+                const data=await response.json();
+                return Array.isArray(data.traffic_history) && data.traffic_history.length >= 2;
               }""", timeout=45000)
               for period in ("7d","30d","24h"):
                   page.locator('[data-traffic-period="' + period + '"]').click()
