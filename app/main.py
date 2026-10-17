@@ -1873,8 +1873,22 @@ html body main.app-shell>aside.sidebar>.abyss-utility-links{
  margin:10px 0 12px!important;padding-bottom:6px!important;
 }
 @media(max-width:850px){
- html body main.app-shell>aside.sidebar{padding-bottom:max(16px,env(safe-area-inset-bottom))!important}
- html body main.app-shell>aside.sidebar>.abyss-utility-links{gap:6px!important}
+ html body main.app-shell>aside.sidebar{
+   height:100dvh!important;max-height:100dvh!important;min-height:0!important;
+   padding-top:max(12px,env(safe-area-inset-top))!important;
+   padding-bottom:max(12px,env(safe-area-inset-bottom))!important;
+   overflow:hidden!important;
+ }
+ html body main.app-shell>aside.sidebar>.side-nav{
+   flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;
+   overscroll-behavior:contain!important;scrollbar-width:thin!important;
+   padding-bottom:8px!important;
+ }
+ html body main.app-shell>aside.sidebar>.side-caption:nth-last-child(2){flex:0 0 auto!important}
+ html body main.app-shell>aside.sidebar>.abyss-utility-links{
+   flex:0 0 auto!important;gap:6px!important;margin-top:8px!important;
+   padding-bottom:0!important;
+ }
  html body main.app-shell>aside.sidebar>.abyss-utility-links a{max-width:100%!important}
 }
 /* Keep mobile controls usable without turning each toolbar action into a full-width row. */
