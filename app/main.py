@@ -2140,6 +2140,18 @@ html body:has(.login-layout) .login-layout:after{
  background-size:320px 250px!important;background-repeat:repeat!important;
 }
 html body:has(.login-layout) .login-layout>.card{z-index:2!important}
+
+/* Tablet header fit: compact controls so the theme selector does not fall onto an isolated row. */
+@media(min-width:851px) and (max-width:1150px){
+ html body main.app-shell>.workspace>.top>.tools{gap:5px!important;row-gap:5px!important}
+ html body main.app-shell>.workspace>.top>.tools>*{font-size:10px!important;padding:5px 6px!important;min-height:30px!important;line-height:1.2!important}
+ html body main.app-shell>.workspace>.top>.tools>.top-tools-search{flex:1 1 120px!important;width:120px!important;min-width:110px!important}
+ html body main.app-shell>.workspace>.top>.tools>#abyssThemeDock{flex:0 0 auto!important;width:165px!important;max-width:165px!important;min-width:0!important;gap:3px!important;padding:4px 5px!important}
+ html body main.app-shell>.workspace>.top>.tools>#abyssThemeDock select{width:116px!important;max-width:116px!important;min-width:0!important;font-size:10px!important;padding:4px!important}
+}
+@media(min-width:851px){
+ html body:has(.login-layout) .login-visual .visual-orbit{width:min(20vw,260px)!important}
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
