@@ -1875,6 +1875,49 @@ html body main.app-shell>aside.sidebar>.abyss-utility-links{
    width:auto!important;min-width:0!important;
  }
 }
+
+/* Reference-matching pass: simplify the rail and compact the header/cards without removing controls. */
+@media(min-width:851px){
+ html body main.app-shell>.workspace>.top{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto!important;align-items:center!important;gap:7px!important;padding:4px 0 8px!important}
+ html body main.app-shell>.workspace>.top>.abyss-brand-row,html body main.app-shell>.workspace>.top>.mint{display:none!important}
+ html body main.app-shell>.workspace>.top>.tools{grid-row:1!important;grid-column:1!important;display:flex!important;flex-wrap:nowrap!important;justify-content:flex-start!important;align-items:center!important;gap:7px!important;width:100%!important;min-width:0!important;overflow-x:auto!important;padding:2px 0 5px!important;scrollbar-width:thin!important}
+ html body main.app-shell>.workspace>.top>.tools>*{flex:0 0 auto!important;white-space:nowrap!important}
+ html body main.app-shell>.workspace>.top>.tools>.top-tools-search{width:190px!important;flex:0 1 190px!important}
+ html body main.app-shell>.workspace>.top>.section-heading{grid-row:2!important;grid-column:1!important;justify-self:start!important;align-self:center!important;font-size:18px!important;font-weight:700!important;margin:0!important;padding:4px 0!important}
+ html body main.app-shell>aside.sidebar .side-nav>.nav-item{background:transparent!important;border-color:transparent!important;box-shadow:none!important;border-radius:9px!important;min-height:35px!important;padding:7px 9px!important;transition:background .16s ease,border-color .16s ease!important}
+ html body main.app-shell>aside.sidebar .side-nav>.nav-item:hover{background:rgba(255,255,255,.045)!important;border-color:rgba(255,255,255,.06)!important}
+ html body main.app-shell>aside.sidebar .side-nav>.nav-item.active{background:linear-gradient(90deg,rgba(230,232,237,.105),rgba(230,232,237,.035))!important;border-color:rgba(230,232,237,.13)!important;box-shadow:inset -2px 0 0 rgba(225,227,232,.78)!important}
+ html body main.app-shell>.workspace>#overviewStats{direction:ltr!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ html body main.app-shell>.workspace>#overviewStats>.card{direction:rtl!important;text-align:right!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard{min-height:0!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard>.stats{margin:8px 0!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard>.stats>.card{padding:8px!important;min-height:66px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard>.stats>.card .num{font-size:21px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:112px!important;max-height:112px!important;margin-top:3px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:4px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{display:none!important}
+ html body main.app-shell>.workspace>#panelHealthCard #dashboardComponentStatus>*{min-height:31px!important;padding:5px 9px!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard{min-height:0!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard .quick-detail-row{padding:7px 9px!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList{max-height:165px!important}
+}
+html body main.app-shell{background-image:radial-gradient(1px 1px at 7% 13%,rgba(235,237,242,.32) 98%,transparent),radial-gradient(1px 1px at 19% 64%,rgba(235,237,242,.22) 98%,transparent),radial-gradient(1px 1px at 32% 27%,rgba(235,237,242,.25) 98%,transparent),radial-gradient(1px 1px at 48% 79%,rgba(235,237,242,.18) 98%,transparent),radial-gradient(1px 1px at 67% 18%,rgba(235,237,242,.24) 98%,transparent),radial-gradient(1px 1px at 81% 53%,rgba(235,237,242,.22) 98%,transparent),radial-gradient(1px 1px at 93% 33%,rgba(235,237,242,.27) 98%,transparent)!important;background-size:100% 100%!important;background-repeat:no-repeat!important}
+@media(max-width:850px){
+ html body main.app-shell>.workspace>.top{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto!important;gap:7px!important;padding:0 0 8px!important}
+ html body main.app-shell>.workspace>.top>.abyss-brand-row,html body main.app-shell>.workspace>.top>.mint{display:none!important}
+ html body main.app-shell>.workspace>.top>.section-heading{grid-row:1!important;grid-column:1!important;justify-self:start!important;font-size:18px!important;margin:0!important;padding:3px 0!important}
+ html body main.app-shell>.workspace>.top>.tools{grid-row:2!important;grid-column:1!important;display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:6px!important;width:100%!important;padding:2px 0 7px!important;scrollbar-width:none!important}
+ html body main.app-shell>.workspace>.top>.tools::-webkit-scrollbar{display:none!important}
+ html body main.app-shell>.workspace>.top>.tools>*{flex:0 0 auto!important;min-width:36px!important;max-width:none!important;width:auto!important;white-space:nowrap!important;overflow-wrap:normal!important;padding:8px 10px!important;min-height:38px!important;font-size:11px!important}
+ html body main.app-shell>.workspace>.top>.tools>.top-tools-search{flex:0 0 145px!important;width:145px!important}
+ html body main.app-shell>.workspace>.top>.tools>button[data-i18n="changePassword"],html body main.app-shell>.workspace>.top>.tools>button[data-i18n="refresh"],html body main.app-shell>.workspace>.top>.tools>button[data-i18n="logout"]{display:none!important}
+ html body main.app-shell>.workspace>.top>.tools>.account-badge{flex:0 0 auto!important;grid-column:auto!important}
+ html body main.app-shell>.workspace>#overviewStats{direction:ltr!important}
+ html body main.app-shell>.workspace>#overviewStats>.card{direction:rtl!important;text-align:right!important}
+ html body main.app-shell>aside.sidebar .side-nav>.nav-item{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+ html body main.app-shell>aside.sidebar .side-nav>.nav-item.active{background:rgba(235,237,242,.09)!important;border-color:rgba(235,237,242,.12)!important}
+}
+
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
