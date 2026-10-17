@@ -2576,7 +2576,7 @@ html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6p
   width:100%!important;min-width:0!important;max-width:none!important;
  }
  html body main.app-shell>.workspace #clientDetailsPanel{
-  width:100%!important;min-width:0!important;max-width:none!important;
+  display:none!important;
  }
 }
 </style>"""
