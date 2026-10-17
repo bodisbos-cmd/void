@@ -2502,18 +2502,22 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
 }
 
 
-/* Match the reference dashboard chart: title and trend graph, without a second row of CPU/RAM/disk mini-cards. */
+/* Match the reference dashboard chart and preserve all four status/activity rows without clipping. */
 @media(min-width:851px){
  html body main.app-shell>.workspace>#dashboardUsageCard>.stats{display:none!important}
- html body main.app-shell>.workspace>#dashboardUsageCard{height:190px!important;min-height:190px!important;max-height:190px!important;padding:12px 13px!important;overflow:hidden!important}
- html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:116px!important;max-height:116px!important;margin-top:6px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard{height:220px!important;min-height:220px!important;max-height:220px!important;padding:12px 13px!important;overflow:hidden!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:138px!important;max-height:138px!important;margin-top:6px!important}
  html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:3px!important}
- html body main.app-shell>.workspace>#panelHealthCard{height:190px!important;min-height:190px!important;max-height:190px!important;overflow:hidden!important}
- html body main.app-shell>.workspace>#dashboardQuickCard{height:190px!important;min-height:190px!important;max-height:190px!important;overflow:hidden!important}
+ html body main.app-shell>.workspace>#panelHealthCard{height:auto!important;min-height:220px!important;max-height:none!important;overflow:visible!important;padding:12px!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard{height:auto!important;min-height:220px!important;max-height:none!important;overflow:visible!important;padding:12px!important}
+ html body main.app-shell>.workspace>#panelHealthCard .dashboard-component-list{gap:4px!important}
+ html body main.app-shell>.workspace>#panelHealthCard .dashboard-component-list>*{padding-top:5px!important;padding-bottom:5px!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event{padding:5px 8px!important;margin-top:4px!important;min-height:0!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event *{line-height:1.2!important}
 }
 @media(min-width:851px) and (max-height:800px){
- html body main.app-shell>.workspace>#dashboardUsageCard{height:178px!important;min-height:178px!important;max-height:178px!important}
- html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:104px!important;max-height:104px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard{height:205px!important;min-height:205px!important;max-height:205px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:123px!important;max-height:123px!important}
 }
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
