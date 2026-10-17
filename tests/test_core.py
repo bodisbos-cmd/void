@@ -32,7 +32,7 @@ class CoreTests(unittest.TestCase):
             with mod.db() as conn:
                 conn.execute("DELETE FROM panel_admins WHERE username='admin'")
                 conn.execute("DELETE FROM admins WHERE id=1")
-            for password in ("", "admin", "password", "12345678", "changeme"):
+            for password in ("", "admin", "password", "12345678", "changeme", "tiny-unique"):
                 if password:
                     os.environ["ABYSS_INITIAL_ADMIN_PASSWORD"] = password
                 else:
