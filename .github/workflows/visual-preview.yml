@@ -112,7 +112,7 @@ jobs:
                 const data=await response.json();
                 const canvas=document.getElementById('usageSparkline');
                 const label=canvas?.getAttribute('aria-label')||'';
-                const match=label.match(/(\\d+)$/);
+                const match=label.match(/(\d+)$/);
                 return {httpStatus:response.status,apiSamples:Array.isArray(data.history)?data.history.length:0,renderedSamples:match?Number(match[1]):0,canvasWidth:canvas?.width||0};
               }""")
               print("CHART_HISTORY=" + repr(chart_history))
