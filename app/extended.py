@@ -31,6 +31,12 @@ def _init(panel):
         cols={row["name"] for row in c.execute("PRAGMA table_info(api_keys)")}
         if "expires_at" not in cols: c.execute("ALTER TABLE api_keys ADD COLUMN expires_at TEXT")
         c.execute("CREATE INDEX IF NOT EXISTS idx_api_keys_enabled ON api_keys(enabled)")
+        c.execute("""CREATE TABLE IF NOT EXISTS metrics_history(
+            sampled_at INTEGER PRIMARY KEY,
+            recorded_traffic_bytes INTEGER NOT NULL,
+            cpu_percent REAL,
+            memory_used_percent REAL)""")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_metrics_history_sampled_at ON metrics_history(sampled_at)")
 
 def _admin(r, p): p.require_admin(r)
 def _role(r, p, *roles): p.require_role(r, *roles)
@@ -288,9 +294,38 @@ def install_extended(app, namespace):
         return {"ok":True}
 
     @app.get("/api/system/metrics")
-    async def system_metrics(request:Request):
+    async def system_metrics(request:Request, period:str="24h"):
         _admin(request,p)
-        return {"current":_metrics(p),"history":list(_HISTORY)}
+        periods={"24h":86400,"7d":604800,"30d":2592000}
+        if period not in periods:
+            raise HTTPException(422,"Unsupported metrics history period")
+        current=_metrics(p)
+        now=int(time.time())
+        with p.db() as c:
+            latest=c.execute("SELECT sampled_at FROM metrics_history ORDER BY sampled_at DESC LIMIT 1").fetchone()
+            if latest is None or now-int(latest["sampled_at"])>=60:
+                c.execute(
+                    "INSERT OR REPLACE INTO metrics_history(sampled_at,recorded_traffic_bytes,cpu_percent,memory_used_percent) VALUES(?,?,?,?)",
+                    (now,int(current.get("recorded_traffic_bytes") or 0),current.get("cpu_percent"),current.get("memory_used_percent")))
+            c.execute("DELETE FROM metrics_history WHERE sampled_at < ?",(now-2592000,))
+            rows=[dict(x) for x in c.execute(
+                "SELECT sampled_at,recorded_traffic_bytes FROM metrics_history WHERE sampled_at>=? ORDER BY sampled_at",
+                (now-periods[period],))]
+        sample_count=len(rows)
+        if sample_count>120:
+            step=(sample_count+119)//120
+            sampled=rows[::step]
+            if sampled[-1]["sampled_at"]!=rows[-1]["sampled_at"]:
+                sampled.append(rows[-1])
+        else:
+            sampled=rows
+        return {
+            "current":current,
+            "history":list(_HISTORY),
+            "period":period,
+            "traffic_history_count":sample_count,
+            "traffic_history":[{"at":int(x["sampled_at"]),"recorded_traffic_bytes":int(x["recorded_traffic_bytes"] or 0)} for x in sampled]
+        }
 
     @app.get("/api/system/profiles/check")
     async def check_profile_routes(request:Request):

@@ -476,7 +476,7 @@ input,select,textarea{max-width:100%;min-width:0}table{display:block;max-width:1
 </nav><div class="sidebar-account-badge" aria-label="حساب فعلی"><span class="sidebar-account-avatar" aria-hidden="true">◉</span><span><b id="sidebarAccountUsername">admin</b><small id="sidebarAccountRole">مدیر کل</small></span></div><div class="side-caption" style="margin-top:22px">سازنده · Abyss Tunnel</div><div class="abyss-utility-links"><a href="https://github.com/bodisbos-cmd/Void" target="_blank" rel="noopener">⌘ GitHub</a><a href="https://github.com/bodisbos-cmd/Void/stargazers" target="_blank" rel="noopener">☆ ستاره دادن</a><a href="#support-link-not-configured" onclick="if(this.getAttribute('href')==='#support-link-not-configured'){alert('لینک حمایت مالی هنوز تنظیم نشده است؛ متغیر SUPPORT_URL را در Railway تنظیم کن.');return false}">◇ حمایت از پروژه</a></div></aside>
 <div class="workspace"><header class="top"><div class="abyss-brand-row"><span class="abyss-logo-mark" aria-hidden="true"></span><span class="brand-name"><b>AbyssTunnel</b><small>• I T A • · داشبورد مدیریت</small></span></div><div class="mint" data-i18n="tagline">داشبورد مدیریتی خصوصی</div><div id="sectionTitle" class="section-heading">نمای کلی</div><div class="tools"><input class="top-tools-search" id="globalSearch" type="search" placeholder="جست‌وجوی کاربر…" data-i18n-placeholder="search" aria-label="جست‌وجوی کاربر" onkeydown="if(event.key==='Enter'){event.preventDefault();runGlobalSearch()}"><button type="button" class="toolbar-icon" onclick="showSection('events')" title="رویدادهای اخیر" aria-label="رویدادهای اخیر"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button type="button" class="toolbar-icon" onclick="showSection('settings')" title="تنظیمات اتصال" aria-label="تنظیمات اتصال">⚙</button><button id="langBtn" onclick="toggleLanguage()">English</button><button type="button" class="toolbar-icon" onclick="showPanelHelp()" title="راهنمای پنل" aria-label="راهنمای پنل">?</button><span class="account-badge"><span class="account-avatar" aria-hidden="true">◉</span><span class="account-copy"><b id="accountUsername">مدیر پنل</b><small id="accountRole">حساب مدیریت</small></span></span><button onclick="changePassword()" data-i18n="changePassword">تغییر رمز عبور</button><button onclick="load()" data-i18n="refresh">به‌روزرسانی</button><button onclick="location.href='/logout'" data-i18n="logout">خروج</button></div></header>
 <section id="overviewStats" class="stats" data-section-page="dashboard"><div class="card"><span data-i18n="total">کل کاربران</span><div class="num" id="total">—</div></div><div class="card"><span data-i18n="active">کاربران فعال</span><div class="num" id="active">—</div></div><div class="card"><span data-i18n="xray">وضعیت Xray</span><div class="num" id="xray">—</div></div><div class="card"><span>مصرف ثبت‌شده</span><div class="num" id="dashboardTraffic">—</div><div class="small">ترافیک ثبت‌شدهٔ داشبورد</div></div></section>
-<section id="dashboardUsageCard" class="card" data-section-page="dashboard"><div class="section-title">مصرف منابع و عملکرد</div><div class="small">وضعیت فرایندها و منابع همین کانتینر؛ نه پینگ واقعی اپراتور موبایل.</div><div class="stats"><div class="card"><span>CPU</span><div class="num" id="dashCpu">—</div></div><div class="card"><span>RAM</span><div class="num" id="dashRam">—</div></div><div class="card"><span>دیسک</span><div class="num" id="dashDisk">—</div></div></div><canvas id="usageSparkline" height="112" aria-label="نمودار زنده منابع"></canvas><div id="chartLegend" class="chart-legend"><span><i class="cpu"></i>CPU</span><span><i class="ram"></i>RAM</span><span><i class="net"></i>ترافیک</span></div><div id="chartNote" class="small" style="margin-top:7px">در انتظار نخستین نمونهٔ واقعی منابع…</div></section>
+<section id="dashboardUsageCard" class="card" data-section-page="dashboard"><div class="usage-chart-head"><div><div class="section-title">نمودار مصرف پهنای باند</div><div class="small">تاریخچهٔ واقعی مصرف ثبت‌شدهٔ سرویس‌ها؛ نمونه‌ها هر دقیقه ذخیره می‌شوند.</div></div><div class="usage-range-tabs" role="group" aria-label="بازهٔ نمودار مصرف"><button type="button" class="is-active" data-traffic-period="24h" aria-pressed="true" onclick="setTrafficChartPeriod('24h')">24h</button><button type="button" data-traffic-period="7d" aria-pressed="false" onclick="setTrafficChartPeriod('7d')">7d</button><button type="button" data-traffic-period="30d" aria-pressed="false" onclick="setTrafficChartPeriod('30d')">30d</button></div></div><div class="stats"><div class="card"><span>CPU</span><div class="num" id="dashCpu">—</div></div><div class="card"><span>RAM</span><div class="num" id="dashRam">—</div></div><div class="card"><span>دیسک</span><div class="num" id="dashDisk">—</div></div></div><canvas id="usageSparkline" height="112" aria-label="نمودار واقعی مصرف ثبت‌شده بر حسب گیگابایت"></canvas><div id="chartLegend" class="chart-legend"><span><i class="net"></i>مصرف ثبت‌شده (GB)</span></div><div id="chartNote" class="small" style="margin-top:7px">تاریخچهٔ واقعی مصرف در حال جمع‌آوری است…</div></section>
 <section class="card" data-section-page="clients"><div class="row"><div><div class="section-title" data-i18n="clients">مدیریت کاربران <span class="help-dot" title="ساخت سرویس، مدیریت زمان و حجم و کنترل دسترسی." aria-label="راهنمای مدیریت کاربران">؟</span></div><div class="small" data-i18n="clientHelp">ساخت سرویس، کنترل دسترسی و مدیریت لینک اشتراک</div></div><div class="users-search-actions"><input id="search" placeholder="جست‌وجوی نام یا شناسه…" oninput="renderClients()" data-i18n-placeholder="search"><button class="primary" type="button" onclick="showSection('create')">افزودن کاربر +</button></div></div>
 <div class="clients-layout"><div id="clients" class="clients-table-wrap" style="margin-top:12px"></div><aside id="clientDetailsPanel" class="client-details-panel" aria-live="polite"><div class="small">یک سرویس را انتخاب کن تا جزئیاتش نمایش داده شود.</div></aside></div></section><section class="card" id="createServiceCard" data-section-page="create"><div class="reference-page-head"><div><div class="section-title">ساخت سرویس جدید <span class="help-dot" title="برای سرویس زمان، حجم و پروفایل‌های اتصال را مشخص کن." aria-label="راهنمای ساخت سرویس">؟</span></div><div class="small">سرویس را برای کاربر بساز؛ هر تغییری در محدودیت‌ها و پروفایل‌ها به همین سرویس اعمال می‌شود.</div></div></div><div class="creation-tabs" role="tablist" aria-label="بخش‌های ساخت سرویس"><button type="button" class="creation-tab" role="tab" aria-selected="false" aria-controls="creationPanelGeneral" id="creationTabGeneral" onclick="switchCreationTab('general')">عمومی</button><button type="button" class="creation-tab" role="tab" aria-selected="false" aria-controls="creationPanelLimits" id="creationTabLimits" onclick="switchCreationTab('limits')">محدودیت‌ها</button><button type="button" class="creation-tab is-active" role="tab" aria-selected="true" aria-controls="creationPanelProfiles" id="creationTabProfiles" onclick="switchCreationTab('profiles')">پروتکل‌ها</button></div><div class="creation-tab-panel" id="creationPanelGeneral" role="tabpanel" aria-labelledby="creationTabGeneral" data-creation-panel="general" hidden><div class="fields creation-fields-general"><input id="name" maxlength="64" placeholder="نام کاربر" data-i18n-placeholder="name" title="نام نمایشی سرویس"><input id="note" maxlength="300" placeholder="یادداشت (اختیاری)" data-i18n-placeholder="note"></div><p class="small creation-hint">نام سرویس الزامی است؛ یادداشت برای شناسایی داخلی اختیاری است.</p></div><div class="creation-tab-panel" id="creationPanelLimits" role="tabpanel" aria-labelledby="creationTabLimits" data-creation-panel="limits" hidden><div class="fields creation-fields-limits"><input id="days" type="number" min="1" max="3650" placeholder="مدت (روز، اختیاری)" data-i18n-placeholder="days" title="خالی گذاشتن یعنی بدون انقضا"><input id="quota" type="number" min="1" max="100000" placeholder="حجم (GB، اختیاری)" data-i18n-placeholder="quota" title="خالی گذاشتن یعنی بدون محدودیت حجم"></div><p class="small creation-hint">خالی گذاشتن مدت و حجم یعنی نامحدود؛ محدودیت‌های پشتیبانی‌نشده نمایش داده نمی‌شوند.</p></div><div class="creation-tab-panel is-active" id="creationPanelProfiles" role="tabpanel" aria-labelledby="creationTabProfiles" data-creation-panel="profiles"><div class="section-title creation-panel-title">پروفایل‌های قابل ارائه <span class="help-dot" title="چند پروفایل را هم‌زمان انتخاب کن. فقط پروفایل‌های فعال سراسری قابل ارائه‌اند." aria-label="راهنمای انتخاب پروفایل‌ها">؟</span></div><div id="clientProfileChoices" class="profile-grid"></div></div><div class="row creation-submit-row"><span class="small" id="creationFormHint">برای ساخت، نام سرویس را در بخش عمومی وارد کن و دست‌کم یک پروفایل فعال را انتخاب کن.</span><button class="primary" onclick="add()" data-i18n="create">+ ساخت کاربر</button></div></section>
 
@@ -584,59 +584,88 @@ function showPanelHelp(){const dialog=document.getElementById('panelHelpDialog')
 function showSection(name){document.querySelectorAll('[data-section-page]').forEach(el=>{const inactive=el.dataset.sectionPage!==name;el.classList.toggle('nav-hidden',inactive);if(inactive)el.style.setProperty('display','none','important');else el.style.removeProperty('display')});document.querySelectorAll('[data-nav]').forEach(el=>el.classList.toggle('active',el.dataset.nav===name));const titles={dashboard:'داشبورد',clients:'مدیریت کاربران',create:'ساخت سرویس',servers:'مدیریت سرورها',protocols:'پروتکل‌ها',reports:'گزارش‌ها',reseller:'حساب‌های نمایندگی و سهمیه',settings:'تنظیمات اتصال',diagnostics:'عیب‌یابی هوشمند',backup:'پشتیبان‌گیری و بازیابی',metrics:'پایش زنده سرویس',admins:'مدیریت مدیران داشبورد',apikeys:'API و اتصال ربات',events:'رویدادهای اخیر'};const title=document.getElementById('sectionTitle');if(title)title.textContent=titles[name]||'Abyss Tunnel';const side=document.getElementById('sidebar');if(side&&innerWidth<=850)side.classList.remove('open');if(name==='servers')loadServerStatus();if(name==='reports')loadReports();if(name==='protocols')loadProtocolCatalog()}
 function toggleSidebar(){const side=document.getElementById('sidebar');if(side)side.classList.toggle('open')}
 function rootOnly(show){document.querySelectorAll('[data-owner-only]').forEach(el=>el.classList.toggle('hidden',!show))}
-async function loadMetrics(){try{const d=await api('/api/system/metrics'),m=d.current||{};const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};set('metricCpu',m.cpu_percent==null?'—':m.cpu_percent+'%');set('metricRam',m.memory_used_percent==null?'—':m.memory_used_percent+'%');set('metricDisk',m.disk_used_percent==null?'—':m.disk_used_percent+'%');set('metricSpeed',((Number(m.traffic_bytes_per_second)||0)/1048576).toFixed(3)+' MB/s');set('metricLoad',Array.isArray(m.load_average)?m.load_average.join(' / '):'—');set('metricTraffic',((Number(m.recorded_traffic_bytes)||0)/1073741824).toFixed(3)+' GB');set('dashCpu',m.cpu_percent==null?'—':m.cpu_percent+'%');set('dashRam',m.memory_used_percent==null?'—':m.memory_used_percent+'%');set('dashDisk',m.disk_used_percent==null?'—':m.disk_used_percent+'%');set('dashboardTraffic',((Number(m.recorded_traffic_bytes)||0)/1073741824).toFixed(3)+' GB');if(Array.isArray(d.history)&&d.history.length){const now=Date.now();usageHistory.splice(0,usageHistory.length,...d.history.slice(-24).map((v,i)=>({at:Number.isFinite(Date.parse(v.at))?Date.parse(v.at):now-(d.history.length-i)*15000,cpu:Math.max(0,Math.min(100,Number(v.cpu_percent)||0)),ram:Math.max(0,Math.min(100,Number(v.memory_used_percent)||0)),net:Math.max(0,Number(v.traffic_bytes_per_second)||0)})))}drawUsageSparkline(m)}catch(e){const el=document.getElementById('profileChecks');if(el)el.textContent='خطای پایش: '+e.message}}
-const usageHistory=[];
-function drawUsageSparkline(metrics){
+let trafficChartPeriod='24h';
+async function loadMetrics(period=trafficChartPeriod){
+ try{
+  if(!['24h','7d','30d'].includes(period))period='24h';
+  trafficChartPeriod=period;
+  const d=await api('/api/system/metrics?period='+encodeURIComponent(period)),m=d.current||{};
+  const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+  set('metricCpu',m.cpu_percent==null?'—':m.cpu_percent+'%');
+  set('metricRam',m.memory_used_percent==null?'—':m.memory_used_percent+'%');
+  set('metricDisk',m.disk_used_percent==null?'—':m.disk_used_percent+'%');
+  set('metricSpeed',((Number(m.traffic_bytes_per_second)||0)/1048576).toFixed(3)+' MB/s');
+  set('metricLoad',Array.isArray(m.load_average)?m.load_average.join(' / '):'—');
+  set('metricTraffic',((Number(m.recorded_traffic_bytes)||0)/1073741824).toFixed(3)+' GB');
+  set('dashCpu',m.cpu_percent==null?'—':m.cpu_percent+'%');
+  set('dashRam',m.memory_used_percent==null?'—':m.memory_used_percent+'%');
+  set('dashDisk',m.disk_used_percent==null?'—':m.disk_used_percent+'%');
+  set('dashboardTraffic',((Number(m.recorded_traffic_bytes)||0)/1073741824).toFixed(3)+' GB');
+  document.querySelectorAll('[data-traffic-period]').forEach(button=>{
+   const active=button.dataset.trafficPeriod===period;
+   button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));
+  });
+  drawUsageSparkline(d.traffic_history||[],period,Number(d.traffic_history_count)||0);
+ }catch(e){const el=document.getElementById('profileChecks');if(el)el.textContent='خطای پایش: '+e.message}
+}
+function setTrafficChartPeriod(period){
+ if(!['24h','7d','30d'].includes(period))return;
+ trafficChartPeriod=period;
+ document.querySelectorAll('[data-traffic-period]').forEach(button=>{
+  const active=button.dataset.trafficPeriod===period;
+  button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));
+ });
+ loadMetrics(period);
+}
+function drawUsageSparkline(history,period,totalSamples){
  const c=document.getElementById('usageSparkline');if(!c)return;
- const m=metrics||{},now=Date.now();
- const values=[m.cpu_percent,m.memory_used_percent,m.traffic_bytes_per_second];
- const hasTelemetry=values.some(v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v)));
- const last=usageHistory[usageHistory.length-1];
- if(hasTelemetry&&(!last||now-last.at>=10000)){
-  usageHistory.push({at:now,cpu:Math.max(0,Math.min(100,Number(m.cpu_percent)||0)),ram:Math.max(0,Math.min(100,Number(m.memory_used_percent)||0)),net:Math.max(0,Number(m.traffic_bytes_per_second)||0)});
-  if(usageHistory.length>24)usageHistory.shift();
- }
+ const points=Array.isArray(history)?history:[];
  const w=Math.max(260,Math.floor(c.clientWidth||600)),h=Math.max(108,Math.floor(c.clientHeight||144)),dpr=Math.min(devicePixelRatio||1,1.25);
  c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);
  const ctx=c.getContext('2d');if(!ctx)return;
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
  const root=getComputedStyle(document.documentElement);
  const grid=root.getPropertyValue('--ab-line').trim()||'rgba(170,174,182,.18)';
- const cpuColor=root.getPropertyValue('--chart-cpu').trim()||'#c8cad0';
- const ramColor=root.getPropertyValue('--chart-ram').trim()||'#8e85b8';
- const netColor=root.getPropertyValue('--chart-net').trim()||'#a2b0ba';
- const left=8,right=w-8,top=12,bottom=h-22,plotH=bottom-top;
+ const line=root.getPropertyValue('--chart-cpu').trim()||'#c8cad0';
+ const muted=root.getPropertyValue('--ab-muted').trim()||'rgba(200,202,208,.7)';
+ const left=43,right=w-8,top=12,bottom=h-22,plotH=bottom-top;
+ const values=points.map(v=>Math.max(0,Number(v.recorded_traffic_bytes)||0)/1073741824);
+ const rawMax=Math.max(0,...values),power=Math.pow(10,Math.floor(Math.log10(rawMax||1))),ratio=rawMax/power;
+ const axisMax=(ratio<=1?1:ratio<=2?2:ratio<=5?5:10)*power;
+ ctx.font='10px Vazirmatn,Tahoma,sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
  ctx.strokeStyle=grid;ctx.lineWidth=.65;
- for(let i=0;i<5;i++){const y=top+i*plotH/4;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke()}
- const netMax=Math.max(1,...usageHistory.map(v=>v.net))*1.12;
- const series=[['cpu',cpuColor,100],['ram',ramColor,100],['net',netColor,netMax]];
- for(const [key,color,max] of series){
-  if(!usageHistory.length)continue;
-  const point=(sample,i)=>({
-   x:usageHistory.length===1?right:left+i*(right-left)/(usageHistory.length-1),
-   y:bottom-Math.min(1,Math.max(0,(Number(sample[key])||0)/max))*plotH
-  });
-  if(usageHistory.length>1){
-   ctx.beginPath();
-   usageHistory.forEach((sample,i)=>{const p=point(sample,i);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)});
-   ctx.lineTo(right,bottom);ctx.lineTo(left,bottom);ctx.closePath();
-   ctx.globalAlpha=.15;ctx.fillStyle=color;ctx.fill();ctx.globalAlpha=1;
-  }
-  ctx.beginPath();
-  usageHistory.forEach((sample,i)=>{const p=point(sample,i);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)});
-  ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
-  const newest=usageHistory[usageHistory.length-1],ny=point(newest,usageHistory.length-1).y;
-  ctx.beginPath();ctx.arc(right,ny,2.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+ for(let i=0;i<5;i++){
+  const y=top+i*plotH/4,v=axisMax*(1-i/4);
+  ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();
+  ctx.fillStyle=muted;ctx.fillText(v.toLocaleString('en-US',{maximumFractionDigits:2})+' GB',left-6,y);
  }
- if(usageHistory.length>1){
-  const stamp=v=>{const n=Number(v.at);const t=Number.isFinite(n)?n:Date.parse(v.at);return Number.isFinite(t)?new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}):''};
-  const positions=[{i:0,x:left,align:'left'},{i:Math.floor((usageHistory.length-1)/2),x:(left+right)/2,align:'center'},{i:usageHistory.length-1,x:right,align:'right'}];
-  ctx.fillStyle=root.getPropertyValue('--ab-muted').trim()||'rgba(200,202,208,.7)';ctx.font='10px Vazirmatn,Tahoma,sans-serif';
-  positions.forEach(p=>{ctx.textAlign=p.align;ctx.fillText(stamp(usageHistory[p.i]),p.x,h-4)});
+ if(points.length){
+  const point=(sample,i)=>{
+   const value=Math.max(0,Number(sample.recorded_traffic_bytes)||0)/1073741824;
+   return {x:points.length===1?right:left+i*(right-left)/(points.length-1),y:bottom-Math.min(1,value/axisMax)*plotH};
+  };
+  if(points.length>1){
+   ctx.beginPath();points.forEach((sample,i)=>{const p=point(sample,i);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)});
+   ctx.lineTo(right,bottom);ctx.lineTo(left,bottom);ctx.closePath();ctx.globalAlpha=.17;ctx.fillStyle=line;ctx.fill();ctx.globalAlpha=1;
+  }
+  ctx.beginPath();points.forEach((sample,i)=>{const p=point(sample,i);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)});
+  ctx.strokeStyle=line;ctx.lineWidth=1.8;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+  const newest=point(points[points.length-1],points.length-1);
+  ctx.beginPath();ctx.arc(newest.x,newest.y,2.5,0,Math.PI*2);ctx.fillStyle=line;ctx.fill();
+  if(points.length>1){
+   const stamp=sample=>{
+    const d=new Date(Number(sample.at)*1000);
+    return period==='24h'?d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hourCycle:'h23'}):d.toLocaleDateString([],{month:'2-digit',day:'2-digit'});
+   };
+   const labels=[{i:0,x:left,align:'left'},{i:Math.floor((points.length-1)/2),x:(left+right)/2,align:'center'},{i:points.length-1,x:right,align:'right'}];
+   ctx.fillStyle=muted;ctx.font='10px Vazirmatn,Tahoma,sans-serif';ctx.textBaseline='alphabetic';
+   labels.forEach(item=>{ctx.textAlign=item.align;ctx.fillText(stamp(points[item.i]),item.x,h-4)});
+  }
  }
  const note=document.getElementById('chartNote');
- if(note)note.textContent=usageHistory.length<3?'در حال جمع‌آوری نمونه‌های واقعی؛ نمودار با نمونه‌های بعدی کامل می‌شود.':'تاریخچهٔ واقعی آخرین نمونه‌های ثبت‌شده · نمونه‌برداری هر ۱۵ ثانیه';
- c.setAttribute('aria-label','نمودار واقعی CPU، RAM و نرخ ترافیک؛ تعداد نمونه‌ها: '+usageHistory.length);
+ const periodLabel={'24h':'۲۴ ساعت اخیر','7d':'۷ روز اخیر','30d':'۳۰ روز اخیر'}[period]||'بازهٔ انتخاب‌شده';
+ if(note)note.textContent=totalSamples<2?'تاریخچهٔ مصرف واقعی در حال جمع‌آوری است؛ نمونه‌ها هر دقیقه ثبت می‌شوند.':periodLabel+' · '+totalSamples.toLocaleString('fa-IR')+' نمونهٔ واقعی';
+ c.setAttribute('aria-label','نمودار واقعی مصرف ثبت‌شده بر حسب گیگابایت ('+period+'); '+points.length);
 }
 async function runDiagnostics(){const summary=document.getElementById('diagnosticSummary'),out=document.getElementById('diagnosticResults');if(summary)summary.textContent='در حال بررسی تنظیمات، Xray، Nginx و همه مسیرها…';if(out)out.innerHTML='';try{const carrier=document.getElementById('diagnosticCarrier')?.value||'mci';const d=await api('/api/system/diagnostics?carrier='+encodeURIComponent(carrier));if(summary)summary.textContent=d.summary+' · اپراتور: '+d.carrier_label+' · مسیر داخلی است، نه پینگ واقعی تونل.';if(out)out.innerHTML=(d.profiles||[]).map(p=>'<div class="diag-item"><b>'+esc(p.label)+'</b><div class="small">حالت: '+esc(p.mode||p.network)+' · HTTP '+esc(p.http_status??'—')+' · '+esc(p.latency_ms??'—')+' ms · گزارش: '+esc(p.feedback_reports??0)+' · موفقیت: '+(p.feedback_success_rate==null?'—':esc(p.feedback_success_rate)+'%')+'</div><div class="'+(p.route_ok?'diag-ok':'diag-bad')+'">'+esc(p.status_text||p.hint||p.status)+'</div><div class="small">پیشنهاد: '+esc(p.recommendation||p.hint||'—')+'</div></div>').join('')}catch(e){if(summary)summary.textContent='خطای عیب‌یابی: '+e.message}}
 async function repairDiagnostics(){if(!confirm('اعتبارسنجی تنظیمات و راه‌اندازی مجدد امن انجام شود؟'))return;const summary=document.getElementById('diagnosticSummary');if(summary)summary.textContent='در حال اعتبارسنجی و تعمیر…';try{const d=await api('/api/system/diagnostics/repair',{method:'POST',body:JSON.stringify({})});if(summary)summary.textContent=d.message||'تعمیر انجام شد.';await runDiagnostics();await load()}catch(e){if(summary)summary.textContent='تعمیر ناموفق بود: '+e.message}}
@@ -2281,6 +2310,14 @@ html body:has(.login-layout) .login-visual .visual-eyebrow{top:calc(4% + min(20v
 html body:has(.login-layout) .login-visual h2{top:calc(4% + min(20vw,180px) + 39px)!important;left:7%!important;width:min(20vw,280px)!important}
 /* Four-column profile choices mirror the compact protocol matrix in the reference. */
 @media(min-width:1151px){html body main.app-shell>.workspace>#createServiceCard #clientProfileChoices.profile-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important}}
+/* Reference bandwidth-history controls and chart axis. */
+html body main.app-shell>.workspace>#dashboardUsageCard .usage-chart-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:10px!important;flex-wrap:wrap!important;margin-bottom:9px!important}
+html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs{display:flex!important;align-items:center!important;gap:5px!important;flex:0 0 auto!important}
+html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs button{min-height:30px!important;height:30px!important;min-width:42px!important;padding:4px 10px!important;border:1px solid var(--ab-line)!important;border-radius:9px!important;background:rgba(255,255,255,.018)!important;color:var(--ab-muted)!important;font-size:10px!important;line-height:1!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important}
+html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs button.is-active{border-color:rgba(220,225,232,.34)!important;background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.045))!important;color:var(--ab-text)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 3px 10px rgba(0,0,0,.12)!important}
+html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:108px!important;max-height:108px!important;margin-top:6px!important}
+@media(max-width:560px){html body main.app-shell>.workspace>#dashboardUsageCard .usage-chart-head{align-items:stretch!important}html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs{justify-content:flex-start!important}html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs button{flex:1!important}}
+
 
 
 
