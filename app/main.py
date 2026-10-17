@@ -2276,9 +2276,9 @@ html body .login-layout>.card input{min-height:39px!important;padding-block:8px!
 html body .login-layout>.card form>button:not(.login-password-toggle){min-height:40px!important;padding-block:8px!important}
 html body .login-layout>.card .login-password-toggle{width:30px!important;min-width:30px!important;height:30px!important;min-height:30px!important;padding:0!important;border:0!important;border-radius:50%!important;box-shadow:none!important}
 /* Align the eclipse and wordmark above the form, matching the supplied login composition. */
-html body:has(.login-layout) .login-visual .visual-orbit{top:4%!important;left:7%!important;width:min(20vw,220px)!important;opacity:.38!important}
-html body:has(.login-layout) .login-visual .visual-eyebrow{top:calc(4% + min(20vw,220px) + 8px)!important;left:7%!important;width:min(20vw,280px)!important;font-size:21px!important}
-html body:has(.login-layout) .login-visual h2{top:calc(4% + min(20vw,220px) + 39px)!important;left:7%!important;width:min(20vw,280px)!important}
+html body:has(.login-layout) .login-visual .visual-orbit{top:4%!important;left:7%!important;width:min(20vw,180px)!important;opacity:.38!important}
+html body:has(.login-layout) .login-visual .visual-eyebrow{top:calc(4% + min(20vw,180px) + 8px)!important;left:7%!important;width:min(20vw,280px)!important;font-size:21px!important}
+html body:has(.login-layout) .login-visual h2{top:calc(4% + min(20vw,180px) + 39px)!important;left:7%!important;width:min(20vw,280px)!important}
 
 
 @media(max-width:700px){
