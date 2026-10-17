@@ -519,7 +519,7 @@ function renderClients(){
  const term=(document.getElementById('search')?.value||'').trim().toLowerCase();
  const rows=allClients.filter(c=>(c.name+' '+c.id+' '+(c.note||'')).toLowerCase().includes(term));
  const pageSize=6,selectedMatch=rows.find(c=>c.id===window.selectedClientId)||null;
- if(!selectedMatch)window.clientPage=1;
+ if(window.clientSearchTerm!==term){window.clientPage=1;window.clientSearchTerm=term;}
  const pageCount=Math.max(1,Math.ceil(rows.length/pageSize));
  window.clientPage=Math.max(1,Math.min(pageCount,Number(window.clientPage)||1));
  if(selectedMatch)window.clientPage=Math.floor(rows.findIndex(c=>c.id===selectedMatch.id)/pageSize)+1;
