@@ -63,7 +63,7 @@ jobs:
               # Slightly irregular, steadily rising synthetic history, matching the reference chart rather than a straight ramp.
               chronological_index = 30 - sample_index
               variation_gb = (0.00, 0.08, -0.04, 0.14, 0.02, -0.06, 0.11, 0.03)[chronological_index % 8]
-              traffic_bytes = int((0.75 + chronological_index * 0.032 + variation_gb) * 1024**3)
+              traffic_bytes = int((0.75 + sample_index * 0.032 + variation_gb) * 1024**3)
               db.execute(
                   "INSERT OR REPLACE INTO metrics_history(sampled_at,recorded_traffic_bytes,cpu_percent,memory_used_percent) VALUES(?,?,?,?)",
                   (sampled_at, traffic_bytes, 18 + sample_index % 23, 31 + sample_index % 17),
