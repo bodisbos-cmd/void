@@ -1910,7 +1910,7 @@ html body main.app-shell{background-image:radial-gradient(1px 1px at 7% 13%,rgba
  html body main.app-shell>.workspace>.top>.tools::-webkit-scrollbar{display:none!important}
  html body main.app-shell>.workspace>.top>.tools>*{flex:0 0 auto!important;min-width:36px!important;max-width:none!important;width:auto!important;white-space:nowrap!important;overflow-wrap:normal!important;padding:8px 10px!important;min-height:38px!important;font-size:11px!important}
  html body main.app-shell>.workspace>.top>.tools>.top-tools-search{flex:0 0 145px!important;width:145px!important}
- html body main.app-shell>.workspace>.top>.tools>button[data-i18n="changePassword"],html body main.app-shell>.workspace>.top>.tools>button[data-i18n="refresh"],html body main.app-shell>.workspace>.top>.tools>button[data-i18n="logout"]{display:none!important}
+ html body main.app-shell>.workspace>.top>.tools>button[data-i18n="refresh"]{display:none!important}
  html body main.app-shell>.workspace>.top>.tools>.account-badge{flex:0 0 auto!important;grid-column:auto!important}
  html body main.app-shell>.workspace>#overviewStats{direction:ltr!important}
  html body main.app-shell>.workspace>#overviewStats>.card{direction:rtl!important;text-align:right!important}
