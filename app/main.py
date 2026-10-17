@@ -1856,7 +1856,7 @@ html body main.app-shell>.workspace>.top .tools input{font-size:12px!important}
  html body main.app-shell>.workspace{gap:12px!important}
  html body main.app-shell>.workspace>#overviewStats>.card{padding:15px!important;min-height:96px!important}
  html body main.app-shell>.workspace>#dashboardUsageCard{padding:15px!important}
- html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:108px!important;max-height:108px!important;margin-top:5px!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:88px!important;max-height:88px!important;margin-top:3px!important}
  html body main.app-shell>.workspace>#dashboardUsageCard>.stats{gap:8px!important}
  html body main.app-shell>.workspace>#dashboardUsageCard>.stats>.card{padding:10px!important}
  html body main.app-shell>.workspace>#panelHealthCard{padding:15px!important}
