@@ -2251,6 +2251,42 @@ html body #createServiceCard .profile-setting{min-height:58px!important;padding:
 html body #createServiceCard .profile-setting:has(input:checked){border-color:rgba(220,228,232,.32)!important;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.02))!important}
 @media(max-width:850px){html body #createServiceCard .profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:560px){html body #createServiceCard .creation-tabs{gap:4px!important}html body #createServiceCard .creation-tab{flex-basis:calc(50% - 4px)!important}html body #createServiceCard .creation-fields-general,html body #createServiceCard .creation-fields-limits{grid-template-columns:minmax(0,1fr)!important}html body #createServiceCard .profile-grid{grid-template-columns:minmax(0,1fr)!important}html body #createServiceCard .creation-submit-row{align-items:stretch!important;flex-direction:column!important}html body #createServiceCard .creation-submit-row button{width:100%!important}}
+/* Metric cards borrow the reference's compact, embossed icon medallions without inventing metrics. */
+html body main.app-shell>.workspace>#overviewStats>.card{
+ position:relative!important;isolation:isolate!important;padding-left:64px!important;
+ overflow:hidden!important;min-width:0!important;
+ background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.012))!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 22px rgba(0,0,0,.16)!important;
+}
+html body main.app-shell>.workspace>#overviewStats>.card:before{
+ content:"";position:absolute!important;left:17px!important;top:50%!important;transform:translateY(-50%)!important;
+ width:36px!important;height:36px!important;box-sizing:border-box!important;border-radius:50%!important;
+ border:1px solid rgba(214,222,232,.19)!important;
+ background-color:rgba(255,255,255,.025)!important;
+ background-repeat:no-repeat!important;background-position:center!important;background-size:19px 19px!important;
+ box-shadow:inset 0 1px 3px rgba(255,255,255,.045),0 3px 9px rgba(0,0,0,.18)!important;
+ pointer-events:none!important;
+}
+html body main.app-shell>.workspace>#overviewStats>.card:nth-child(1):before{
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d5d9df' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='3.5'/%3E%3Cpath d='M5 20c.8-3.3 3.1-5 7-5s6.2 1.7 7 5'/%3E%3C/svg%3E")!important;
+}
+html body main.app-shell>.workspace>#overviewStats>.card:nth-child(2):before{
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d5d9df' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='3'/%3E%3Cpath d='M3 20c.5-3.2 2.5-5 6-5 2.1 0 3.7.7 4.7 2'/%3E%3Cpath d='m15 18 2 2 4-5'/%3E%3C/svg%3E")!important;
+}
+html body main.app-shell>.workspace>#overviewStats>.card:nth-child(3):before{
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d5d9df' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='4' width='16' height='6' rx='2'/%3E%3Crect x='4' y='14' width='16' height='6' rx='2'/%3E%3Cpath d='M8 7h.01M8 17h.01M12 7h4M12 17h4'/%3E%3C/svg%3E")!important;
+}
+html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d5d9df' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3C9 7 5 11 5 15a7 7 0 0 0 14 0c0-4-4-8-7-12Z'/%3E%3Cpath d='M9 16a3 3 0 0 0 3 3'/%3E%3C/svg%3E")!important;
+}
+@media(max-width:1150px){
+ html body main.app-shell>.workspace>#overviewStats>.card{padding-left:58px!important}
+ html body main.app-shell>.workspace>#overviewStats>.card:before{left:12px!important;width:32px!important;height:32px!important;background-size:17px 17px!important}
+}
+@media(max-width:560px){
+ html body main.app-shell>.workspace>#overviewStats>.card{padding:14px 10px 14px 48px!important}
+ html body main.app-shell>.workspace>#overviewStats>.card:before{left:9px!important;width:28px!important;height:28px!important;background-size:15px 15px!important}
+}
 
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
