@@ -2169,7 +2169,7 @@ html body main.app-shell>.workspace>#dashboardQuickCard .dashboard-status-sr-onl
 
 /* Keep all four reference-style activity rows visible without an inner scrollbar on desktop. */
 @media(min-width:1151px){
- html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList{max-height:190px!important;overflow-y:auto!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList{max-height:220px!important;overflow-y:visible!important}
  html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event{
   gap:2px!important;padding:6px 9px!important;margin:4px 0 0!important;border-radius:10px!important;
  }
