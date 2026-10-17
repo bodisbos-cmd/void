@@ -2534,6 +2534,11 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
  html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event strong,
  html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event b{font-size:10px!important;line-height:1.1!important}
 }
+
+/* Hide the resource summary chips inside the usage chart on every viewport; the chart itself remains visible. */
+html body main.app-shell>.workspace>#dashboardUsageCard .stats{display:none!important}
+html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{margin-top:12px!important}
+html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6px!important}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
