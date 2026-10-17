@@ -87,7 +87,7 @@ def init_db():
                 or bool(os.getenv("RAILWAY_PROJECT_ID") and os.getenv("RAILWAY_SERVICE_ID"))
             )
             pw=os.getenv("ABYSS_INITIAL_ADMIN_PASSWORD","").strip()
-            if production_mode and (not pw or pw.lower() in ("admin","password","12345678","changeme")):
+            if production_mode and (len(pw) < 16 or pw.lower() in ("admin","password","12345678","changeme")):
                 raise RuntimeError("Set a strong, unique ABYSS_INITIAL_ADMIN_PASSWORD before starting a production installation.")
             if not pw:
                 pw="admin"
