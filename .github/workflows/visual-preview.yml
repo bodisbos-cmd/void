@@ -112,7 +112,12 @@ jobs:
                 const e=document.getElementById('dashboardComponentStatus');
                 return e && e.querySelectorAll('.dashboard-component').length === 4;
               }""", timeout=45000)
-              page.wait_for_timeout(16000)
+              # Wait for the first real telemetry history sample instead of sleeping a fixed 16 seconds.
+              page.wait_for_function("""() => {
+                const note=document.getElementById('chartNote');
+                const canvas=document.getElementById('usageSparkline');
+                return note && canvas && /نمونهٔ واقعی/.test(note.textContent);
+              }""", timeout=45000)
               for period in ("7d","30d","24h"):
                   page.locator('[data-traffic-period="' + period + '"]').click()
                   page.wait_for_function("expected => document.querySelector('[data-traffic-period].is-active')?.dataset.trafficPeriod === expected && (document.getElementById('usageSparkline')?.getAttribute('aria-label') || '').includes(expected)", arg=period, timeout=10000)
