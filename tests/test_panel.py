@@ -699,6 +699,17 @@ def test_backup_and_restore_round_trip(client):
     assert restored.status_code == 200, restored.text
     assert client.get("/api/overview").json()["total"] == 1
 
+def test_legacy_sqlite_backup_is_removed_after_download(client):
+    admin_client(client)
+    before = set(Path(panel.DATA_DIR).glob("abyss-backup-*.sqlite3"))
+    backup = client.get("/api/backup/sqlite")
+    assert backup.status_code == 200
+    assert backup.headers["content-type"].startswith("application/vnd.sqlite3")
+    assert backup.content.startswith(b"SQLite format 3")
+    after = set(Path(panel.DATA_DIR).glob("abyss-backup-*.sqlite3"))
+    assert after == before
+
+
 def test_nested_reseller_allocation_is_atomic_and_scoped(client):
     csrf = admin_client(client)
     headers = {"X-CSRF-Token": csrf}
