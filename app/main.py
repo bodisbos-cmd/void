@@ -2437,6 +2437,22 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
 }
 
 
+
+/* Restore the reference's stacked metric label/value while keeping compact card height. */
+@media(min-width:851px){
+ html body main.app-shell>.workspace>#overviewStats>.card{
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  justify-content:center!important;gap:2px!important;padding:8px 12px 8px 48px!important;
+  text-align:right!important
+ }
+ html body main.app-shell>.workspace>#overviewStats>.card>span{
+  display:block!important;font-size:11px!important;line-height:1.15!important;white-space:nowrap!important
+ }
+ html body main.app-shell>.workspace>#overviewStats>.card>.num{
+  display:block!important;font-size:21px!important;line-height:1.1!important
+ }
+ html body main.app-shell>.workspace>#overviewStats>.card .small{display:none!important}
+}
 /* Reference-proportion correction: compact metrics and keep the chart/status row dense. */
 @media(min-width:851px){
  html body main.app-shell>.workspace>#overviewStats>.card{
