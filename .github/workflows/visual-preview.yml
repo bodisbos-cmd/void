@@ -199,6 +199,25 @@ jobs:
                         const e=document.getElementById('reportSummary');
                         return e && !e.innerText.includes('در حال اجرای بررسی‌های واقعی');
                       }""", timeout=45000)
+                  elif nav == "clients":
+                      page.wait_for_function("""() => {
+                        const table=document.querySelector('#clients .clients-table tbody');
+                        const details=document.getElementById('clientDetailsPanel');
+                        return table && table.querySelectorAll('tr').length>0 && details && details.innerText.trim().length>0;
+                      }""", timeout=45000)
+                      client_view=page.evaluate("""() => ({rows:document.querySelectorAll('#clients .clients-table tbody tr').length,detail:!!document.querySelector('#clientDetailsPanel .client-detail-head'),pagination:!!document.querySelector('#clients .client-pagination')})""")
+                      print("CLIENT_TABLE_VIEW=" + repr(client_view))
+                      if client_view["rows"]<1 or not client_view["detail"] or not client_view["pagination"]:
+                          raise SystemExit("Client table/detail/pagination view is incomplete: " + repr(client_view))
+                  elif nav == "protocols":
+                      page.wait_for_function("""() => {
+                        const table=document.querySelector('#protocolCatalog .protocol-table tbody');
+                        return table && table.querySelectorAll('tr').length>0;
+                      }""", timeout=45000)
+                      protocol_view=page.evaluate("""() => ({rows:document.querySelectorAll('#protocolCatalog .protocol-table tbody tr').length,toggles:document.querySelectorAll('#protocolCatalog .protocol-table-toggle input[type=checkbox]').length})""")
+                      print("PROTOCOL_TABLE_VIEW=" + repr(protocol_view))
+                      if protocol_view["rows"]<1 or protocol_view["toggles"]!==protocol_view["rows"]:
+                          raise SystemExit("Protocol table/toggles are incomplete: " + repr(protocol_view))
                   page.screenshot(path=str(out / filename), full_page=False, animations="disabled")
               page.locator('[data-nav="dashboard"]').first.click()
               assert_active_section("dashboard")
