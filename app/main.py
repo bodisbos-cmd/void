@@ -620,7 +620,7 @@ function drawUsageSparkline(metrics){
    ctx.beginPath();
    usageHistory.forEach((sample,i)=>{const p=point(sample,i);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)});
    ctx.lineTo(right,bottom);ctx.lineTo(left,bottom);ctx.closePath();
-   ctx.globalAlpha=.10;ctx.fillStyle=color;ctx.fill();ctx.globalAlpha=1;
+   ctx.globalAlpha=.15;ctx.fillStyle=color;ctx.fill();ctx.globalAlpha=1;
   }
   ctx.beginPath();
   usageHistory.forEach((sample,i)=>{const p=point(sample,i);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)});
@@ -629,7 +629,7 @@ function drawUsageSparkline(metrics){
   ctx.beginPath();ctx.arc(right,ny,2.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
  }
  if(usageHistory.length>1){
-  const stamp=v=>{const n=Number(v.at);const t=Number.isFinite(n)?n:Date.parse(v.at);return Number.isFinite(t)?new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''};
+  const stamp=v=>{const n=Number(v.at);const t=Number.isFinite(n)?n:Date.parse(v.at);return Number.isFinite(t)?new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}):''};
   const positions=[{i:0,x:left,align:'left'},{i:Math.floor((usageHistory.length-1)/2),x:(left+right)/2,align:'center'},{i:usageHistory.length-1,x:right,align:'right'}];
   ctx.fillStyle=root.getPropertyValue('--ab-muted').trim()||'rgba(200,202,208,.7)';ctx.font='10px Vazirmatn,Tahoma,sans-serif';
   positions.forEach(p=>{ctx.textAlign=p.align;ctx.fillText(stamp(usageHistory[p.i]),p.x,h-4)});
