@@ -2166,6 +2166,16 @@ html body main.app-shell>.workspace>#dashboardQuickCard .dashboard-status-sr-onl
  html body main.app-shell>aside.sidebar{width:220px!important;padding:16px 10px!important}
  html body main.app-shell>.workspace{min-width:0!important}
 }
+
+/* Keep all four reference-style activity rows visible without an inner scrollbar on desktop. */
+@media(min-width:1151px){
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList{max-height:190px!important;overflow-y:auto!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .report-event{
+  gap:2px!important;padding:6px 9px!important;margin:4px 0 0!important;border-radius:10px!important;
+ }
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .event-message{font-size:11px!important;line-height:1.3!important}
+ html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList .event-meta{font-size:9px!important;line-height:1.2!important}
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
