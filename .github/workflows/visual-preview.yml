@@ -208,6 +208,10 @@ jobs:
                       page.locator('#creationTabProfiles').click()
                       if not page.locator('#creationPanelProfiles').is_visible():
                           raise SystemExit("Create service preview did not return to the reference protocol-choice panel")
+                      profile_columns = page.locator('#clientProfileChoices').evaluate("(e) => getComputedStyle(e).gridTemplateColumns.split(' ').length")
+                      print("CREATE_PROFILE_COLUMNS=" + repr(profile_columns))
+                      if profile_columns != 4:
+                          raise SystemExit("Desktop protocol choices must use the reference four-column grid: " + repr(profile_columns))
                   if nav == "servers":
                       page.wait_for_function("""() => {
                         const e=document.getElementById('serverStatusGrid');
