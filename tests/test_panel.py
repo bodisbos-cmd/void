@@ -102,8 +102,8 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "repeating-conic-gradient" in response.text
     assert "Desktop proportions from the reference dashboard" in response.text
     assert "grid-column:1 / span 3!important;grid-row:3!important" in response.text
-    assert "grid-column:4 / span 2!important;grid-row:3!important" in response.text
-    assert "grid-column:6 / span 7!important;grid-row:3!important" in response.text
+    assert "grid-column:4 / span 3!important;grid-row:3!important" in response.text
+    assert "grid-column:7 / span 6!important;grid-row:3!important" in response.text
     assert "#dashboardQuickCard #recentActivityList[hidden]{display:none!important}" in response.text
     assert "ABYSS TUNNEL" in login_page.text
     assert "Secure · Private · Unlimited" in login_page.text
