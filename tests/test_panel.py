@@ -98,7 +98,10 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'id="dashboardUsageCard"' in response.text
     assert 'id="panelHealthCard"' in response.text
     assert "grid-template-columns:repeat(4,minmax(0,1fr))!important" in response.text
-    assert '<span class="abyss-logo-mark" aria-hidden="true"></span>' in response.text
+    assert '<img class="abyss-logo-image" src="/brand-logo" alt="" aria-hidden="true">' in response.text
+    logo = client.get("/brand-logo")
+    assert logo.status_code == 200
+    assert logo.headers.get("content-type", "").startswith("image/jpeg")
     assert "background-image:url('/brand/abyss-tunnel-logo.jpg')" in response.text
     assert "Desktop proportions from the reference dashboard" in response.text
     assert "grid-column:1 / span 3!important;grid-row:3!important" in response.text
