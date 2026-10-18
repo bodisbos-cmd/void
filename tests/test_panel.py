@@ -201,7 +201,8 @@ def test_voidling_procedural_webgl_model_and_state_contract(client):
         "createVoidlingRenderer", "getContext('webgl'", "vertexSource",
         "fragmentSource", "sphereData", "tubeData", "procedural-webgl",
         "voidling-rotation", "voidling-position", "voidling-sound",
-        "voidling-rotation-toggle", "function updateVisualState",
+        "voidling-rotation-toggle", "function updateVisualState", "data:image/webp;base64,",
+        "data-rotation-mode", "background-size:500% 100%", "rotation mode",
     ):
         assert marker in page
     for state in ("online", "checking", "error", "sleep", "reacting"):
