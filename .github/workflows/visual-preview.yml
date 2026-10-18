@@ -100,7 +100,7 @@ jobs:
           base = "http://127.0.0.1:18080"
           out = Path("visual-preview")
           with sync_playwright() as p:
-              browser = p.chromium.launch()
+              browser = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist", "--enable-unsafe-swiftshader"])
               page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
               errors = []
               page.on("pageerror", lambda e: errors.append(str(e) + " | " + str(getattr(e, "stack", ""))))
@@ -263,6 +263,53 @@ jobs:
                       or sidebar_logo["http"] != 200 or sidebar_logo["bytes"] < 1000
                       or "/brand/abyss-tunnel-logo.jpg" not in sidebar_logo["backgroundImage"]):
                   raise SystemExit("Sidebar is missing the supplied reference orbital logo: " + repr(sidebar_logo))
+              voidling_3d = page.evaluate("""() => {
+                const widget=document.getElementById('voidling-widget'), canvas=widget?.querySelector('canvas.voidling-renderer');
+                let gl=null; try { gl=canvas?.getContext('webgl'); } catch (_) {}
+                return {exists:!!widget,renderer:widget?.dataset.renderer,model:widget?.dataset.model,
+                  geometry:canvas?.dataset.geometry,webgl:!!gl,meshCount:Number(widget?.dataset.meshCount)||0,
+                  width:canvas?.width||0,height:canvas?.height||0};
+              }""")
+              print("VOIDLING_WEBGL_MODEL=" + repr(voidling_3d))
+              if (not voidling_3d.get("exists") or voidling_3d.get("renderer") != "webgl"
+                      or voidling_3d.get("model") != "procedural-webgl" or not voidling_3d.get("webgl")
+                      or voidling_3d.get("geometry") != "procedural-mesh" or voidling_3d.get("meshCount", 0) < 10
+                      or voidling_3d.get("width", 0) < 20 or voidling_3d.get("height", 0) < 20):
+                  raise SystemExit("Voidling did not render its procedural 3D WebGL mesh: " + repr(voidling_3d))
+              # Exercise real panel-state mutation: error outranks loading and interaction,
+              # then a healthy recovery returns the model to idle.
+              status_cards = page.locator("#dashboardComponentStatus .dashboard-component")
+              if status_cards.count() != 4:
+                  raise SystemExit("Expected four live service status cards for Voidling state tests")
+              saved_card_html = status_cards.evaluate_all("(els) => els.map(el => el.innerHTML)")
+              status_cards.first.evaluate("(el) => { el.textContent = 'Xray error'; }")
+              page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'error'", timeout=4000)
+              page.locator("#voidling-widget").click()
+              if page.locator("#voidling-widget").get_attribute("data-state") != "error":
+                  raise SystemExit("User interaction hid an active service error")
+              status_cards.first.evaluate("(el) => { el.textContent = 'Xray loading'; }")
+              page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'checking'", timeout=4000)
+              page.evaluate("(items) => document.querySelectorAll('#dashboardComponentStatus .dashboard-component').forEach((el,i) => { if(items[i] !== undefined) el.innerHTML=items[i]; })", saved_card_html)
+              page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'online'", timeout=6000)
+              page.locator("#voidling-widget").click()
+              page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'reacting'", timeout=3000)
+              page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'online'", timeout=3000)
+              rotation_toggle = page.locator("#voidling-rotation-toggle")
+              rotation_toggle.click()
+              rotate_start = page.locator("#voidling-widget").bounding_box()
+              page.mouse.move(rotate_start["x"] + rotate_start["width"]/2, rotate_start["y"] + rotate_start["height"]/2)
+              page.mouse.down()
+              page.mouse.move(rotate_start["x"] + rotate_start["width"]/2 + 24, rotate_start["y"] + rotate_start["height"]/2 + 9, steps=6)
+              page.mouse.up()
+              rotation_data = page.evaluate("() => { try { return JSON.parse(localStorage.getItem('voidling-rotation') || 'null'); } catch (_) { return null; } }")
+              rotate_end = page.locator("#voidling-widget").bounding_box()
+              print("VOIDLING_ROTATION=" + repr({"saved":rotation_data,"before":{"x":rotate_start["x"],"y":rotate_start["y"]},"after":{"x":rotate_end["x"],"y":rotate_end["y"]}}))
+              if (not rotation_data or not isinstance(rotation_data.get("yaw"), (int,float))
+                      or not isinstance(rotation_data.get("pitch"), (int,float)) or abs(rotation_data["yaw"]) < 0.1
+                      or abs(rotate_end["x"] - rotate_start["x"]) > 3 or abs(rotate_end["y"] - rotate_start["y"]) > 3):
+                  raise SystemExit("Dragging in rotation mode did not rotate and persist the 3D pose independently of widget position: " + repr(rotation_data))
+              rotation_toggle.click()
+              page.locator("#voidling-dismiss").click()
               page.screenshot(path=str(out / "02-dashboard-desktop.png"), full_page=False, animations="disabled")
               for nav, filename in [("clients","03-users-desktop.png"),("create","04-create-desktop.png"),("servers","05-servers-desktop.png"),("protocols","06-protocols-desktop.png"),("reports","07-reports-desktop.png"),("settings","08-settings-desktop.png")]:
                   locator = page.locator('[data-nav="' + nav + '"]').first
