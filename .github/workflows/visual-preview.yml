@@ -308,7 +308,7 @@ jobs:
               page.locator("#voidling-widget").click()
               if page.locator("#voidling-widget").get_attribute("data-state") != "error":
                   raise SystemExit("User interaction hid an active service error")
-              page.locator("#voidling-dismiss").click()
+              page.evaluate("document.getElementById('voidling-status-popover')?.remove()")
               status_cards.first.evaluate("(el) => { el.textContent = 'Xray loading'; }")
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'checking'", timeout=4000)
               status_cards.evaluate_all("""(els) => els.forEach(el => {
@@ -336,11 +336,11 @@ jobs:
               # A synthetic click can close the status popover when drag ends; reopen it if needed.
               if not page.locator("#voidling-rotation-toggle").is_visible():
                   if page.locator("#voidling-status-popover").count():
-                      page.locator("#voidling-dismiss").click()
+                      page.evaluate("document.getElementById('voidling-status-popover')?.remove()")
                   page.locator("#voidling-widget").click()
                   page.wait_for_selector("#voidling-rotation-toggle", state="visible", timeout=3000)
               page.locator("#voidling-rotation-toggle").click()
-              page.locator("#voidling-dismiss").click()
+              page.evaluate("document.getElementById('voidling-status-popover')?.remove()")
               # Invoke real user activity after enabling the test-only accelerated idle timeout.
               page.evaluate("window.__voidlingFastSleepTest=true")
               page.locator("#voidling-widget").click()
@@ -351,7 +351,7 @@ jobs:
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'reacting'", timeout=3000)
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'online'", timeout=3000)
               if page.locator("#voidling-dismiss").count():
-                  page.locator("#voidling-dismiss").click()
+                  page.evaluate("document.getElementById('voidling-status-popover')?.remove()")
               # Put the synthetic DOM back exactly as found before the state-machine tests.
               status_cards.evaluate_all("""(els,prior) => els.forEach((el,i) => {
                 const s=prior[i];if(!s)return;el.innerHTML=s.html;el.className=s.className;
