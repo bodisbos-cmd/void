@@ -153,8 +153,12 @@ jobs:
                 return Array.isArray(data.traffic_history) && data.traffic_history.length >= 2;
               }""", timeout=45000)
               for period in ("7d","30d","24h"):
-                  page.locator('[data-traffic-period="' + period + '"]').click()
-                  page.wait_for_function("expected => document.querySelector('[data-traffic-period].is-active')?.dataset.trafficPeriod === expected && (document.getElementById('usageSparkline')?.getAttribute('aria-label') || '').includes(expected)", arg=period, timeout=10000)
+                  # Wait for this specific range request; then verify that the real canvas label switched too.
+                  with page.expect_response(lambda response, p=period: "/api/system/metrics?period=" + p in response.url, timeout=20000) as period_response:
+                      page.locator('[data-traffic-period="' + period + '"]').click()
+                  if period_response.value.status != 200:
+                      raise SystemExit("Traffic range request failed: " + period + " HTTP " + str(period_response.value.status))
+                  page.wait_for_function("expected => document.querySelector('[data-traffic-period].is-active')?.dataset.trafficPeriod === expected && (document.getElementById('usageSparkline')?.getAttribute('aria-label') || '').includes(expected)", arg=period, timeout=20000)
               chart_history = page.evaluate("""async () => {
                 const checks=[];
                 for (const period of ['24h','7d','30d']) {
@@ -329,7 +333,13 @@ jobs:
                       or not isinstance(rotation_data.get("pitch"), (int,float)) or abs(rotation_data["yaw"]) < 0.1
                       or abs(rotate_end["x"] - rotate_start["x"]) > 3 or abs(rotate_end["y"] - rotate_start["y"]) > 3):
                   raise SystemExit("Dragging in rotation mode did not rotate and persist the 3D pose independently of widget position: " + repr(rotation_data))
-              rotation_toggle.click()
+              # A synthetic click can close the status popover when drag ends; reopen it if needed.
+              if not page.locator("#voidling-rotation-toggle").is_visible():
+                  if page.locator("#voidling-status-popover").count():
+                      page.locator("#voidling-dismiss").click()
+                  page.locator("#voidling-widget").click()
+                  page.wait_for_selector("#voidling-rotation-toggle", state="visible", timeout=3000)
+              page.locator("#voidling-rotation-toggle").click()
               page.locator("#voidling-dismiss").click()
               # Invoke real user activity after enabling the test-only accelerated idle timeout.
               page.evaluate("window.__voidlingFastSleepTest=true")
