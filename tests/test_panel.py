@@ -105,6 +105,11 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "grid-column:4 / span 3!important;grid-row:3!important" in response.text
     assert "grid-column:7 / span 6!important;grid-row:3!important" in response.text
     assert "#dashboardQuickCard #recentActivityList[hidden]{display:none!important}" in response.text
+    visual_workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "visual-preview.yml").read_text(encoding="utf-8")
+    assert "chartXBeforeHealth:chart.x<health.x" in visual_workflow
+    assert "healthXBeforeQuick:health.x<quick.x" in visual_workflow
+    assert 'dashboard_layout["chartXBeforeHealth"]' in visual_workflow
+    assert 'dashboard_layout["healthXBeforeQuick"]' in visual_workflow
     assert "ABYSS TUNNEL" in login_page.text
     assert "Secure · Private · Unlimited" in login_page.text
     assert 'class="login-password-toggle"' in login_page.text
