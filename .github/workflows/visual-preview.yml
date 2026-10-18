@@ -104,7 +104,7 @@ jobs:
               page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
               page.add_init_script("""(() => {
                 const nativeSetTimeout=window.setTimeout.bind(window);
-                window.setTimeout=(fn,delay,...args)=>nativeSetTimeout(fn,window.__voidlingFastSleepTest&&delay===45000?25:delay,...args);
+                window.setTimeout=(fn,delay,...args)=>nativeSetTimeout(fn,window.__voidlingFastSleepTest&&delay===45000?850:delay,...args);
               })()""")
               errors = []
               page.on("pageerror", lambda e: errors.append(str(e) + " | " + str(getattr(e, "stack", ""))))
@@ -285,7 +285,20 @@ jobs:
               status_cards = page.locator("#dashboardComponentStatus .dashboard-component")
               if status_cards.count() != 4:
                   raise SystemExit("Expected four live service status cards for Voidling state tests")
-              saved_card_html = status_cards.evaluate_all("(els) => els.map(el => el.innerHTML)")
+              saved_card_state = status_cards.evaluate_all("""(els) => els.map(el => ({
+                html:el.innerHTML,className:el.className,dataStatus:el.getAttribute('data-status'),
+                dataLoading:el.getAttribute('data-loading'),ariaBusy:el.getAttribute('aria-busy')}))""")
+              status_node = page.locator("#status")
+              saved_status = status_node.evaluate("(el) => ({html:el.innerHTML,className:el.className,dataStatus:el.getAttribute('data-status'),dataLoading:el.getAttribute('data-loading'),ariaBusy:el.getAttribute('aria-busy')})")
+              # Start from an explicit healthy fixture, then test error -> checking -> recovered status.
+              status_cards.evaluate_all("""(els) => els.forEach(el => {
+                el.className='dashboard-component';el.textContent='Service online';
+                el.setAttribute('data-status','online');el.removeAttribute('data-loading');el.removeAttribute('aria-busy');
+              })""")
+              status_node.evaluate("""(el) => {
+                el.textContent='متصل';el.className='status';el.setAttribute('data-status','online');
+                el.removeAttribute('data-loading');el.removeAttribute('aria-busy');
+              }""")
               status_cards.first.evaluate("(el) => { el.textContent = 'Xray error'; }")
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'error'", timeout=4000)
               page.locator("#voidling-widget").click()
@@ -294,7 +307,10 @@ jobs:
               page.locator("#voidling-dismiss").click()
               status_cards.first.evaluate("(el) => { el.textContent = 'Xray loading'; }")
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'checking'", timeout=4000)
-              page.evaluate("(items) => document.querySelectorAll('#dashboardComponentStatus .dashboard-component').forEach((el,i) => { if(items[i] !== undefined) el.innerHTML=items[i]; })", saved_card_html)
+              status_cards.evaluate_all("""(els) => els.forEach(el => {
+                el.className='dashboard-component';el.textContent='Service online';
+                el.setAttribute('data-status','online');el.removeAttribute('data-loading');el.removeAttribute('aria-busy');
+              })""")
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'online'", timeout=6000)
               page.locator("#voidling-widget").click()
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'reacting'", timeout=3000)
@@ -315,21 +331,30 @@ jobs:
                   raise SystemExit("Dragging in rotation mode did not rotate and persist the 3D pose independently of widget position: " + repr(rotation_data))
               rotation_toggle.click()
               page.locator("#voidling-dismiss").click()
-              # Accelerate only the 45-second idle timer for this isolated test; normal panel timing is unchanged.
-              page.evaluate("""() => {
-                window.__voidlingFastSleepTest=true;
-                document.body.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:4,clientY:4}));
-              }""")
+              # Invoke real user activity after enabling the test-only accelerated idle timeout.
+              page.evaluate("window.__voidlingFastSleepTest=true")
+              page.locator("#voidling-widget").click()
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'sleep'", timeout=3000)
               print("VOIDLING_IDLE_SLEEP=" + repr(page.locator("#voidling-widget").get_attribute("data-state")))
-              page.evaluate("""() => {
-                window.__voidlingFastSleepTest=false;
-                document.getElementById('voidling-widget').click();
-              }""")
+              page.evaluate("window.__voidlingFastSleepTest=false")
+              page.locator("#voidling-widget").click()
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'reacting'", timeout=3000)
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'online'", timeout=3000)
               if page.locator("#voidling-dismiss").count():
                   page.locator("#voidling-dismiss").click()
+              # Put the synthetic DOM back exactly as found before the state-machine tests.
+              status_cards.evaluate_all("""(els,prior) => els.forEach((el,i) => {
+                const s=prior[i];if(!s)return;el.innerHTML=s.html;el.className=s.className;
+                for(const [key,value] of [['data-status',s.dataStatus],['data-loading',s.dataLoading],['aria-busy',s.ariaBusy]]) {
+                  if(value===null)el.removeAttribute(key);else el.setAttribute(key,value);
+                }
+              })""", saved_card_state)
+              status_node.evaluate("""(el,s) => {
+                el.innerHTML=s.html;el.className=s.className;
+                for(const [key,value] of [['data-status',s.dataStatus],['data-loading',s.dataLoading],['aria-busy',s.ariaBusy]]) {
+                  if(value===null)el.removeAttribute(key);else el.setAttribute(key,value);
+                }
+              }""", saved_status)
               page.screenshot(path=str(out / "02-dashboard-desktop.png"), full_page=False, animations="disabled")
               for nav, filename in [("clients","03-users-desktop.png"),("create","04-create-desktop.png"),("servers","05-servers-desktop.png"),("protocols","06-protocols-desktop.png"),("reports","07-reports-desktop.png"),("settings","08-settings-desktop.png")]:
                   locator = page.locator('[data-nav="' + nav + '"]').first
