@@ -2888,8 +2888,56 @@ html body .login-visual .visual-orbit{
  }
 }
 </style>"""
+ABYSS_VOIDLING_CSS = r"""<style id="voidling-interactive-space">
+#void-space-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:.9}
+body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:relative;z-index:2}
+#voidling-widget{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:60;width:76px;height:94px;border:0!important;background:transparent!important;box-shadow:none!important;min-height:0!important;padding:0!important;cursor:pointer;filter:drop-shadow(0 8px 18px rgba(0,0,0,.75));transition:transform .25s ease,filter .25s ease}
+#voidling-widget:hover{transform:translateY(-4px) scale(1.035);filter:drop-shadow(0 0 15px rgba(220,228,255,.24))}
+#voidling-widget:focus-visible{outline:2px solid #dce4ff!important;outline-offset:5px;border-radius:18px}
+.voidling-body{position:absolute;left:17px;top:12px;width:43px;height:44px;border:1px solid rgba(220,229,255,.55);border-radius:46% 54% 48% 52%;background:radial-gradient(ellipse at 35% 22%,#424550 0,#17191f 34%,#030405 76%);box-shadow:inset -5px -6px 12px #000, inset 3px 3px 7px rgba(255,255,255,.16),0 0 18px rgba(215,225,255,.12);animation:voidling-float 3.6s ease-in-out infinite}
+.voidling-body:before,.voidling-body:after{content:"";position:absolute;top:-7px;width:15px;height:20px;background:linear-gradient(145deg,#22242b,#030405 70%);border:1px solid rgba(220,229,255,.4);border-radius:90% 12% 70% 18%;z-index:-1}
+.voidling-body:before{left:0;transform:rotate(-27deg)}.voidling-body:after{right:0;transform:scaleX(-1) rotate(-27deg)}
+.voidling-eye{position:absolute;top:17px;width:9px;height:13px;border-radius:60% 60% 52% 52%;background:#f7f8ff;box-shadow:0 0 5px #fff,0 0 12px rgba(214,225,255,.9);animation:voidling-blink 5.4s infinite}
+.voidling-eye.left{left:9px}.voidling-eye.right{right:9px}
+.voidling-tail{position:absolute;left:25px;top:49px;width:25px;height:28px;border-left:2px solid rgba(196,207,239,.68);border-bottom:2px solid rgba(196,207,239,.42);border-radius:0 0 0 85%;transform:rotate(-26deg);filter:drop-shadow(0 0 4px rgba(205,215,255,.45));animation:voidling-tail 2.8s ease-in-out infinite}
+.voidling-orbit{position:absolute;left:7px;top:30px;width:62px;height:30px;border:1px solid rgba(205,215,255,.25);border-radius:50%;transform:rotate(-25deg);animation:voidling-orbit 9s linear infinite}
+#voidling-widget[data-state="error"] .voidling-eye{background:#ff777e;box-shadow:0 0 7px #ff4d59,0 0 14px rgba(255,60,70,.7)}
+#voidling-widget[data-state="checking"] .voidling-body{animation:voidling-float 1.2s ease-in-out infinite;box-shadow:0 0 22px rgba(215,225,255,.25)}
+#voidling-widget[data-state="sleep"]{opacity:.72}
+#voidling-widget.is-reacting .voidling-body{animation:voidling-react .55s ease-out 1}
+#voidling-widget.is-reacting .voidling-orbit{border-color:rgba(238,243,255,.75)}
+#voidling-label{position:absolute;right:0;bottom:0;white-space:nowrap;font:10px/1.5 Vazirmatn,Tahoma,sans-serif;color:#dce4f6;background:rgba(7,8,12,.88);border:1px solid rgba(205,215,240,.2);border-radius:99px;padding:3px 8px;opacity:0;transform:translateY(3px);transition:opacity .2s,transform .2s;pointer-events:none}
+#voidling-widget:hover #voidling-label,#voidling-widget:focus-visible #voidling-label,#voidling-widget.show-label #voidling-label{opacity:1;transform:translateY(0)}
+@keyframes voidling-float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+@keyframes voidling-tail{0%,100%{transform:rotate(-26deg) scaleY(1)}50%{transform:rotate(-12deg) scaleY(.88)}}
+@keyframes voidling-orbit{to{transform:rotate(335deg)}}
+@keyframes voidling-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.12)}}
+@keyframes voidling-react{0%{transform:scale(1)}35%{transform:scale(1.17) rotate(7deg)}100%{transform:scale(1)}}
+@media(max-width:600px){#voidling-widget{right:12px;bottom:max(12px,env(safe-area-inset-bottom));transform:scale(.88);transform-origin:bottom right}}
+@media(prefers-reduced-motion:reduce){.voidling-body,.voidling-tail,.voidling-orbit,.voidling-eye{animation:none!important}#voidling-widget{transition:none}}
+</style>"""
+ABYSS_VOIDLING_JS = r"""<script id="voidling-interactive-space-script">
+(()=>{if(document.getElementById('void-space-canvas'))return;
+const canvas=document.createElement('canvas');canvas.id='void-space-canvas';canvas.setAttribute('aria-hidden','true');document.body.appendChild(canvas);
+const ctx=canvas.getContext('2d',{alpha:true});if(!ctx)return;
+let w=0,h=0,dpr=1,raf=0;const ripples=[],prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function resize(){dpr=Math.min(window.devicePixelRatio||1,1.5);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0)}
+function addRipple(x,y){ripples.push({x,y,start:performance.now(),life:prefersReduced?420:1050});if(ripples.length>12)ripples.shift();if(!raf)raf=requestAnimationFrame(draw)}
+function draw(now){ctx.clearRect(0,0,w,h);for(let i=ripples.length-1;i>=0;i--){const p=ripples[i],t=(now-p.start)/p.life;if(t>=1){ripples.splice(i,1);continue}const radius=8+t*Math.min(145,Math.max(w,h)*.19),alpha=(1-t)*.42;ctx.lineWidth=1.15*(1-t)+.25;ctx.strokeStyle='rgba(220,228,245,'+alpha+')';ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.stroke();if(t<.78){ctx.strokeStyle='rgba(180,192,220,'+(alpha*.45)+')';ctx.beginPath();ctx.arc(p.x,p.y,radius*.68,0,Math.PI*2);ctx.stroke()}for(let j=0;j<7;j++){const a=j*2.399+t*1.2,rr=radius*(.3+(j%3)*.22);ctx.fillStyle='rgba(225,231,248,'+(alpha*(.7-j*.07))+')';ctx.beginPath();ctx.arc(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr,1.2*(1-t),0,Math.PI*2);ctx.fill()}}
+if(ripples.length)raf=requestAnimationFrame(draw);else{raf=0;ctx.clearRect(0,0,w,h)}}
+resize();addEventListener('resize',resize,{passive:true});
+document.addEventListener('click',e=>{if(e.target.closest('#voidling-widget,button,a,input,select,textarea,[role="button"]')){if(e.target.closest('#voidling-widget'))return}addRipple(e.clientX,e.clientY)},{passive:true});
+const widget=document.createElement('button');widget.type='button';widget.id='voidling-widget';widget.setAttribute('aria-label','Voidling؛ نمایش وضعیت پنل');widget.setAttribute('aria-haspopup','dialog');widget.dataset.state='online';widget.innerHTML='<span class="voidling-orbit" aria-hidden="true"></span><span class="voidling-body" aria-hidden="true"><i class="voidling-eye left"></i><i class="voidling-eye right"></i></span><span class="voidling-tail" aria-hidden="true"></span><span id="voidling-label">پنل آنلاین</span>';document.body.appendChild(widget);
+let labelTimer=0;
+function setState(state,label){widget.dataset.state=state;const l=document.getElementById('voidling-label');if(l)l.textContent=label}
+function readStatus(){const status=(document.getElementById('status')?.innerText||'')+' '+(document.getElementById('dashboardComponentStatus')?.innerText||'');if(/خطا|ناموفق|offline|failed|error/i.test(status))setState('error','نیازمند بررسی');else if(/در حال بررسی|در حال دریافت|checking|loading/i.test(status))setState('checking','در حال بررسی');else if(status.trim())setState('online','پنل آنلاین')}
+const observer=new MutationObserver(readStatus);['status','dashboardComponentStatus'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{subtree:true,childList:true,characterData:true})});setTimeout(readStatus,900);setInterval(readStatus,15000);
+widget.addEventListener('click',()=>{widget.classList.remove('is-reacting');void widget.offsetWidth;widget.classList.add('is-reacting','show-label');clearTimeout(labelTimer);labelTimer=setTimeout(()=>widget.classList.remove('show-label','is-reacting'),3200);addRipple(innerWidth-55,innerHeight-60);const existing=document.getElementById('voidling-status-popover');if(existing){existing.remove();return}const pop=document.createElement('div');pop.id='voidling-status-popover';pop.setAttribute('role','status');pop.style.cssText='position:fixed;right:18px;bottom:120px;z-index:61;max-width:min(280px,calc(100vw - 36px));padding:13px 15px;border:1px solid rgba(205,215,240,.24);border-radius:14px;background:rgba(7,9,14,.96);color:#e8edf9;box-shadow:0 12px 40px #0009;backdrop-filter:blur(14px);font:12px/1.9 Vazirmatn,Tahoma,sans-serif';const state=widget.dataset.state;pop.innerHTML='<strong>Voidling · وضعیت پنل</strong><div style="color:#bfc9dc;margin-top:4px">'+(state==='error'?'برخی بررسی‌ها نیازمند توجه هستند.':state==='checking'?'وضعیت اجزای پنل در حال بررسی است.':'پنل در دسترس است؛ برای جزئیات بیشتر بخش وضعیت سرویس‌ها را ببین.')+'</div><button type="button" style="margin-top:9px;padding:5px 10px;min-height:30px;border:1px solid #353c4a;border-radius:8px;background:#141820;color:#e8edf9" id="voidling-dismiss">بستن</button>';document.body.appendChild(pop);document.getElementById('voidling-dismiss').addEventListener('click',()=>pop.remove());setTimeout(()=>{if(pop.isConnected)pop.remove()},6500)});
+})();
+</script>"""
+
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
-DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
+DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_VOIDLING_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_VOIDLING_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 
 @app.get("/dashboard.js",response_class=PlainTextResponse)
 async def dashboard_js():
