@@ -278,6 +278,17 @@ jobs:
                       print("CREATE_PROFILE_COLUMNS=" + repr(profile_columns))
                       if profile_columns != 4:
                           raise SystemExit("Desktop protocol choices must use the reference four-column grid: " + repr(profile_columns))
+                      profile_checks = page.locator('#clientProfileChoices input[name="clientProfile"]')
+                      if profile_checks.count() < 2:
+                          raise SystemExit("Service creation must expose multiple selectable protocol profiles")
+                      originally_checked = profile_checks.evaluate_all("(els) => els.map((e) => e.checked)")
+                      profile_checks.nth(0).check()
+                      profile_checks.nth(1).check()
+                      checked_count = profile_checks.evaluate_all("(els) => els.filter((e) => e.checked).length")
+                      print("CREATE_MULTISELECT_CHECKED=" + repr(checked_count))
+                      if checked_count < 2:
+                          raise SystemExit("Service creation protocol choices behave as single-select instead of multi-select")
+                      profile_checks.evaluate_all("(els, prior) => els.forEach((e, i) => { if (e.checked !== prior[i]) e.click(); })", originally_checked)
                   if nav == "servers":
                       page.wait_for_function("""() => {
                         const e=document.getElementById('serverStatusGrid');
