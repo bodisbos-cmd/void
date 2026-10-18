@@ -2001,8 +2001,8 @@ html body main.app-shell>aside.sidebar>.abyss-utility-links{
 }
 /* Reference-matching pass: simplify the rail and compact the header/cards without removing controls. */
 @media(min-width:851px){
- html body main.app-shell>.workspace>.top{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto!important;align-items:center!important;gap:7px!important;padding:4px 0 8px!important}
- html body main.app-shell>.workspace>.top>.abyss-brand-row,html body main.app-shell>.workspace>.top>.mint{display:none!important}
+ html body main.app-shell>.workspace>.top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;align-items:center!important;gap:7px!important;padding:4px 0 8px!important}
+ html body main.app-shell>.workspace>.top>.mint{display:none!important}
  html body main.app-shell>.workspace>.top>.tools{grid-row:1!important;grid-column:1!important;display:flex!important;flex-wrap:nowrap!important;justify-content:flex-start!important;align-items:center!important;gap:7px!important;width:100%!important;min-width:0!important;overflow-x:auto!important;padding:2px 0 5px!important;scrollbar-width:thin!important}
  html body main.app-shell>.workspace>.top>.tools>*{flex:0 0 auto!important;white-space:nowrap!important}
  html body main.app-shell>.workspace>.top>.tools>.top-tools-search{width:190px!important;flex:0 1 190px!important}
@@ -2043,6 +2043,12 @@ html body main.app-shell{background-image:radial-gradient(1px 1px at 7% 13%,rgba
 
 
 @media(min-width:851px){html body main.app-shell>.workspace>.top>.section-heading{justify-self:end!important;text-align:left!important}}
+@media(min-width:851px) and (max-width:1150px){html body main.app-shell>.workspace>.top>.abyss-brand-row{display:none!important}}
+@media(min-width:1151px){
+ html body main.app-shell>.workspace>.top>.abyss-brand-row{display:flex!important;grid-row:1!important;grid-column:2!important;align-self:center!important;justify-self:start!important;margin:0!important;max-width:160px!important;white-space:nowrap!important}
+ html body main.app-shell>.workspace>.top>.tools{grid-row:1!important;grid-column:1!important}
+ html body main.app-shell>.workspace>.top>.section-heading{grid-row:2!important;grid-column:1!important;justify-self:end!important;text-align:right!important}
+}
 
 @media(max-width:850px){
  html body main.app-shell>.workspace>.top{grid-template-rows:auto auto auto!important}
@@ -2104,7 +2110,7 @@ html body main.app-shell>aside.sidebar .nav-icon svg{display:block!important;wid
 /* Tighten the login eclipse scale and keep the form itself free of a duplicate wordmark. */
 html body:has(.login-layout) .login-visual .visual-orbit{
  top:12%!important;left:9%!important;width:min(20vw,280px)!important;
- opacity:.2!important;
+ opacity:.3!important;filter:drop-shadow(0 0 22px rgba(220,222,230,.10))!important;
 }
 html body:has(.login-layout) .login-visual .visual-eyebrow{
  top:calc(12% + min(20vw,280px) + 8px)!important;
@@ -2567,7 +2573,7 @@ html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6p
   box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 20px rgba(0,0,0,.18)!important;
  }
 }
-//* Reference user table: prioritize the full-width table; retain the inspector beneath it. */
+/* Reference user table: prioritize the full-width table; retain the inspector beneath it. */
 @media(min-width:851px){
  html body main.app-shell>.workspace .clients-layout{
   display:grid!important;
