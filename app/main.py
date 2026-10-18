@@ -291,13 +291,18 @@ def record_client_usage_history(now=None, client_id=None):
 def get_client_usage_history(client_id, days=90, now=None):
     now=int(time.time() if now is None else now)
     days=max(1,min(90,int(days)))
-    record_client_usage_history(now=now,client_id=client_id)
-    with db() as c:
-        rows=c.execute(
-            "SELECT sampled_at,used_bytes FROM client_usage_history WHERE client_id=? AND sampled_at>=? ORDER BY sampled_at",
-            (client_id,now-days*86400)
-        ).fetchall()
-    return [{"at":int(row["sampled_at"]),"used_bytes":max(0,int(row["used_bytes"] or 0))} for row in rows]
+    try:
+        record_client_usage_history(now=now,client_id=client_id)
+        with db() as c:
+            rows=c.execute(
+                "SELECT sampled_at,used_bytes FROM client_usage_history WHERE client_id=? AND sampled_at>=? ORDER BY sampled_at",
+                (client_id,now-days*86400)
+            ).fetchall()
+        return [{"at":int(row["sampled_at"]),"used_bytes":max(0,int(row["used_bytes"] or 0))} for row in rows]
+    except Exception as e:
+        try: event("WARNING",f"Usage history unavailable for client {str(client_id)[:8]}: {e}")
+        except Exception: pass
+        return []
 
 async def enforce_client_limits():
     # Expiry and already-recorded quota enforcement must continue even while
@@ -305,7 +310,11 @@ async def enforce_client_limits():
     if Path(XRAY_BIN).exists() and xray_proc and xray_proc.poll() is None:
         stats=read_xray_stats()
         apply_xray_stats(stats)
-    record_client_usage_history()
+    try:
+        record_client_usage_history()
+    except Exception as e:
+        try: event("WARNING",f"Client usage history sample failed: {e}")
+        except Exception: pass
     auto_disabled=[]
     with db() as c:
         rows=[dict(x) for x in c.execute("SELECT id,name,enabled,expires_at,quota_bytes,used_bytes FROM clients")]
