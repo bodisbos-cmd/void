@@ -122,6 +122,8 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "TABLET_CLIENTS_LAYOUT=" in visual_workflow
     assert "TABLET_CREATE_LAYOUT=" in visual_workflow
     assert "quickDetailCount:quickDetailRows.length,quickDetailLabels,quickDetailValues," in visual_workflow
+    assert "CREATE_MULTISELECT_CHECKED=" in visual_workflow
+    assert "protocol choices behave as single-select" in visual_workflow
     assert "ABYSS TUNNEL" in login_page.text
     assert "Secure · Private · Unlimited" in login_page.text
     assert 'class="login-password-toggle"' in login_page.text
