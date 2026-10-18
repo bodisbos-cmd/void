@@ -2918,7 +2918,7 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 @keyframes voidling-react{0%{transform:scale(1)}35%{transform:scale(1.12) rotate(5deg)}100%{transform:scale(1)}}
 @keyframes voidling-nav-orbit{0%{transform:rotate(-25deg) scale(1)}45%{transform:rotate(155deg) scale(1.16)}100%{transform:rotate(335deg) scale(1)}}
 @keyframes voidling-nav-hop{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-10px) scale(1.06)}65%{transform:translateY(1px) scale(.98)}}
-@media(max-width:600px){#voidling-widget{right:12px;left:auto;top:max(137px,calc(env(safe-area-inset-top) + 125px));bottom:auto;width:58px;height:68px;transform:none;transform-origin:top right}#voidling-widget:hover{transform:translateY(-2px)}#voidling-status-popover{top:max(64px,calc(env(safe-area-inset-top) + 52px))!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto;max-width:none!important}}
+@media(max-width:600px){#voidling-widget{right:12px;left:auto;top:max(137px,calc(env(safe-area-inset-top) + 125px));bottom:auto;width:40px;height:44px;transform:none;transform-origin:top right}#voidling-widget:hover{transform:translateY(-2px)}#voidling-status-popover{top:max(64px,calc(env(safe-area-inset-top) + 52px))!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto;max-width:none!important}}
 @media(min-width:601px) and (max-width:1100px){#voidling-widget{width:54px;height:64px;bottom:10px}}
 @media(prefers-reduced-motion:reduce){.voidling-art,.voidling-orbit{animation:none!important}#voidling-widget{transition:none}}
 </style>"""
