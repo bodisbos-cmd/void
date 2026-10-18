@@ -486,6 +486,72 @@ jobs:
               if mobile_overflow["headerHeight"] is None or mobile_overflow["headerHeight"] > 430:
                   raise SystemExit("Mobile toolbar is excessively tall instead of using compact controls: " + repr(mobile_overflow))
               mobile.screenshot(path=str(out / "09-dashboard-mobile.png"), full_page=False, animations="disabled")
+              # Voidling: validate the reference sprite, responsive docking, status popup, optional audio, drag and persistence.
+              voidling_layout = mobile.evaluate("""async () => {
+                const widget=document.getElementById('voidling-widget'), art=widget?.querySelector('.voidling-art');
+                if (!widget || !art) return {missing:true};
+                const r=widget.getBoundingClientRect(), stats=document.getElementById('overviewStats')?.getBoundingClientRect();
+                const background=getComputedStyle(art).backgroundImage;
+                const source=background.startsWith('url("') ? background.slice(5,-2) : '';
+                let image={loaded:false,width:0,height:0};
+                if(source.startsWith('data:image/webp;base64,')){
+                  const testImage=new Image(); testImage.src=source;
+                  try { await testImage.decode(); image={loaded:true,width:testImage.naturalWidth,height:testImage.naturalHeight}; } catch (_) {}
+                }
+                return {missing:false,rect:{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height},
+                  stats:stats?{top:stats.top,bottom:stats.bottom}:null,backgroundIsEmbeddedWebp:source.startsWith('data:image/webp;base64,'),
+                  image,position: getComputedStyle(widget).position};
+              }""")
+              print("VOIDLING_MOBILE_LAYOUT=" + repr(voidling_layout))
+              if voidling_layout.get("missing") or not voidling_layout["backgroundIsEmbeddedWebp"] or not voidling_layout["image"]["loaded"] or voidling_layout["image"]["width"] < 80:
+                  raise SystemExit("Voidling reference artwork failed to decode: " + repr(voidling_layout))
+              if abs(voidling_layout["rect"]["width"]-36)>1 or abs(voidling_layout["rect"]["height"]-42)>1:
+                  raise SystemExit("Voidling mobile dimensions drifted from its responsive dock: " + repr(voidling_layout))
+              if not voidling_layout["stats"] or voidling_layout["rect"]["bottom"] > voidling_layout["stats"]["top"]+1:
+                  raise SystemExit("Voidling overlaps the mobile dashboard cards: " + repr(voidling_layout))
+              mobile.locator("#voidling-widget").click()
+              mobile.wait_for_selector("#voidling-status-popover",state="visible",timeout=3000)
+              popup_layout=mobile.locator("#voidling-status-popover").evaluate("""e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,width:r.width,viewport:innerHeight,display:getComputedStyle(e).display}}""")
+              print("VOIDLING_STATUS_POPOVER=" + repr(popup_layout))
+              if popup_layout["top"] > 100 or popup_layout["bottom"] >= popup_layout["viewport"] or popup_layout["display"] == "none":
+                  raise SystemExit("Voidling status popup is not docked at the top on mobile: " + repr(popup_layout))
+              sound_toggle=mobile.locator("#voidling-sound-toggle")
+              if not sound_toggle.count() or sound_toggle.get_attribute("aria-pressed") != "false":
+                  raise SystemExit("Voidling optional sound control did not start in the off state")
+              sound_toggle.click()
+              sound_enabled=mobile.evaluate("() => localStorage.getItem('voidling-sound')==='on' && document.getElementById('voidling-sound-toggle')?.getAttribute('aria-pressed')==='true'")
+              sound_toggle.click()
+              sound_disabled=mobile.evaluate("() => localStorage.getItem('voidling-sound')==='off' && document.getElementById('voidling-sound-toggle')?.getAttribute('aria-pressed')==='false'")
+              print("VOIDLING_OPTIONAL_SOUND=" + repr({"enabledAndPersisted":sound_enabled,"disabledAndPersisted":sound_disabled}))
+              if not sound_enabled or not sound_disabled:
+                  raise SystemExit("Voidling optional sound toggle failed to persist both states")
+              mobile.locator("#voidling-dismiss").click()
+              mobile.wait_for_selector("#voidling-status-popover",state="detached",timeout=3000)
+              drag_box=mobile.locator("#voidling-widget").bounding_box()
+              drag_start={"x":drag_box["x"]+drag_box["width"]/2,"y":drag_box["y"]+drag_box["height"]/2}
+              await_mouse=mobile.mouse
+              await_mouse.move(drag_start["x"],drag_start["y"])
+              await_mouse.down()
+              await_mouse.move(drag_start["x"]-24,drag_start["y"]+8,steps=5)
+              await_mouse.up()
+              mobile.wait_for_function("""() => {
+                try { const p=JSON.parse(localStorage.getItem('voidling-position')||'null');return !!p&&Number.isFinite(p.x)&&Number.isFinite(p.y); } catch (_) { return false; }
+              }""",timeout=3000)
+              drag_saved=mobile.evaluate("() => JSON.parse(localStorage.getItem('voidling-position'))")
+              moved_box=mobile.locator("#voidling-widget").bounding_box()
+              if abs(moved_box["x"]-drag_saved["x"])>2 or abs(moved_box["y"]-drag_saved["y"])>2 or (abs(moved_box["x"]-drag_box["x"])<8 and abs(moved_box["y"]-drag_box["y"])<5):
+                  raise SystemExit("Voidling drag did not update and persist its position: " + repr({"before":drag_box,"after":moved_box,"saved":drag_saved}))
+              mobile.reload(wait_until="domcontentloaded")
+              mobile.wait_for_selector("#voidling-widget",timeout=8000)
+              mobile.wait_for_function("""expected => {
+                const w=document.getElementById('voidling-widget');return w&&Math.abs(w.getBoundingClientRect().x-expected.x)<2&&Math.abs(w.getBoundingClientRect().y-expected.y)<2;
+              }""",arg=drag_saved,timeout=5000)
+              restored=mobile.locator("#voidling-widget").bounding_box()
+              print("VOIDLING_DRAG_PERSISTENCE=" + repr({"saved":drag_saved,"restored":{"x":restored["x"],"y":restored["y"]}}))
+              mobile.evaluate("() => { localStorage.removeItem('voidling-position'); localStorage.setItem('voidling-sound','off'); }")
+              mobile.reload(wait_until="domcontentloaded")
+              mobile.wait_for_selector("#voidling-widget",timeout=8000)
+              mobile.wait_for_timeout(350)
               toggle = mobile.locator("#menuToggle")
               if not toggle.count():
                   raise SystemExit("Mobile drawer toggle is missing")
@@ -512,7 +578,15 @@ jobs:
                   raise SystemExit("Mobile drawer utility links overlap creator label: " + repr(drawer_layers))
               mobile.screenshot(path=str(out / "10-mobile-menu.png"), full_page=False, animations="disabled")
               # Check responsive client management and service creation, not only the dashboard shell.
-              mobile.locator('[data-nav="clients"]').first.click()
+              nav_reaction = mobile.evaluate("""() => {
+                const target=document.querySelector('[data-nav="clients"]'), widget=document.getElementById('voidling-widget');
+                if (!target || !widget) return {missing:true};
+                target.click();
+                return {missing:false,navigating:widget.classList.contains('is-navigating'),reacting:widget.classList.contains('is-reacting')};
+              }""")
+              print("VOIDLING_MENU_REACTION=" + repr(nav_reaction))
+              if nav_reaction.get("missing") or not nav_reaction["navigating"] or not nav_reaction["reacting"]:
+                  raise SystemExit("Voidling did not react when the mobile menu section changed: " + repr(nav_reaction))
               mobile.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
                 return visible.length>0&&visible.every(e=>e.dataset.sectionPage==='clients')
