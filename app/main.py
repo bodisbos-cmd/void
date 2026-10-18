@@ -2641,6 +2641,7 @@ html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6p
   min-width:0!important;
   max-width:none!important;
  }
+ html body main.app-shell>.workspace .clients-layout>#clientDetailsPanel{margin-top:12px!important}
  html body main.app-shell>.workspace .clients-layout .clients-table-scroll{
   width:100%!important;
   max-width:none!important;
