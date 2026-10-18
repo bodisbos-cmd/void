@@ -2567,16 +2567,15 @@ html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6p
   box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 20px rgba(0,0,0,.18)!important;
  }
 }
-/* User-management reference: wide user table and persistent details panel side by side. */
+/* Reference layout: let the user table use the full content width; keep details accessible beneath it. */
 @media(min-width:851px){
  html body main.app-shell>.workspace .clients-layout{
-  display:grid!important;grid-template-columns:minmax(0,1.65fr) minmax(300px,.95fr)!important;align-items:start!important;gap:12px!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-items:start!important;gap:12px!important;
  }
  html body main.app-shell>.workspace #clients,
  html body main.app-shell>.workspace #clientDetailsPanel{
-  width:100%!important;min-width:0!important;max-width:none!important;
+  display:block!important;width:100%!important;min-width:0!important;max-width:none!important;
  }
- html body main.app-shell>.workspace #clientDetailsPanel{display:block!important;}
 }
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
