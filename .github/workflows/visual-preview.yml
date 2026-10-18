@@ -232,6 +232,12 @@ jobs:
               print("XRAY_STATUS_UI=" + repr(xray_state))
               if xray_state["http"] != 200 or xray_state["actual"] != xray_state["shown"]:
                   raise SystemExit("Quick dashboard status differs from the actual Xray state: " + repr(xray_state))
+              page.locator("#langBtn").click()
+              page.wait_for_function("""() => document.querySelector('#dashboardQuickCard .section-title')?.textContent?.trim()==='Quick details'
+                && document.querySelector('#dashboardQuickDetails .quick-detail-copy .small')?.textContent?.trim()==='Latest service created'""", timeout=5000)
+              page.locator("#langBtn").click()
+              page.wait_for_function("""() => document.querySelector('#dashboardQuickCard .section-title')?.textContent?.trim()==='جزئیات سریع'
+                && document.querySelector('#dashboardQuickDetails .quick-detail-copy .small')?.textContent?.trim()==='آخرین سرویس ساخته‌شده'""", timeout=5000)
               page.screenshot(path=str(out / "02-dashboard-desktop.png"), full_page=False, animations="disabled")
               for nav, filename in [("clients","03-users-desktop.png"),("create","04-create-desktop.png"),("servers","05-servers-desktop.png"),("protocols","06-protocols-desktop.png"),("reports","07-reports-desktop.png"),("settings","08-settings-desktop.png")]:
                   locator = page.locator('[data-nav="' + nav + '"]').first
