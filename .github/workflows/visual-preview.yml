@@ -211,7 +211,7 @@ jobs:
               print("SIDEBAR_LAYOUT=" + repr(sidebar_layout))
               if not sidebar_layout["nav"] or not sidebar_layout["account"] or not sidebar_layout["caption"] or sidebar_layout["nav"]["bottom"] > sidebar_layout["account"]["top"] + 1:
                   raise SystemExit("Sidebar account overlaps navigation: " + repr(sidebar_layout))
-              if sidebar_layout["account"]["bottom"] > sidebar_layout["caption"]["top"] + 1:
+              if sidebar_layout["account"]["top"] < sidebar_layout["caption"]["bottom"] - 1:
                   raise SystemExit("Sidebar creator label overlaps account identity: " + repr(sidebar_layout))
               if sidebar_layout["links"] and sidebar_layout["caption"]["bottom"] > sidebar_layout["links"]["top"] + 1:
                   raise SystemExit("Sidebar utility links overlap creator label: " + repr(sidebar_layout))
