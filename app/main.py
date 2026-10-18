@@ -2942,16 +2942,19 @@ body:before{z-index:0!important;opacity:.28!important;background:linear-gradient
 .warning{color:#bdbfc5!important}
 @media(max-width:700px){body:before{display:none!important}.shell{padding-top:18px!important}.brand-name{font-size:11px!important}}
 @media(min-width:1101px){
- .shell{width:min(1480px,100%);padding:22px clamp(24px,3vw,48px) 36px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:start;align-content:start}
- .shell>.top{grid-column:1/-1;margin:0;min-width:0}
- .shell>.hero{grid-column:9/-1;margin:0;padding:20px;min-width:0;align-self:start}
- .shell>.grid{grid-column:1/9;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0;align-self:start}
+ .shell{width:min(1480px,100%);padding:22px clamp(24px,3vw,48px) 36px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:min-content;grid-auto-flow:row;gap:14px;align-items:start;align-content:start}
+ .shell>.top{grid-column:1/-1!important;grid-row:1!important;margin:0;min-width:0}
+ .shell>.hero{grid-column:9/-1!important;grid-row:2!important;margin:0;padding:20px;min-width:0;align-self:start}
+ .shell>.grid{grid-column:1/9!important;grid-row:2!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0;align-self:start}
  .shell>.grid>.metric{padding:13px 11px}
  .shell>.grid>.metric b{font-size:15px}
- .shell>.usage-panel{grid-column:9/span 4;margin:0;align-self:start}
- .shell>.profiles-panel{grid-column:5/span 4;margin:0;align-self:start}
- .shell>.share-panel{grid-column:1/span 4;margin:0!important;align-self:start}
- .shell>.footer{grid-column:1/-1;margin-top:0}
+ .shell>.usage-panel{grid-column:9/-1!important;grid-row:3!important;margin:0;align-self:start}
+ .shell>.profiles-panel{grid-column:5/9!important;grid-row:3!important;margin:0;align-self:start}
+ .shell>.share-panel{grid-column:1/5!important;grid-row:3!important;margin:0!important;align-self:start}
+ .shell>.footer{grid-column:1/-1!important;grid-row:4!important;margin-top:0}
+ .shell>#abyssTroubleshoot{grid-column:7/-1!important;grid-row:5!important;width:100%;min-width:0;margin:0!important}
+ .shell>#abyssTroubleshoot+.panel{grid-column:1/7!important;grid-row:5!important;width:100%;min-width:0;margin:0!important}
+ .shell>#abyssTroubleshoot+.panel+.panel{grid-column:1/-1!important;grid-row:6!important;width:100%;min-width:0;margin:0!important}
  .usage-visual{grid-template-columns:112px minmax(0,1fr);gap:12px}
  .usage-gauge{width:110px}
  .usage-gauge:before{inset:8px}
