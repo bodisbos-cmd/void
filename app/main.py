@@ -2914,7 +2914,7 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 @keyframes voidling-orbit{to{transform:rotate(335deg)}}
 @keyframes voidling-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.12)}}
 @keyframes voidling-react{0%{transform:scale(1)}35%{transform:scale(1.17) rotate(7deg)}100%{transform:scale(1)}}
-@media(max-width:600px){#voidling-widget{right:8px;bottom:max(8px,env(safe-area-inset-bottom));transform:scale(.68);transform-origin:bottom right}#voidling-widget:hover{transform:scale(.72)}#voidling-status-popover{right:8px!important;bottom:auto!important;top:12px;max-width:calc(100vw - 16px)!important}}
+@media(max-width:600px){#voidling-widget{right:5px;bottom:max(5px,env(safe-area-inset-bottom));transform:scale(.44);transform-origin:bottom right;opacity:.9}#voidling-widget:hover{transform:scale(.48)}#voidling-status-popover{right:8px!important;bottom:auto!important;top:12px;max-width:calc(100vw - 16px)!important}}
 @media(prefers-reduced-motion:reduce){.voidling-body,.voidling-tail,.voidling-orbit,.voidling-eye{animation:none!important}#voidling-widget{transition:none}}
 </style>"""
 ABYSS_VOIDLING_JS = r"""<script id="voidling-interactive-space-script">
