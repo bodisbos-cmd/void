@@ -2567,19 +2567,19 @@ html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6p
   box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 20px rgba(0,0,0,.18)!important;
  }
 }
-/* User-management reference: table-first layout with full-width user list. */
+/* Reference user table: use the full content width and keep the detail inspector below. */
 @media(min-width:851px){
  html body main.app-shell>.workspace .clients-layout{
   display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-items:start!important;gap:12px!important;
  }
- html body main.app-shell>.workspace #clients{
-  display:block!important;width:100%!important;min-width:0!important;max-width:none!important;
-  grid-column:1/-1!important;
+ html body main.app-shell>.workspace .clients-layout>.clients-table-wrap,
+ html body main.app-shell>.workspace .clients-layout>#clients,
+ html body main.app-shell>.workspace .clients-layout>.client-details-panel,
+ html body main.app-shell>.workspace .clients-layout>#clientDetailsPanel{
+  grid-column:1/-1!important;width:100%!important;min-width:0!important;max-width:none!important;
  }
- html body main.app-shell>.workspace #clientDetailsPanel{
-  display:block!important;position:static!important;width:100%!important;min-width:0!important;max-width:none!important;
-  grid-column:1/-1!important;
- }
+ html body main.app-shell>.workspace .clients-layout .clients-table-scroll{width:100%!important;max-width:none!important}
+ html body main.app-shell>.workspace .clients-layout .clients-table{width:100%!important;min-width:0!important}
 }
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
