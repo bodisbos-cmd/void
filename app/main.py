@@ -2805,7 +2805,7 @@ html body .login-visual .visual-eyebrow,html body .login-visual h2,html body .lo
   width:100%!important;
   max-width:none!important;
   box-sizing:border-box!important;
-  padding:24px 24px 42px calc(clamp(178px,15vw,220px) + 24px)!important;
+  padding:24px 24px 42px!important;
  }
  html body main.app-shell .workspace .top{padding-top:0!important}
 }
