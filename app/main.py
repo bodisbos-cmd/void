@@ -2822,6 +2822,12 @@ html body .login-visual{z-index:auto!important;isolation:auto!important}
   height:auto!important;min-height:220px!important;max-height:none!important;overflow:visible!important
  }
 }
+
+/* Soften the supplied JPEG's rectangular edge while preserving the eclipse, rays, and wordmark. */
+html body .login-visual .visual-orbit{
+ -webkit-mask-image:radial-gradient(ellipse 76% 80% at 50% 43%,#000 38%,rgba(0,0,0,.88) 52%,rgba(0,0,0,.38) 69%,transparent 82%)!important;
+ mask-image:radial-gradient(ellipse 76% 80% at 50% 43%,#000 38%,rgba(0,0,0,.88) 52%,rgba(0,0,0,.38) 69%,transparent 82%)!important;
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
