@@ -57,7 +57,16 @@ jobs:
               message = f"Created client '{name}' (visual-{i+1:02d})." if i == 5 else f"Visual preview: service created for {name}"
               db.execute("INSERT INTO events(at,level,message) VALUES(?,?,?)",
                          (event_at, "INFO", message))
-          # Seed isolated synthetic chart history for deterministic visual regression tests.
+          # Seed isolated per-client history for the subscriber usage graph (never production data).
+          for sample_index in range(31):
+              sampled_at = int(now.timestamp()) - sample_index * 86400
+              # Monotonic, slightly irregular synthetic cumulative usage ending at the fixture current total.
+              used_gb = 45.2 - sample_index * 0.77 + (sample_index % 5) * 0.025
+              db.execute(
+                  "INSERT OR REPLACE INTO client_usage_history(client_id,sampled_at,used_bytes) VALUES(?,?,?)",
+                  ("visual-01", sampled_at, int(used_gb * 1024**3)),
+              )
+          # Seed isolated system-wide chart history for deterministic dashboard visual regression tests.
           for sample_index in range(31):
               sampled_at = int(now.timestamp()) - sample_index * 3600
               # Slightly irregular, steadily rising synthetic history, matching the reference chart rather than a straight ramp.
@@ -70,7 +79,7 @@ jobs:
               )
           db.commit()
           db.close()
-          print("Seeded 6 isolated visual-preview clients, events, and 31 synthetic traffic samples.")
+          print("Seeded 6 isolated visual-preview clients, events, 31 per-client usage samples, and 31 system metrics samples.")
           PY
       - name: Install browser for real screenshots
         run: |
@@ -330,6 +339,21 @@ jobs:
               subscription.wait_for_selector(".profile-choice", timeout=5000)
               if subscription.locator(".profile-choice").count() < 3 or not subscription.locator(".hero h1").count():
                   raise SystemExit("Subscription page is missing its service overview or connection profiles")
+              subscription.locator("#clientUsageChart").wait_for(state="visible", timeout=5000)
+              chart_checks = []
+              for chart_days in (7, 30, 90):
+                  subscription.locator(f'[data-usage-days="{chart_days}"]').click()
+                  chart_state = subscription.locator("#clientUsageChart").evaluate("""e => ({
+                    width: e.getBoundingClientRect().width,
+                    height: e.getBoundingClientRect().height,
+                    renderedPoints: Number(e.dataset.renderedPoints || 0),
+                    periodDays: Number(e.dataset.periodDays || 0)
+                  })""")
+                  chart_checks.append({"days": chart_days, **chart_state})
+                  if chart_state["width"] < 100 or chart_state["height"] < 100 or chart_state["renderedPoints"] < 2 or chart_state["periodDays"] != chart_days:
+                      raise SystemExit("Subscription usage chart failed for " + str(chart_days) + " days: " + repr(chart_state))
+              print("SUBSCRIPTION_CHART=" + repr(chart_checks))
+              subscription.locator('[data-usage-days="30"]').click()
               qr = subscription.locator("img.qr")
               qr_result = qr.evaluate("""img => ({
                 src: img.currentSrc || img.src,
