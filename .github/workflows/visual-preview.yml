@@ -369,12 +369,13 @@ jobs:
                   cardsSameRow: row.length===4 && Math.max(...row.map(x=>x.y))-Math.min(...row.map(x=>x.y))<=3,
                   referenceOrder: row.length===4 && details.x<usage.x && usage.x<chart.x && chart.x<share.x,
                   profilesBelow: !!profiles && row.length===4 && profiles.y>=Math.max(...row.map(x=>x.bottom))-1,
+                  mobileMetricsHidden: getComputedStyle(document.querySelector(".service-details-mobile-metrics")).display==="none",
                   legacyHeroHidden: getComputedStyle(document.querySelector('.hero')).display==='none',
                   legacyStatsHidden: getComputedStyle(document.querySelector('.grid')).display==='none'
                 };
               }""")
               print("SUBSCRIPTION_LAYOUT=" + repr(subscription_layout))
-              if not subscription_layout["cardsSameRow"] or not subscription_layout["referenceOrder"] or not subscription_layout["profilesBelow"] or not subscription_layout["legacyHeroHidden"] or not subscription_layout["legacyStatsHidden"]:
+              if not subscription_layout["cardsSameRow"] or not subscription_layout["referenceOrder"] or not subscription_layout["profilesBelow"] or not subscription_layout["mobileMetricsHidden"] or not subscription_layout["legacyHeroHidden"] or not subscription_layout["legacyStatsHidden"]:
                   raise SystemExit("Subscription desktop layout diverged from the reference row: " + repr(subscription_layout))
               if subscription_layout["chart"]["width"] < 350 or subscription_layout["details"]["width"] < 230 or subscription_layout["usage"]["width"] < 230 or subscription_layout["share"]["width"] < 270:
                   raise SystemExit("Subscription reference cards are too narrow: " + repr(subscription_layout))
