@@ -292,10 +292,23 @@ jobs:
                         const details=document.getElementById('clientDetailsPanel');
                         return table && table.querySelectorAll('tr').length>0 && details && details.innerText.trim().length>0;
                       }""", timeout=45000)
-                      client_view=page.evaluate("""() => ({rows:document.querySelectorAll('#clients .clients-table tbody tr').length,detail:!!document.querySelector('#clientDetailsPanel .client-detail-head'),pagination:!!document.querySelector('#clients .client-pagination')})""")
+                      client_view=page.evaluate("""() => {
+                        const box=selector=>{const e=document.querySelector(selector);if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+                        const table=box('#clients'), details=box('#clientDetailsPanel');
+                        return {
+                          rows:document.querySelectorAll('#clients .clients-table tbody tr').length,
+                          detail:!!document.querySelector('#clientDetailsPanel .client-detail-head'),
+                          pagination:!!document.querySelector('#clients .client-pagination'),
+                          table,details,
+                          sameRow:!!table&&!!details&&Math.abs(table.y-details.y)<=2,
+                          inspectorRightOfTable:!!table&&!!details&&table.x<details.x&&table.right<=details.x+2
+                        };
+                      }""")
                       print("CLIENT_TABLE_VIEW=" + repr(client_view))
-                      if client_view["rows"]<1 or not client_view["detail"] or not client_view["pagination"]:
-                          raise SystemExit("Client table/detail/pagination view is incomplete: " + repr(client_view))
+                      if (client_view["rows"]<1 or not client_view["detail"] or not client_view["pagination"]
+                              or not client_view["sameRow"] or not client_view["inspectorRightOfTable"]
+                              or client_view["table"]["width"]<600 or client_view["details"]["width"]<250):
+                          raise SystemExit("Desktop client table/detail split diverged from the reference: " + repr(client_view))
                   elif nav == "protocols":
                       page.wait_for_function("""() => {
                         const table=document.querySelector('#protocolCatalog .protocol-table tbody');
