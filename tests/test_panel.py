@@ -113,6 +113,10 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "Administrator created a database backup" in visual_workflow
     assert "Updated enabled connection profiles" in visual_workflow
     assert 'expected_quick_values = ("user123"' in visual_workflow
+    assert 'out / "13-users-mobile.png"' in visual_workflow
+    assert 'out / "14-create-mobile.png"' in visual_workflow
+    assert "MOBILE_CLIENTS_LAYOUT=" in visual_workflow
+    assert "MOBILE_CREATE_LAYOUT=" in visual_workflow
     assert "ABYSS TUNNEL" in login_page.text
     assert "Secure · Private · Unlimited" in login_page.text
     assert 'class="login-password-toggle"' in login_page.text
