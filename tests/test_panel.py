@@ -163,6 +163,7 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "function loadServerStatus()" in dashboard_script.text
     assert "function loadReports()" in dashboard_script.text
     assert "report-event-table" in dashboard_script.text
+    assert '<bdi dir="ltr">' in dashboard_script.text
     assert "function renderProtocolCatalog(profiles)" in dashboard_script.text
     assert response.text.count('id="name"') == 1
     assert response.text.count('id="clientProfileChoices"') == 1
@@ -467,6 +468,7 @@ def test_subscription_landing_page_and_qr_are_responsive_and_private(client):
     assert page.status_code == 200
     assert "viewport-fit=cover" in page.text
     assert "Abyss Tunnel" in page.text
+    assert '.usage-detail b{direction:ltr!important;unicode-bidi:isolate!important;display:block!important;text-align:left!important}' in page.text
     assert 'id="abyss-theme-polish"' in page.text
     assert "Portal user" in page.text
     assert "xhttp-auto" in page.text and "xhttp-packet-up" in page.text
