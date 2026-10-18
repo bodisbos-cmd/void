@@ -110,6 +110,9 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "healthXBeforeQuick:health.x<quick.x" in visual_workflow
     assert 'dashboard_layout["chartXBeforeHealth"]' in visual_workflow
     assert 'dashboard_layout["healthXBeforeQuick"]' in visual_workflow
+    assert "Administrator created a database backup" in visual_workflow
+    assert "Updated enabled connection profiles" in visual_workflow
+    assert 'expected_quick_values = ("user123"' in visual_workflow
     assert "ABYSS TUNNEL" in login_page.text
     assert "Secure · Private · Unlimited" in login_page.text
     assert 'class="login-password-toggle"' in login_page.text
