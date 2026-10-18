@@ -228,7 +228,7 @@ jobs:
                   raise SystemExit("Dashboard cards overlap: " + repr(dashboard_layout))
               if dashboard_layout["quickDetailCount"] != 3 or any(not label for label in dashboard_layout["quickDetailLabels"]):
                   raise SystemExit("Dashboard quick-details card must render its three reference rows: " + repr(dashboard_layout["quickDetailLabels"]))
-              expected_quick_values = ("user123", "پروفایل‌های اتصال فعال به‌روزرسانی شدند", "نسخهٔ پشتیبان آماده شد")
+              expected_quick_values = ("user123", "پروفایل‌های اتصال به‌روزرسانی شدند", "نسخهٔ پشتیبان آماده شد")
               if tuple(dashboard_layout["quickDetailValues"]) != expected_quick_values:
                   raise SystemExit("Dashboard quick-details data does not match the seeded reference fixture: " + repr(dashboard_layout["quickDetailValues"]))
               if dashboard_layout["activity"] and (not dashboard_layout["activity"]["hidden"] or dashboard_layout["activity"]["scrollHeight"] > dashboard_layout["activity"]["clientHeight"] + 1):
