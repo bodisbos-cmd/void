@@ -191,9 +191,10 @@ jobs:
                 const activity=recent?{count:recent.querySelectorAll('.report-event').length,clientHeight:recent.clientHeight,scrollHeight:recent.scrollHeight,hidden:getComputedStyle(recent).display==='none'}:null;
                 const quickDetailRows=[...document.querySelectorAll('#dashboardQuickDetails .quick-detail-row')];
                 const quickDetailLabels=quickDetailRows.map(row=>row.querySelector('.quick-detail-copy .small')?.textContent?.trim()||'');
+                const quickDetailValues=quickDetailRows.map(row=>row.querySelector('strong')?.textContent?.trim()||'');
                 const overlaps=(x,y)=>!(x.x+x.width<=y.x || y.x+y.width<=x.x || x.y+x.height<=y.y || y.y+y.height<=x.y);
                 const sameRow=Math.max(chart.y,health.y,quick.y)-Math.min(chart.y,health.y,quick.y)<2;
-                return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,top,stats,chart,health,quick,sameRow,activity,quickDetailCount:quickDetailRows.length,quickDetailLabels,
+                return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,top,stats,chart,health,quick,sameRow,activity,quickDetailCount:quickDetailRows.length,quickDetailLabels,quickDetailValues,
                   chartXBeforeHealth:chart.x<health.x,healthXBeforeQuick:health.x<quick.x,
                   statsChartOverlap:overlaps(stats,chart),statsHealthOverlap:overlaps(stats,health),statsQuickOverlap:overlaps(stats,quick),
                   chartHealthOverlap:overlaps(chart,health),chartQuickOverlap:overlaps(chart,quick),healthQuickOverlap:overlaps(health,quick),
@@ -227,6 +228,9 @@ jobs:
                   raise SystemExit("Dashboard cards overlap: " + repr(dashboard_layout))
               if dashboard_layout["quickDetailCount"] != 3 or any(not label for label in dashboard_layout["quickDetailLabels"]):
                   raise SystemExit("Dashboard quick-details card must render its three reference rows: " + repr(dashboard_layout["quickDetailLabels"]))
+              expected_quick_values = ("user123", "پروفایل‌های اتصال فعال به‌روزرسانی شدند", "نسخهٔ پشتیبان آماده شد")
+              if tuple(dashboard_layout["quickDetailValues"]) != expected_quick_values:
+                  raise SystemExit("Dashboard quick-details data does not match the seeded reference fixture: " + repr(dashboard_layout["quickDetailValues"]))
               if dashboard_layout["activity"] and (not dashboard_layout["activity"]["hidden"] or dashboard_layout["activity"]["scrollHeight"] > dashboard_layout["activity"]["clientHeight"] + 1):
                   raise SystemExit("The legacy activity list must stay hidden outside the reference quick-details card: " + repr(dashboard_layout["activity"]))
               recent_activity = page.locator("#recentActivityList").text_content() or ""
