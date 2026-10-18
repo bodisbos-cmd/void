@@ -2811,6 +2811,17 @@ html body .login-visual .visual-eyebrow,html body .login-visual h2,html body .lo
 }
 /* Preserve the supplied logo while reducing the compressed JPEG's near-black square edge. */
 html body .login-visual .visual-orbit{filter:contrast(2) brightness(1.08)!important}
+
+/* Final visual QA: let the supplied logo image blend with the page starfield instead of an isolated JPEG tile. */
+html body .login-layout{isolation:auto!important}
+html body .login-visual{z-index:auto!important;isolation:auto!important}
+
+/* Tablet width: allow all reference quick-detail rows to determine the card height instead of clipping them. */
+@media (min-width:851px) and (max-width:1150px){
+ html body main.app-shell>.workspace>#dashboardQuickCard{
+  height:auto!important;min-height:220px!important;max-height:none!important;overflow:visible!important
+ }
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
