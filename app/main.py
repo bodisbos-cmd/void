@@ -2838,6 +2838,48 @@ html body .login-visual .visual-orbit{
 .login-reference-footer .login-footer-brand small{display:block!important;color:rgba(170,172,180,.48)!important;font-size:8px!important;letter-spacing:.14em!important}
 @media(max-width:850px){.login-reference-footer{position:relative!important;left:auto!important;bottom:auto!important;width:min(432px,calc(100vw - 28px))!important;max-width:432px!important;margin:14px auto 0!important;gap:12px!important;font-size:9px!important}.login-reference-footer .login-footer-links{gap:9px!important}.login-reference-footer a{font-size:9px!important}.login-reference-footer .login-footer-brand{font-size:9px!important}}
 @media(max-width:380px){.login-reference-footer{flex-direction:column!important;align-items:flex-start!important}.login-reference-footer .login-footer-brand{text-align:left!important}}
+
+/* Final reference QA: fit quick details and tablet toolbar without changing page structure. */
+@media(min-width:1151px){
+ html body main.app-shell>.workspace>#dashboardQuickCard{
+  height:220px!important;min-height:220px!important;max-height:220px!important;overflow:hidden!important;padding:10px!important
+ }
+ html body main.app-shell>.workspace>#dashboardQuickDetails{
+  gap:4px!important;margin-top:6px!important
+ }
+ html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-row{
+  padding:4px 7px!important;gap:6px!important;border-radius:9px!important;min-height:0!important
+ }
+ html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-copy{gap:1px!important}
+ html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-copy>.small{
+  font-size:9px!important;line-height:1.2!important
+ }
+ html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-meta{
+  font-size:8px!important;line-height:1.15!important
+ }
+ html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-row>strong{
+  max-width:50%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+  font-size:10px!important;line-height:1.15!important
+ }
+}
+@media(min-width:851px) and (max-width:1150px){
+ html body main.app-shell>.workspace>.top>.tools{gap:4px!important;min-width:0!important}
+ html body main.app-shell>.workspace>.top>.tools>.top-tools-search{
+  width:145px!important;max-width:145px!important;min-width:115px!important;flex:0 1 145px!important;
+  padding:6px 8px!important;font-size:10px!important
+ }
+ html body main.app-shell>.workspace>.top>.tools>button{
+  min-height:32px!important;height:32px!important;padding:5px 7px!important;font-size:10px!important;white-space:nowrap!important;flex:0 1 auto!important
+ }
+ html body main.app-shell>.workspace>.top>.tools>#abyssThemeDock{
+  width:132px!important;max-width:132px!important;min-width:0!important;flex:0 0 132px!important;
+  gap:4px!important;padding:4px!important;font-size:9px!important
+ }
+ html body main.app-shell>.workspace>.top>.tools>#abyssThemeDock>span:not(.theme-mark){display:none!important}
+ html body main.app-shell>.workspace>.top>.tools>#abyssThemeDock>#abyssThemeSelect{
+  width:96px!important;max-width:96px!important;min-width:0!important;padding:3px!important;font-size:9px!important
+ }
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
