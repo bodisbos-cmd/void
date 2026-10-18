@@ -530,6 +530,14 @@ jobs:
               if max(mobile_clients["documentWidth"],mobile_clients["bodyWidth"])>mobile_clients["viewport"]+1 or not mobile_clients["noOverlap"]:
                   raise SystemExit("Mobile user-management layout overflows or overlaps: " + repr(mobile_clients))
               mobile.screenshot(path=str(out / "13-users-mobile.png"), full_page=True, animations="disabled")
+              # Navigation to another section closes the mobile drawer; reopen it before selecting the next page.
+              mobile.evaluate("""() => {
+                if (!document.body.classList.contains('abyss-menu-open')) {
+                  document.getElementById('menuToggle')?.click();
+                }
+              }""")
+              mobile.wait_for_function("""() => document.body.classList.contains('abyss-menu-open')
+                && document.querySelector('#sidebar')?.classList.contains('open')""", timeout=3000)
               mobile.locator('[data-nav="create"]').first.click()
               mobile.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);

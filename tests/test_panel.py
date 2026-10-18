@@ -136,6 +136,7 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'id="serversPage"' in response.text
     assert 'id="protocolsPage"' in response.text
     assert 'id="reportsPage"' in response.text
+    assert 'data-settings-tab="backup"' in response.text
     assert 'id="protocolCatalog"' in response.text
     assert 'id="reportProfiles"' in response.text
     assert 'id="serverTableBody"' in response.text
@@ -158,6 +159,7 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "function showPanelHelp()" in dashboard_script.text
     assert "function loadServerStatus()" in dashboard_script.text
     assert "function loadReports()" in dashboard_script.text
+    assert "report-event-table" in dashboard_script.text
     assert "function renderProtocolCatalog(profiles)" in dashboard_script.text
     assert response.text.count('id="name"') == 1
     assert response.text.count('id="clientProfileChoices"') == 1
