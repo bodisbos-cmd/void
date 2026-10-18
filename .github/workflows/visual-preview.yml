@@ -249,6 +249,20 @@ jobs:
               page.locator("#langBtn").click()
               page.wait_for_function("""() => document.querySelector('#dashboardQuickCard .section-title')?.textContent?.trim()==='جزئیات سریع'
                 && document.querySelector('#dashboardQuickDetails .quick-detail-copy .small')?.textContent?.trim()==='آخرین سرویس ساخته‌شده'""", timeout=5000)
+              sidebar_logo = page.evaluate("""async () => {
+                const mark=document.querySelector('.sidebar .side-brand .abyss-logo-mark');
+                if (!mark) return {present:false};
+                const r=mark.getBoundingClientRect(), style=getComputedStyle(mark);
+                const response=await fetch('/brand/abyss-tunnel-logo.jpg',{cache:'no-store'});
+                const blob=await response.blob();
+                return {present:true,width:r.width,height:r.height,backgroundImage:style.backgroundImage,
+                  http:response.status,bytes:blob.size};
+              }""")
+              print("SIDEBAR_REFERENCE_LOGO=" + repr(sidebar_logo))
+              if (not sidebar_logo.get("present") or sidebar_logo["width"] < 24 or sidebar_logo["height"] < 24
+                      or sidebar_logo["http"] != 200 or sidebar_logo["bytes"] < 1000
+                      or "/brand/abyss-tunnel-logo.jpg" not in sidebar_logo["backgroundImage"]):
+                  raise SystemExit("Sidebar is missing the supplied reference orbital logo: " + repr(sidebar_logo))
               page.screenshot(path=str(out / "02-dashboard-desktop.png"), full_page=False, animations="disabled")
               for nav, filename in [("clients","03-users-desktop.png"),("create","04-create-desktop.png"),("servers","05-servers-desktop.png"),("protocols","06-protocols-desktop.png"),("reports","07-reports-desktop.png"),("settings","08-settings-desktop.png")]:
                   locator = page.locator('[data-nav="' + nav + '"]').first
