@@ -520,7 +520,7 @@ jobs:
               print("VOIDLING_MOBILE_LAYOUT=" + repr(voidling_layout))
               if voidling_layout.get("missing") or not voidling_layout["backgroundIsEmbeddedWebp"] or not voidling_layout["image"]["loaded"] or voidling_layout["image"]["width"] < 80:
                   raise SystemExit("Voidling reference artwork failed to decode: " + repr(voidling_layout))
-              if abs(voidling_layout["rect"]["width"]-36)>1 or abs(voidling_layout["rect"]["height"]-42)>1:
+              if abs(voidling_layout["rect"]["width"]-40)>1 or abs(voidling_layout["rect"]["height"]-44)>1:
                   raise SystemExit("Voidling mobile dimensions drifted from its responsive dock: " + repr(voidling_layout))
               if not voidling_layout["stats"] or voidling_layout["rect"]["bottom"] > voidling_layout["stats"]["top"]+1:
                   raise SystemExit("Voidling overlaps the mobile dashboard cards: " + repr(voidling_layout))
@@ -549,8 +549,11 @@ jobs:
               mobile.wait_for_function("document.getElementById('voidling-widget')?.dataset.state==='online'",timeout=3000)
               mobile.wait_for_selector("#voidling-status-popover",state="visible",timeout=3000)
               print("VOIDLING_IDLE_WAKE=" + repr(mobile.evaluate("() => ({state:document.getElementById('voidling-widget')?.dataset.state,popup:!!document.getElementById('voidling-status-popover')})")))
-              popup_layout=mobile.locator("#voidling-status-popover").evaluate("""e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,width:r.width,viewport:innerHeight,display:getComputedStyle(e).display}}""")
+              popup_layout=mobile.locator("#voidling-status-popover").evaluate("""e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,width:r.width,viewport:innerHeight,display:getComputedStyle(e).display,text:e.innerText}}""")
               print("VOIDLING_STATUS_POPOVER=" + repr(popup_layout))
+              mobile.screenshot(path=str(out / "17-voidling-mobile-status.png"), full_page=False, animations="disabled")
+              if "سرویس‌ها:" not in popup_layout["text"] or "کاربران:" not in popup_layout["text"]:
+                  raise SystemExit("Voidling status popup is missing live service/user counts: " + repr(popup_layout))
               if popup_layout["top"] > 100 or popup_layout["bottom"] >= popup_layout["viewport"] or popup_layout["display"] == "none":
                   raise SystemExit("Voidling status popup is not docked at the top on mobile: " + repr(popup_layout))
               sound_toggle=mobile.locator("#voidling-sound-toggle")
