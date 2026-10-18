@@ -404,6 +404,27 @@ jobs:
               print("SUBSCRIPTION_MOBILE_OVERFLOW=" + repr(sub_overflow))
               if max(sub_overflow["documentWidth"],sub_overflow["bodyWidth"]) > sub_overflow["viewport"] + 1:
                   raise SystemExit("Subscription page has horizontal overflow: " + repr(sub_overflow))
+              sub_mobile_layout = subscription_mobile.evaluate("""() => {
+                const box = selector => {
+                  const e = document.querySelector(selector);
+                  if (!e) return null;
+                  const r = e.getBoundingClientRect();
+                  return {top:r.top,bottom:r.bottom,display:getComputedStyle(e).display};
+                };
+                const details=box('.service-details-panel'), share=box('.share-panel'), profiles=box('.profiles-panel'), usage=box('.usage-panel'), chart=box('.usage-chart-panel');
+                const mobileMetrics=document.querySelector('.service-details-mobile-metrics');
+                return {
+                  details,share,profiles,usage,chart,
+                  mobileMetricsVisible:!!mobileMetrics && getComputedStyle(mobileMetrics).display!=='none',
+                  referenceOrder:!!details&&!!share&&!!profiles&&!!usage&&!!chart&&details.top<share.top&&share.top<profiles.top&&profiles.top<usage.top&&usage.top<chart.top,
+                  noCardOverlap:!!details&&!!share&&!!profiles&&!!usage&&!!chart&&details.bottom<=share.top+1&&share.bottom<=profiles.top+1&&profiles.bottom<=usage.top+1&&usage.bottom<=chart.top+1,
+                  legacyHeroHidden:getComputedStyle(document.querySelector('.hero')).display==='none',
+                  legacyStatsHidden:getComputedStyle(document.querySelector('.grid')).display==='none'
+                };
+              }""")
+              print("SUBSCRIPTION_MOBILE_LAYOUT=" + repr(sub_mobile_layout))
+              if not sub_mobile_layout["mobileMetricsVisible"] or not sub_mobile_layout["referenceOrder"] or not sub_mobile_layout["noCardOverlap"] or not sub_mobile_layout["legacyHeroHidden"] or not sub_mobile_layout["legacyStatsHidden"]:
+                  raise SystemExit("Subscription mobile layout diverged from the reference order: " + repr(sub_mobile_layout))
               subscription_mobile.screenshot(path=str(out / "12-subscription-mobile.png"), full_page=True, animations="disabled")
               mobile = browser.new_page(viewport={"width":390,"height":844}, device_scale_factor=1, is_mobile=True, has_touch=True)
               mobile.on("pageerror", lambda e: errors.append("mobile: " + str(e) + " | " + str(getattr(e, "stack", ""))))
