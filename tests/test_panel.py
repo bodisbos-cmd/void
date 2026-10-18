@@ -117,6 +117,10 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'out / "14-create-mobile.png"' in visual_workflow
     assert "MOBILE_CLIENTS_LAYOUT=" in visual_workflow
     assert "MOBILE_CREATE_LAYOUT=" in visual_workflow
+    assert 'out / "15-users-tablet.png"' in visual_workflow
+    assert 'out / "16-create-tablet.png"' in visual_workflow
+    assert "TABLET_CLIENTS_LAYOUT=" in visual_workflow
+    assert "TABLET_CREATE_LAYOUT=" in visual_workflow
     assert "quickDetailCount:quickDetailRows.length,quickDetailLabels,quickDetailValues," in visual_workflow
     assert "ABYSS TUNNEL" in login_page.text
     assert "Secure · Private · Unlimited" in login_page.text
