@@ -100,6 +100,10 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "grid-template-columns:repeat(4,minmax(0,1fr))!important" in response.text
     assert '<span class="abyss-logo-mark" aria-hidden="true"></span>' in response.text
     assert "repeating-conic-gradient" in response.text
+    assert "Desktop proportions from the reference dashboard" in response.text
+    assert "grid-column:1 / span 3!important;grid-row:3!important" in response.text
+    assert "grid-column:4 / span 2!important;grid-row:3!important" in response.text
+    assert "grid-column:6 / span 7!important;grid-row:3!important" in response.text
     assert "ABYSS TUNNEL" in login_page.text
     assert "Secure · Private · Unlimited" in login_page.text
     assert 'class="login-password-toggle"' in login_page.text
@@ -116,6 +120,10 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'id="reportProfiles"' in response.text
     assert 'id="serverTableBody"' in response.text
     assert 'id="dashboardComponentStatus"' in response.text
+    assert 'id="dashboardQuickCard"' in response.text
+    assert 'id="dashboardQuickDetails"' in response.text
+    assert 'data-i18n="quickDetails"' in response.text
+    assert 'id="dashboardStatusAccessible"' in response.text
     assert 'id="globalSearch"' in response.text
     assert 'id="panelHelpDialog"' in response.text
     assert 'class="account-badge"' in response.text
@@ -123,6 +131,10 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     dashboard_script = client.get("/dashboard.js")
     assert dashboard_script.status_code == 200
     assert "function runGlobalSearch()" in dashboard_script.text
+    assert "function renderDashboardQuickDetails(data=latestOverview)" in dashboard_script.text
+    assert "latestService:'آخرین سرویس ساخته‌شده'" in dashboard_script.text
+    assert "latestPanelChange:'آخرین تغییر پنل'" in dashboard_script.text
+    assert "latestBackup:'آخرین پشتیبان'" in dashboard_script.text
     assert "function showPanelHelp()" in dashboard_script.text
     assert "function loadServerStatus()" in dashboard_script.text
     assert "function loadReports()" in dashboard_script.text
