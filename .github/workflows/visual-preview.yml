@@ -57,6 +57,11 @@ jobs:
               message = f"Created client '{name}' (visual-{i+1:02d})." if i == 5 else f"Visual preview: service created for {name}"
               db.execute("INSERT INTO events(at,level,message) VALUES(?,?,?)",
                          (event_at, "INFO", message))
+          # Populate the reference dashboard's quick-details card with explicit preview-only events.
+          db.execute("INSERT INTO events(at,level,message) VALUES(?,?,?)",
+                     ((now - timedelta(minutes=12)).isoformat(timespec="seconds"), "INFO", "Administrator created a database backup"))
+          db.execute("INSERT INTO events(at,level,message) VALUES(?,?,?)",
+                     ((now - timedelta(minutes=5)).isoformat(timespec="seconds"), "INFO", "Updated enabled connection profiles"))
           # Seed isolated per-client history for the subscriber usage graph (never production data).
           for sample_index in range(31):
               sampled_at = int(now.timestamp()) - sample_index * 86400
