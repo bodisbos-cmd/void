@@ -506,7 +506,7 @@ jobs:
                   raise SystemExit("Mobile overlay obscures or blurs the drawer: " + repr(drawer_layers))
               if not drawer_layers["nav"] or not drawer_layers["account"] or not drawer_layers["caption"] or drawer_layers["nav"]["bottom"] > drawer_layers["account"]["top"] + 1:
                   raise SystemExit("Mobile drawer account overlaps navigation: " + repr(drawer_layers))
-              if drawer_layers["account"]["bottom"] > drawer_layers["caption"]["top"] + 1:
+              if drawer_layers["account"]["top"] < drawer_layers["caption"]["bottom"] - 1:
                   raise SystemExit("Mobile drawer creator label overlaps account identity: " + repr(drawer_layers))
               if drawer_layers["links"] and drawer_layers["caption"]["bottom"] > drawer_layers["links"]["top"] + 1:
                   raise SystemExit("Mobile drawer utility links overlap creator label: " + repr(drawer_layers))
