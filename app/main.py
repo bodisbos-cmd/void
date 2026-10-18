@@ -2921,7 +2921,7 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 @media(max-width:600px){#voidling-widget{right:12px;left:auto;top:max(137px,calc(env(safe-area-inset-top) + 125px));bottom:auto;width:40px;height:44px;transform:none;transform-origin:top right}#voidling-widget:hover{transform:translateY(-2px)}#voidling-status-popover{top:max(64px,calc(env(safe-area-inset-top) + 52px))!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto;max-width:none!important}}
 @media(min-width:601px) and (max-width:1100px){#voidling-widget{width:38px;height:44px;bottom:10px}}
 @media(prefers-reduced-motion:reduce){.voidling-art,.voidling-orbit{animation:none!important}#voidling-widget{transition:none}}
-</style>""""
+</style>"""
 ABYSS_VOIDLING_JS = r"""<script id="voidling-interactive-space-script">
 (()=>{if(document.getElementById('void-space-canvas'))return;
 const canvas=document.createElement('canvas');canvas.id='void-space-canvas';canvas.setAttribute('aria-hidden','true');document.body.appendChild(canvas);
