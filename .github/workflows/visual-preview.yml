@@ -533,6 +533,49 @@ jobs:
               if max(mobile_create["documentWidth"],mobile_create["bodyWidth"])>mobile_create["viewport"]+1 or mobile_create["profileChoices"]<1 or mobile_create["visiblePanel"]!=1:
                   raise SystemExit("Mobile service-creation layout overflows or hides its active panel: " + repr(mobile_create))
               mobile.screenshot(path=str(out / "14-create-mobile.png"), full_page=True, animations="disabled")
+              # A fresh non-mobile context checks the tablet breakpoint for the same sections.
+              tablet = browser.new_page(viewport={"width":1024,"height":768}, device_scale_factor=1)
+              tablet.on("pageerror", lambda e: errors.append("tablet: " + str(e) + " | " + str(getattr(e, "stack", ""))))
+              tablet.goto(base + "/login", wait_until="domcontentloaded")
+              tablet.locator('input[name="username"]').fill("admin")
+              tablet.locator('input[name="password"]').fill("admin")
+              tablet.locator("form button").last.click()
+              tablet.wait_for_url(lambda url: "/login" not in url, timeout=15000)
+              tablet.wait_for_function("""() => {
+                const e=document.getElementById('dashboardComponentStatus');
+                return e && e.querySelectorAll('.dashboard-component').length===4;
+              }""", timeout=45000)
+              tablet.locator('[data-nav="clients"]').first.click()
+              tablet.wait_for_function("""() => {
+                const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
+                return visible.length>0&&visible.every(e=>e.dataset.sectionPage==='clients')
+                  &&document.querySelectorAll('#clients .clients-table tbody tr').length>0
+                  &&!!document.querySelector('#clientDetailsPanel .client-detail-head');
+              }""", timeout=10000)
+              tablet_clients = tablet.evaluate("""() => {
+                const box=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {y:r.y,bottom:r.bottom,width:r.width};};
+                const table=box('#clients'),details=box('#clientDetailsPanel');
+                return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,table,details,
+                  noOverlap:!!table&&!!details&&(table.bottom<=details.y+1||details.bottom<=table.y+1)};
+              }""")
+              print("TABLET_CLIENTS_LAYOUT=" + repr(tablet_clients))
+              if max(tablet_clients["documentWidth"],tablet_clients["bodyWidth"])>tablet_clients["viewport"]+1 or not tablet_clients["noOverlap"]:
+                  raise SystemExit("Tablet user-management layout overflows or overlaps: " + repr(tablet_clients))
+              tablet.screenshot(path=str(out / "15-users-tablet.png"), full_page=True, animations="disabled")
+              tablet.locator('[data-nav="create"]').first.click()
+              tablet.wait_for_function("""() => {
+                const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
+                return visible.length>0&&visible.every(e=>e.dataset.sectionPage==='create')
+                  &&document.querySelectorAll('#clientProfileChoices input[name="clientProfile"]').length>0;
+              }""", timeout=10000)
+              tablet_create = tablet.evaluate("""() => ({viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,
+                profileChoices:document.querySelectorAll('#clientProfileChoices input[name="clientProfile"]').length,
+                visiblePanel:[...document.querySelectorAll('#createServiceCard .creation-tab-panel')].filter(e=>getComputedStyle(e).display!=='none'&&!e.hidden).length})""")
+              print("TABLET_CREATE_LAYOUT=" + repr(tablet_create))
+              if max(tablet_create["documentWidth"],tablet_create["bodyWidth"])>tablet_create["viewport"]+1 or tablet_create["profileChoices"]<1 or tablet_create["visiblePanel"]!=1:
+                  raise SystemExit("Tablet service-creation layout overflows or hides its active panel: " + repr(tablet_create))
+              tablet.screenshot(path=str(out / "16-create-tablet.png"), full_page=True, animations="disabled")
+              tablet.close()
               print("BROWSER_ERRORS=" + repr(errors))
               if errors:
                   raise SystemExit("Browser JavaScript errors detected: " + repr(errors))
