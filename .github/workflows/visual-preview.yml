@@ -357,11 +357,12 @@ jobs:
               tablet_layout = page.evaluate("""() => {
                 const rect=id=>{const e=document.getElementById(id);const b=e.getBoundingClientRect();return {x:b.x,y:b.y,width:b.width,height:b.height}};
                 const overlaps=(a,b)=>!(a.x+a.width<=b.x||b.x+b.width<=a.x||a.y+a.height<=b.y||b.y+b.height<=a.y);
-                const stats=rect('overviewStats'),chart=rect('dashboardUsageCard'),health=rect('panelHealthCard'),quick=rect('dashboardQuickCard');
+                const stats=rect('overviewStats'),chart=rect('dashboardUsageCard'),health=rect('panelHealthCard'),quick=rect('dashboardQuickCard'),voidling=rect('voidling-widget');
                 const tools=document.querySelector('.workspace>.top>.tools');
-                return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,stats,chart,health,quick,
+                return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,stats,chart,health,quick,voidling,
                   toolbar:tools?{clientWidth:tools.clientWidth,scrollWidth:tools.scrollWidth,wrap:getComputedStyle(tools).flexWrap}:null,
                   statsOverlap:overlaps(stats,chart)||overlaps(stats,health)||overlaps(stats,quick),
+                  voidlingQuickOverlap:overlaps(quick,voidling),
                   cardsOverlap:overlaps(chart,health)||overlaps(chart,quick)||overlaps(health,quick),
                   chartHealthSameRow:Math.abs(chart.y-health.y)<2,chartLeftOfHealth:chart.x<health.x,
                   quickBelowCards:quick.y>=Math.max(chart.y+chart.height,health.y+health.height)-1};
@@ -369,8 +370,8 @@ jobs:
               print("TABLET_LAYOUT=" + repr(tablet_layout))
               if tablet_layout["documentWidth"] > tablet_layout["viewport"] + 1:
                   raise SystemExit("Tablet layout has horizontal overflow: " + repr(tablet_layout))
-              if tablet_layout["statsOverlap"] or tablet_layout["cardsOverlap"]:
-                  raise SystemExit("Tablet dashboard cards overlap: " + repr(tablet_layout))
+              if tablet_layout["statsOverlap"] or tablet_layout["cardsOverlap"] or tablet_layout["voidlingQuickOverlap"]:
+                  raise SystemExit("Tablet dashboard cards or Voidling overlap: " + repr(tablet_layout))
               if not tablet_layout["chartHealthSameRow"] or not tablet_layout["chartLeftOfHealth"] or not tablet_layout["quickBelowCards"]:
                   raise SystemExit("Tablet dashboard does not follow the intended chart/status/details order: " + repr(tablet_layout))
               if tablet_layout["toolbar"] and tablet_layout["toolbar"]["scrollWidth"] > tablet_layout["toolbar"]["clientWidth"] + 1:
