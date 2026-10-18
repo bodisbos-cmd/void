@@ -183,11 +183,12 @@ jobs:
                 const rect = id => { const e = document.getElementById(id); const r = e.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; };
                 const chart=rect('dashboardUsageCard'), health=rect('panelHealthCard'), quick=rect('dashboardQuickCard'), stats=rect('overviewStats'), top=rect('sectionTitle');
                 const recent=document.querySelector('#dashboardQuickCard #recentActivityList');
-                const activity=recent?{count:recent.querySelectorAll('.report-event').length,clientHeight:recent.clientHeight,scrollHeight:recent.scrollHeight}:null;
+                const activity=recent?{count:recent.querySelectorAll('.report-event').length,clientHeight:recent.clientHeight,scrollHeight:recent.scrollHeight,hidden:getComputedStyle(recent).display==='none'}:null;
+                const quickDetailRows=[...document.querySelectorAll('#dashboardQuickDetails .quick-detail-row')];
+                const quickDetailLabels=quickDetailRows.map(row=>row.querySelector('.quick-detail-copy .small')?.textContent?.trim()||'');
                 const overlaps=(x,y)=>!(x.x+x.width<=y.x || y.x+y.width<=x.x || x.y+x.height<=y.y || y.y+y.height<=x.y);
                 const sameRow=Math.max(chart.y,health.y,quick.y)-Math.min(chart.y,health.y,quick.y)<2;
-                return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,top,stats,chart,health,quick,sameRow,activity,
-                  chartXBeforeHealth:chart.x<health.x,healthXBeforeQuick:health.x<quick.x,
+                return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,top,stats,chart,health,quick,sameRow,activity,quickDetailCount:quickDetailRows.length,quickDetailLabels,
                   statsChartOverlap:overlaps(stats,chart),statsHealthOverlap:overlaps(stats,health),statsQuickOverlap:overlaps(stats,quick),
                   chartHealthOverlap:overlaps(chart,health),chartQuickOverlap:overlaps(chart,quick),healthQuickOverlap:overlaps(health,quick),
                   statsAboveCards:stats.y+stats.height<=Math.min(chart.y,health.y,quick.y)+1};
@@ -216,15 +217,17 @@ jobs:
                   raise SystemExit("Dashboard cards do not match the reference row order (chart left, health center, quick details right): " + repr(dashboard_layout))
               if any(dashboard_layout[k] for k in ("chartHealthOverlap","chartQuickOverlap","healthQuickOverlap")):
                   raise SystemExit("Dashboard cards overlap: " + repr(dashboard_layout))
-              if dashboard_layout["activity"] and dashboard_layout["activity"]["scrollHeight"] > dashboard_layout["activity"]["clientHeight"] + 1:
-                  raise SystemExit("Recent dashboard activity is clipped inside its card: " + repr(dashboard_layout["activity"]))
-              recent_activity = page.locator("#recentActivityList").inner_text()
+              if dashboard_layout["quickDetailCount"] != 3 or any(not label for label in dashboard_layout["quickDetailLabels"]):
+                  raise SystemExit("Dashboard quick-details card must render its three reference rows: " + repr(dashboard_layout["quickDetailLabels"]))
+              if dashboard_layout["activity"] and (not dashboard_layout["activity"]["hidden"] or dashboard_layout["activity"]["scrollHeight"] > dashboard_layout["activity"]["clientHeight"] + 1):
+                  raise SystemExit("The legacy activity list must stay hidden outside the reference quick-details card: " + repr(dashboard_layout["activity"]))
+              recent_activity = page.locator("#recentActivityList").text_content() or ""
               if "Administrator signed in as" in recent_activity or "Created client " in recent_activity or "Visual preview:" in recent_activity:
                   raise SystemExit("Dashboard recent activity contains untranslated English messages: " + recent_activity)
               xray_state = page.evaluate("""async () => {
                 const r=await fetch('/api/overview',{cache:'no-store'}), d=await r.json();
                 return {http:r.status,actual:d.xray?.running?'متصل':d.xray?.installed?'متوقف':'نصب نشده',
-                  shown:document.querySelector('#dashboardQuickDetails .quick-detail-row strong')?.textContent?.trim()||''};
+                  shown:document.querySelector('#dashboardStatusAccessible .quick-detail-row strong')?.textContent?.trim()||''};
               }""")
               print("XRAY_STATUS_UI=" + repr(xray_state))
               if xray_state["http"] != 200 or xray_state["actual"] != xray_state["shown"]:
