@@ -32,7 +32,7 @@ jobs:
       - name: Seed synthetic data for visual review only
         run: |
           docker exec -i void-visual python - <<'PY'
-          import json, secrets, sqlite3, uuid
+          import json, math, secrets, sqlite3, uuid
           from datetime import datetime, timedelta, timezone
           db = sqlite3.connect("/data/panel.sqlite3")
           now = datetime.now(timezone.utc)
@@ -60,8 +60,9 @@ jobs:
           # Seed isolated per-client history for the subscriber usage graph (never production data).
           for sample_index in range(31):
               sampled_at = int(now.timestamp()) - sample_index * 86400
-              # Monotonic, slightly irregular synthetic cumulative usage ending at the fixture current total.
-              used_gb = 45.2 - sample_index * 0.77 + (sample_index % 5) * 0.025
+              # Monotonic synthetic cumulative usage with reference-like changes in slope, ending at the fixture current total.
+              variation_gb = 0.85 * math.sin(sample_index * 0.55) + 0.10 * math.sin(sample_index * 1.10)
+              used_gb = 45.2 - sample_index * 0.77 + variation_gb
               db.execute(
                   "INSERT OR REPLACE INTO client_usage_history(client_id,sampled_at,used_bytes) VALUES(?,?,?)",
                   ("visual-01", sampled_at, int(used_gb * 1024**3)),
