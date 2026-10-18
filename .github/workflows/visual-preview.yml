@@ -215,6 +215,8 @@ jobs:
                   raise SystemExit("Dashboard metrics overlap monitoring cards or appear below them: " + repr(dashboard_layout))
               if not dashboard_layout["sameRow"] or not dashboard_layout["chartXBeforeHealth"] or not dashboard_layout["healthXBeforeQuick"]:
                   raise SystemExit("Dashboard cards do not match the reference row order (chart left, health center, quick details right): " + repr(dashboard_layout))
+              if dashboard_layout["chart"]["width"] < dashboard_layout["health"]["width"] * 1.65 or dashboard_layout["chart"]["width"] < dashboard_layout["quick"]["width"] * 1.65:
+                  raise SystemExit("Dashboard chart should remain the dominant reference card: " + repr(dashboard_layout))
               if any(dashboard_layout[k] for k in ("chartHealthOverlap","chartQuickOverlap","healthQuickOverlap")):
                   raise SystemExit("Dashboard cards overlap: " + repr(dashboard_layout))
               if dashboard_layout["quickDetailCount"] != 3 or any(not label for label in dashboard_layout["quickDetailLabels"]):
