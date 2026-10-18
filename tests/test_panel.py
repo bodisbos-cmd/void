@@ -99,7 +99,7 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'id="panelHealthCard"' in response.text
     assert "grid-template-columns:repeat(4,minmax(0,1fr))!important" in response.text
     assert '<span class="abyss-logo-mark" aria-hidden="true"></span>' in response.text
-    assert "repeating-conic-gradient" in response.text
+    assert "background-image:url('/brand/abyss-tunnel-logo.jpg')" in response.text
     assert "Desktop proportions from the reference dashboard" in response.text
     assert "grid-column:1 / span 3!important;grid-row:3!important" in response.text
     assert "grid-column:4 / span 3!important;grid-row:3!important" in response.text
@@ -122,10 +122,16 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "TABLET_CLIENTS_LAYOUT=" in visual_workflow
     assert "TABLET_CREATE_LAYOUT=" in visual_workflow
     assert "quickDetailCount:quickDetailRows.length,quickDetailLabels,quickDetailValues," in visual_workflow
+    assert "logoReady" in visual_workflow
     assert "CREATE_MULTISELECT_CHECKED=" in visual_workflow
     assert "protocol choices behave as single-select" in visual_workflow
     assert "ABYSS TUNNEL" in login_page.text
-    assert "Secure · Private · Unlimited" in login_page.text
+    assert 'class="visual-orbit" src="/brand/abyss-tunnel-logo.jpg" alt="AbyssTunnel · I.T.A."' in login_page.text
+    logo_response = client.get("/brand/abyss-tunnel-logo.jpg")
+    assert logo_response.status_code == 200
+    assert logo_response.headers.get("content-type", "").startswith("image/jpeg")
+    assert logo_response.content.startswith(b"\xff\xd8\xff")
+    assert logo_response.content.endswith(b"\xff\xd9")
     assert 'class="login-password-toggle"' in login_page.text
     assert 'aria-pressed="false"' in login_page.text
     assert 'data-nav="create"' in response.text

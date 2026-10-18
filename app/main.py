@@ -834,6 +834,10 @@ html[data-abyss-theme="angel"] .card,html[data-abyss-theme="angel"] .panel,html[
 @media(min-width:851px){.app-shell{width:100%;max-width:none;grid-template-columns:260px minmax(0,1fr)}.workspace{width:100%;max-width:none;padding-inline:clamp(20px,2.2vw,42px)}.workspace>section.card,.workspace>.stats{width:100%}}
 @media(max-width:850px){.abyss-utility-links a{min-height:40px}.workspace{max-width:100%}.sidebar{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}}
 @media(prefers-reduced-motion:reduce){#abyssParticleCanvas{display:none!important}}
+
+/* Use the exact user-approved AbyssTunnel image, including compact sidebar and subscription marks. */
+.abyss-logo-mark{background-image:url('/brand/abyss-tunnel-logo.jpg')!important;background-size:150% 150%!important;background-position:center top!important;background-repeat:no-repeat!important;background-color:#050505!important;overflow:hidden!important}
+.abyss-logo-mark:before{content:none!important;display:none!important}
 </style>"""
 ABYSS_THEME_POLISH_CSS = r"""<style id="abyss-theme-polish">
 :root{--ab-radius-xl:25px;--ab-radius-lg:20px;--ab-radius-md:14px;--ab-radius-sm:11px;--ab-motion:.24s}
@@ -1274,7 +1278,7 @@ ABYSS_LAYOUT_REPAIR_JS = r"""<script id="abyss-layout-repair-js">
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>"""
-LOGIN = LOGIN.replace('<body><main class="card">','<body><div class="login-layout"><aside class="login-visual" aria-label="Abyss Tunnel"><div class="visual-orbit" aria-hidden="true"></div><div class="visual-eyebrow">AbyssTunnel</div><h2>• I T A •</h2><p>Secure · Private · Unlimited</p></aside><main class="card">').replace('</form></main></body>','</form></main><dialog id="loginHelpDialog"><div class="modal-top"><div><h2>بازیابی رمز عبور</h2><div class="small">راهنمای دسترسی امن</div></div><button type="button" onclick="document.getElementById(\'loginHelpDialog\').close()" aria-label="بستن">✕</button></div><p class="small">بازیابی از طریق ایمیل در این استقرار پیکربندی نشده است. اگر رمز عبور را تغییر داده‌ای و فراموش کرده‌ای، از مالک پنل برای بازنشانی امن کمک بگیر.</p></dialog></div></body>')
+LOGIN = LOGIN.replace('<body><main class="card">','<body><div class="login-layout"><aside class="login-visual" aria-label="Abyss Tunnel"><img class="visual-orbit" src="/brand/abyss-tunnel-logo.jpg" alt="AbyssTunnel · I.T.A."></aside><main class="card">').replace('</form></main></body>','</form></main><dialog id="loginHelpDialog"><div class="modal-top"><div><h2>بازیابی رمز عبور</h2><div class="small">راهنمای دسترسی امن</div></div><button type="button" onclick="document.getElementById(\'loginHelpDialog\').close()" aria-label="بستن">✕</button></div><p class="small">بازیابی از طریق ایمیل در این استقرار پیکربندی نشده است. اگر رمز عبور را تغییر داده‌ای و فراموش کرده‌ای، از مالک پنل برای بازنشانی امن کمک بگیر.</p></dialog></div></body>')
 ABYSS_FINAL_LAYOUT_CSS = r"""<style id="abyss-final-layout">
 /* Final cascade layer: deliberately last so the reference layout wins over legacy inline templates. */
 .login-layout{position:relative!important;isolation:isolate!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;place-items:center!important;align-content:center!important;gap:0!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:28px 14px!important;direction:rtl!important}
@@ -2778,6 +2782,14 @@ html body main.app-shell .workspace #reportsPage .report-event-table{display:tab
  html body main.app-shell .workspace #createServiceCard #clientProfileChoices .profile-setting span:not(.help-dot){flex:1 1 auto!important;min-width:0!important;font-size:10px!important;line-height:1.35!important;overflow-wrap:normal!important;word-break:normal!important}
  html body main.app-shell .workspace #createServiceCard #clientProfileChoices .profile-setting .help-dot{flex:0 0 15px!important;width:15px!important;height:15px!important;min-width:15px!important;padding:0!important;font-size:9px!important}
 }
+
+/* Login artwork is the supplied image, not a CSS approximation. */
+html body .abyss-logo-mark{background-image:url('/brand/abyss-tunnel-logo.jpg')!important;background-size:150% 150%!important;background-position:center top!important;background-repeat:no-repeat!important;background-color:#050505!important;overflow:hidden!important}
+html body .abyss-logo-mark:before{content:none!important;display:none!important}
+html body .login-visual .visual-orbit{display:block!important;position:relative!important;top:auto!important;left:auto!important;inset:auto!important;width:min(39vw,440px)!important;max-width:440px!important;height:auto!important;aspect-ratio:auto!important;align-self:center!important;margin:0 auto!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;filter:none!important;mask-image:none!important;opacity:1!important;object-fit:contain!important;mix-blend-mode:screen!important;z-index:1!important}
+html body .login-visual .visual-orbit:before,html body .login-visual .visual-orbit:after{display:none!important;content:none!important}
+html body .login-visual .visual-eyebrow,html body .login-visual h2,html body .login-visual p{display:none!important}
+@media(max-width:900px){html body .login-visual .visual-orbit{width:min(34vw,330px)!important;max-width:330px!important}}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
@@ -2785,6 +2797,11 @@ DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'
 @app.get("/dashboard.js",response_class=PlainTextResponse)
 async def dashboard_js():
     return PlainTextResponse(DASH_JS,media_type="application/javascript",headers={"Cache-Control":"no-store"})
+
+LOGO_PATH = Path(__file__).with_name("abyss-tunnel-logo.jpg")
+@app.get("/brand/abyss-tunnel-logo.jpg",include_in_schema=False)
+async def abyss_brand_logo():
+    return FileResponse(LOGO_PATH,media_type="image/jpeg",headers={"Cache-Control":"public, max-age=86400"})
 
 @app.get("/",response_class=HTMLResponse)
 async def home(r:Request):
