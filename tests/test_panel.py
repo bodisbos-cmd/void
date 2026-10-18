@@ -137,6 +137,9 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'id="protocolsPage"' in response.text
     assert 'id="reportsPage"' in response.text
     assert 'data-settings-tab="backup"' in response.text
+    assert 'html body main.app-shell .workspace #reportsPage .report-event-table{display:table!important;width:100%!important;' in response.text
+    assert 'overflow-wrap:normal!important;word-break:normal!important' in response.text
+    assert 'unicode-bidi:isolate!important' in response.text
     assert 'id="protocolCatalog"' in response.text
     assert 'id="reportProfiles"' in response.text
     assert 'id="serverTableBody"' in response.text

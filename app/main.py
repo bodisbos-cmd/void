@@ -2764,6 +2764,17 @@ html body main.app-shell>.workspace>#dashboardQuickCard .quick-detail-meta{displ
 @media(prefers-reduced-motion:reduce){
   #reportsPage .report-event-table tbody tr{transition:none!important}
 }
+
+/* Final rendered-output fixes verified from the fresh screenshots. */
+html body main.app-shell .workspace #reportsPage .report-event-table{display:table!important;width:100%!important;max-width:none!important;min-width:100%!important;overflow:visible!important;border-collapse:collapse!important}
+#reportsPage .report-event-table-wrap{display:block!important;width:100%!important;max-width:100%!important}
+.workspace .stats .num{direction:ltr!important;unicode-bidi:isolate!important}
+@media(max-width:700px){
+ html body main.app-shell .workspace #createServiceCard #clientProfileChoices .profile-setting{gap:5px!important;padding:7px 6px!important}
+ html body main.app-shell .workspace #createServiceCard #clientProfileChoices .profile-setting input{width:15px!important;height:15px!important;flex:0 0 15px!important}
+ html body main.app-shell .workspace #createServiceCard #clientProfileChoices .profile-setting span:not(.help-dot){flex:1 1 auto!important;min-width:0!important;font-size:10px!important;line-height:1.35!important;overflow-wrap:normal!important;word-break:normal!important}
+ html body main.app-shell .workspace #createServiceCard #clientProfileChoices .profile-setting .help-dot{flex:0 0 15px!important;width:15px!important;height:15px!important;min-width:15px!important;padding:0!important;font-size:9px!important}
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
