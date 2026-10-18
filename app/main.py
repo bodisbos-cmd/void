@@ -3027,9 +3027,9 @@ function readStatus(){
  const all=[statusEl,...services].filter(Boolean),errorRe=/(?:خطا|ناموفق|متوقف|نصب‌نشده|\b(?:offline|failed|error)\b)/i,loadingRe=/(?:در حال بررسی|در حال دریافت|بارگذاری|\b(?:checking|loading|pending)\b)/i;
  if(all.some(el=>errorRe.test(textOf(el)))){setState('error','نیازمند بررسی');return}
  if(all.some(el=>el.getAttribute('aria-busy')==='true'||el.matches('[data-loading="true"],.loading,.is-loading,.spinner'))||all.some(el=>loadingRe.test(textOf(el)))){setState('checking','در حال بررسی');return}
- const healthyRe=/(?:\bonline\b|healthy|running|active|فعال|آنلاین|در حال اجرا)/i;
+ const healthyRe=/(?:\b(?:online|healthy|running|active)\b|فعال|آنلاین|متصل|در دسترس|آماده|سالم|در حال اجرا)/i;
  const healthyServices=services.length>0&&services.every(el=>healthyRe.test(textOf(el))&&!errorRe.test(textOf(el)));
- if(healthyServices||statusEl&&healthyRe.test(textOf(statusEl))){panelState='online';if(!sleeping)updateVisualState();else updateVisualState();return}
+ if(healthyServices||statusEl&&healthyRe.test(textOf(statusEl))){panelState='online';updateVisualState();return}
 }
 const observer=new MutationObserver(readStatus);['status','dashboardComponentStatus'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','data-status','data-loading','aria-busy']})});setTimeout(readStatus,900);setInterval(readStatus,15000);
 let drag=null,moved=false,movedByRotation=false,soundEnabled=false,audioCtx=null,idleSleepTimer=0,panelState='online',sleeping=false,reactionUntil=0;
