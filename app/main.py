@@ -2978,6 +2978,7 @@ function createVoidlingRenderer(host,rotation){
   ];
   tails.forEach((q,i)=>addTube(q,i===1||i===5?.085:.074));
   const closedEyes=[addTube([[-.46,.23,.70],[-.42,.15,.72],[-.31,.15,.72],[-.26,.23,.70]],.022),addTube([[.26,.23,.70],[.31,.15,.72],[.42,.15,.72],[.46,.23,.70]],.022)];
+  const happyEyes=[addTube([[-.47,.09,.70],[-.42,.34,.73],[-.31,.34,.73],[-.25,.09,.70]],.029),addTube([[.25,.09,.70],[.31,.34,.73],[.42,.34,.73],[.47,.09,.70]],.029)];
   function ident(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1])}
   function mul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
   function trans(x,y,z){const m=ident();m[12]=x;m[13]=y;m[14]=z;return m}
@@ -3005,7 +3006,8 @@ function createVoidlingRenderer(host,rotation){
    draw(sphere,root,vp,[0,-.30,.08],[.23,.20,.25],body,rim,glow,.70,.96);
    tubes.slice(0,4).forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],body,highlight,glow,.68,.92));
    tails.forEach((_,i)=>draw(tubes[4+i],root,vp,[0,0,0],[1,1,1],[.014,.017,.028],rim,glow,.78,.94,[Math.sin(t*1.3+i*.8)*.04,0,Math.sin(t*1.1+i)*.035]));
-   if(state==='sleep'||state==='checking'){closedEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.58,.98))}
+   if(state==='sleep'){closedEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.58,.98))}
+   else if(state==='checking'||state==='reacting'){happyEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.64,.98))}
    else{[-1,1].forEach(side=>{const x=side*.29,rot=[0,0,side*.10];draw(sphere,root,vp,[x,.22,.64],[.205,.285,.075],eyeGlow,rim,eyeGlow,.25,.30,rot);draw(sphere,root,vp,[x,.22,.685],[.133,.205,.078],eye,rim,eyeGlow,.92,1,rot);draw(sphere,root,vp,[x-side*.035,.28,.746],[.026,.052,.018],[1,1,1],[1,1,1],[.82,.86,1],.2,.9,rot)})}
    const alive=[];particles.forEach(p=>{const age=(now-p.start)/p.life;if(age>=1)return;alive.push(p);const r=.52+age*.72,x=Math.cos(p.a)*r,y=Math.sin(p.a)*r*.75+p.b*.24,z=.2+Math.sin(p.a*1.7)*.26+age*.18,fade=1-age,size=.024*fade+.004;draw(sphere,root,vp,[x,y,z],[size,size,size],[.70,.78,1],[.72,.82,1],[.58,.68,1],.2,fade*.95)});particles=alive;
    if(!reduceMotion||particles.length)schedule()
