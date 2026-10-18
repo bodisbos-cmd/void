@@ -284,6 +284,31 @@ jobs:
                       or voidling_3d.get("geometry") != "procedural-mesh" or voidling_3d.get("meshCount", 0) < 10
                       or voidling_3d.get("width", 0) < 20 or voidling_3d.get("height", 0) < 20):
                   raise SystemExit("Voidling did not render its procedural 3D WebGL mesh: " + repr(voidling_3d))
+              # Capture the actual WebGL model in every reference state. The sprite strip is
+              # hidden when WebGL succeeds, so CSS background-position checks alone are not
+              # evidence that the 3D face/body state rendered.
+              state_preview = page.locator("#voidling-widget")
+              state_preview.evaluate("(e) => { e.style.width='180px'; e.style.height='200px'; e.style.right='24px'; e.style.bottom='24px'; }")
+              state_screenshots = []
+              for state_name in ("online", "checking", "error", "sleep", "reacting"):
+                  state_preview.evaluate("(e, state) => { e.dataset.state=state; e.classList.toggle('is-reacting', state==='reacting'); }", state_name)
+                  page.wait_for_timeout(140)
+                  rendered = page.evaluate("""() => {
+                    const w=document.getElementById('voidling-widget'), c=w?.querySelector('canvas.voidling-renderer');
+                    const r=c?.getBoundingClientRect();
+                    return {state:w?.dataset.state,renderer:w?.dataset.renderer,model:w?.dataset.model,
+                      canvasWidth:c?.width||0,canvasHeight:c?.height||0,visible:!!r&&r.width>20&&r.height>20,
+                      error:c?.dataset.error||null};
+                  }""")
+                  if rendered["state"] != state_name or rendered["renderer"] != "webgl" or rendered["model"] != "procedural-webgl" or not rendered["visible"] or rendered["error"]:
+                      raise SystemExit("Voidling visual state failed on the real WebGL renderer: " + repr(rendered))
+                  screenshot_path = out / ("voidling-state-" + state_name + ".png")
+                  state_preview.screenshot(path=str(screenshot_path), animations="disabled")
+                  if not screenshot_path.exists() or screenshot_path.stat().st_size < 1000:
+                      raise SystemExit("Voidling state screenshot is missing/empty: " + state_name)
+                  state_screenshots.append({"state":state_name,"screenshot":screenshot_path.name,"bytes":screenshot_path.stat().st_size})
+              print("VOIDLING_3D_STATE_SCREENSHOTS=" + repr(state_screenshots))
+              state_preview.evaluate("(e) => { e.style.width=''; e.style.height=''; e.style.right=''; e.style.bottom=''; e.classList.remove('is-reacting'); }")
               # Exercise real panel-state mutation: error outranks loading and interaction,
               # then a healthy recovery returns the model to idle.
               status_cards = page.locator("#dashboardComponentStatus .dashboard-component")
