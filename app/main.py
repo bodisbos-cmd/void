@@ -2960,7 +2960,7 @@ function createVoidlingRenderer(host,rotation){
   function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
   function norm(v){const d=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/d,v[1]/d,v[2]/d]}
   function bezier(q,t){const u=1-t,a=u*u*u,b=3*u*u*t,c=3*u*t*t,d=t*t*t;return[0,1,2].map(k=>a*q[0][k]+b*q[1][k]+c*q[2][k]+d*q[3][k])}
-  function tangent(q,t){const u=1-t;return norm([0,1,2].map(k=>3*u*u*(q[1][k]-q[0][k])+6*u*t*(q[2][k]-q[1][k])+3*t*t*(q[3][k]-q[2][k)]))}
+  function tangent(q,t){const u=1-t;return norm([0,1,2].map(k=>3*u*u*(q[1][k]-q[0][k])+6*u*t*(q[2][k]-q[1][k])+3*t*t*(q[3][k]-q[2][k])))}
   function tubeData(q,radius,steps=24,sides=7){const p=[],n=[],idx=[];for(let s=0;s<=steps;s++){const t=s/steps,c=bezier(q,t),tan=tangent(q,t),ref=Math.abs(tan[1])>.86?[0,0,1]:[0,1,0],u=norm(cross(tan,ref)),v=norm(cross(tan,u)),r=radius*(.06+.94*Math.pow(1-t,.72));for(let k=0;k<=sides;k++){const a=k*Math.PI*2/sides,rx=Math.cos(a),ry=Math.sin(a),nn=norm([u[0]*rx+v[0]*ry,u[1]*rx+v[1]*ry,u[2]*rx+v[2]*ry]);p.push(c[0]+nn[0]*r,c[1]+nn[1]*r,c[2]+nn[2]*r);n.push(...nn)}}for(let s=0;s<steps;s++)for(let k=0;k<sides;k++){const a=s*(sides+1)+k,b=a+sides+1;idx.push(a,a+1,b,b,a+1,b+1)}return meshData(p,n,idx)}
   const sphere=sphereData(),tubes=[];
   function addTube(q,r){const m=tubeData(q,r);tubes.push(m);return m}
