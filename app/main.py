@@ -2679,6 +2679,13 @@ html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6p
  }
 }html body main.app-shell>.workspace>#dashboardQuickCard .quick-detail-copy{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:2px!important;min-width:0!important;flex:1 1 auto!important;text-align:right!important}
 html body main.app-shell>.workspace>#dashboardQuickCard .quick-detail-meta{display:block!important;min-width:0!important;color:var(--ab-muted)!important;font-size:9px!important;line-height:1.35!important;overflow-wrap:anywhere!important}
+
+/* Desktop proportions from the reference dashboard: chart dominant, compact health and quick-details rails. */
+@media(min-width:1151px){
+ html body main.app-shell>.workspace>#dashboardQuickCard:not(.nav-hidden){grid-column:1 / span 3!important;grid-row:3!important}
+ html body main.app-shell>.workspace>#panelHealthCard:not(.nav-hidden){grid-column:4 / span 2!important;grid-row:3!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard:not(.nav-hidden){grid-column:6 / span 7!important;grid-row:3!important}
+}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
