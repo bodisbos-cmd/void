@@ -2910,7 +2910,7 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 @keyframes voidling-react{0%{transform:scale(1)}35%{transform:scale(1.12) rotate(5deg)}100%{transform:scale(1)}}
 @keyframes voidling-nav-orbit{0%{transform:rotate(-25deg) scale(1)}45%{transform:rotate(155deg) scale(1.16)}100%{transform:rotate(335deg) scale(1)}}
 @keyframes voidling-nav-hop{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-10px) scale(1.06)}65%{transform:translateY(1px) scale(.98)}}
-@media(max-width:600px){#voidling-widget{right:12px;bottom:max(12px,env(safe-area-inset-bottom));width:42px;height:48px;transform:none;transform-origin:bottom right}#voidling-widget:hover{transform:translateY(-2px)}#voidling-status-popover{top:max(64px,calc(env(safe-area-inset-top) + 52px))!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto;max-width:none!important}}
+@media(max-width:600px){#voidling-widget{right:12px;left:auto;top:max(137px,calc(env(safe-area-inset-top) + 125px));bottom:auto;width:36px;height:42px;transform:none;transform-origin:top right}#voidling-widget:hover{transform:translateY(-2px)}#voidling-status-popover{top:max(64px,calc(env(safe-area-inset-top) + 52px))!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto;max-width:none!important}}\n@media(min-width:601px) and (max-width:1100px){#voidling-widget{width:38px;height:44px}}
 @media(prefers-reduced-motion:reduce){.voidling-art,.voidling-orbit{animation:none!important}#voidling-widget{transition:none}}
 </style>"""
 ABYSS_VOIDLING_JS = r"""<script id="voidling-interactive-space-script">
