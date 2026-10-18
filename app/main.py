@@ -579,7 +579,7 @@ en:{tagline:'PRIVATE CONTROL CENTER',quickDetails:'Quick details',latestService:
 function tr(k){return (words[lang]||words.fa)[k]||k}
 function applyLanguage(){document.documentElement.lang=lang;document.documentElement.dir=lang==='fa'?'rtl':'ltr';document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=tr(el.dataset.i18n));document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>el.placeholder=tr(el.dataset.i18nPlaceholder));const langBtn=document.getElementById('langBtn');if(langBtn)langBtn.textContent=lang==='fa'?'English':'فارسی';const status=document.getElementById('status');if(status)status.textContent=tr('connected');renderClients();renderDashboardQuickDetails()}
 function toggleLanguage(){lang=lang==='fa'?'en':'fa';localStorage.setItem('abyss-lang',lang);applyLanguage()}
-async function api(u,o={}){o.headers={...(o.headers||{}),'Content-Type':'application/json','X-CSRF-Token':csrf};let r=await fetch(u,o),d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.detail||'Request failed');return d}
+async function api(u,o={}){const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),20000);try{const r=await fetch(u,{...o,headers:{...(o.headers||{}),'Content-Type':'application/json','X-CSRF-Token':csrf},signal:controller.signal}),d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.detail||'Request failed');return d}catch(e){if(controller.signal.aborted)throw Error('درخواست API پس از ۲۰ ثانیه پاسخ نداد.');throw e}finally{clearTimeout(timeout)}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function renderDashboardQuickDetails(data=latestOverview){
  const host=document.getElementById('dashboardQuickDetails');
