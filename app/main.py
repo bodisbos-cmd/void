@@ -2567,14 +2567,32 @@ html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6p
   box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 20px rgba(0,0,0,.18)!important;
  }
 }
-/* Reference layout: let the user table use the full content width; keep details accessible beneath it. */
+/* Reference layout: full-width user table, with a compact detail inspector below. */
 @media(min-width:851px){
  html body main.app-shell>.workspace .clients-layout{
-  display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-items:start!important;gap:12px!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-items:start!important;gap:10px!important;
  }
- html body main.app-shell>.workspace #clients,
+ html body main.app-shell>.workspace #clients{
+  display:block!important;width:100%!important;min-width:0!important;max-width:none!important;
+ }
  html body main.app-shell>.workspace #clientDetailsPanel{
   display:block!important;width:100%!important;min-width:0!important;max-width:none!important;
+  padding:10px 14px!important;border-radius:12px!important;
+ }
+ html body main.app-shell>.workspace #clientDetailsPanel .client-detail-head{
+  padding-bottom:8px!important;
+ }
+ html body main.app-shell>.workspace #clientDetailsPanel .client-detail-list{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;column-gap:16px!important;
+ }
+ html body main.app-shell>.workspace #clientDetailsPanel .client-detail-list>div{
+  padding:7px 0!important;min-width:0!important;
+ }
+ html body main.app-shell>.workspace #clientDetailsPanel .client-detail-actions{
+  display:flex!important;flex-wrap:wrap!important;justify-content:flex-start!important;margin-top:8px!important;
+ }
+ html body main.app-shell>.workspace #clientDetailsPanel .client-detail-actions button{
+  min-height:32px!important;padding:6px 10px!important;
  }
 }
 </style>"""
