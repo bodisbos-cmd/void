@@ -510,8 +510,31 @@ jobs:
                   raise SystemExit("Voidling mobile dimensions drifted from its responsive dock: " + repr(voidling_layout))
               if not voidling_layout["stats"] or voidling_layout["rect"]["bottom"] > voidling_layout["stats"]["top"]+1:
                   raise SystemExit("Voidling overlaps the mobile dashboard cards: " + repr(voidling_layout))
-              mobile.locator("#voidling-widget").click()
+              state_frames=mobile.evaluate("""() => {
+                const widget=document.getElementById('voidling-widget'), art=widget?.querySelector('.voidling-art');
+                if (!widget || !art) return {missing:true};
+                const previous=widget.dataset.state, frames={};
+                for (const state of ['online','checking','error','sleep']) {
+                  widget.dataset.state=state;
+                  frames[state]=getComputedStyle(art).backgroundPosition;
+                }
+                widget.classList.add('is-reacting');
+                frames.click=getComputedStyle(art).backgroundPosition;
+                widget.classList.remove('is-reacting');
+                widget.dataset.state=previous;
+                return {missing:false,frames};
+              }""")
+              print("VOIDLING_REFERENCE_POSES=" + repr(state_frames))
+              expected_frames={"online":"0% 50%","checking":"25% 50%","error":"50% 50%","sleep":"75% 50%","click":"100% 50%"}
+              if state_frames.get("missing") or state_frames.get("frames") != expected_frames:
+                  raise SystemExit("Voidling status poses do not map to all five source reference variants: " + repr(state_frames))
+              if (voidling_layout["image"]["width"] != 770 or voidling_layout["image"]["height"] != 177
+                      or voidling_layout["image"]["width"] % 5 != 0):
+                  raise SystemExit("Voidling must use the five-frame reference sprite strip: " + repr(voidling_layout["image"]))
+              mobile.evaluate("() => { const w=document.getElementById('voidling-widget'); w.dataset.state='sleep'; w.click(); }")
+              mobile.wait_for_function("document.getElementById('voidling-widget')?.dataset.state==='online'",timeout=3000)
               mobile.wait_for_selector("#voidling-status-popover",state="visible",timeout=3000)
+              print("VOIDLING_IDLE_WAKE=" + repr(mobile.evaluate("() => ({state:document.getElementById('voidling-widget')?.dataset.state,popup:!!document.getElementById('voidling-status-popover')})")))
               popup_layout=mobile.locator("#voidling-status-popover").evaluate("""e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,width:r.width,viewport:innerHeight,display:getComputedStyle(e).display}}""")
               print("VOIDLING_STATUS_POPOVER=" + repr(popup_layout))
               if popup_layout["top"] > 100 or popup_layout["bottom"] >= popup_layout["viewport"] or popup_layout["display"] == "none":
