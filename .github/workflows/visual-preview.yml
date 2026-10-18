@@ -189,6 +189,7 @@ jobs:
                 const overlaps=(x,y)=>!(x.x+x.width<=y.x || y.x+y.width<=x.x || x.y+x.height<=y.y || y.y+y.height<=x.y);
                 const sameRow=Math.max(chart.y,health.y,quick.y)-Math.min(chart.y,health.y,quick.y)<2;
                 return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,top,stats,chart,health,quick,sameRow,activity,quickDetailCount:quickDetailRows.length,quickDetailLabels,
+                  chartXBeforeHealth:chart.x<health.x,healthXBeforeQuick:health.x<quick.x,
                   statsChartOverlap:overlaps(stats,chart),statsHealthOverlap:overlaps(stats,health),statsQuickOverlap:overlaps(stats,quick),
                   chartHealthOverlap:overlaps(chart,health),chartQuickOverlap:overlaps(chart,quick),healthQuickOverlap:overlaps(health,quick),
                   statsAboveCards:stats.y+stats.height<=Math.min(chart.y,health.y,quick.y)+1};
