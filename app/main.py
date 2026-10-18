@@ -2891,15 +2891,15 @@ html body .login-visual .visual-orbit{
 ABYSS_VOIDLING_CSS = r"""<style id="voidling-interactive-space">
 #void-space-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:.9}
 body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:relative;z-index:2}
-#voidling-widget{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:60;width:82px;height:94px;border:0!important;background:transparent!important;box-shadow:none!important;min-height:0!important;padding:0!important;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 8px 18px rgba(0,0,0,.75));transition:transform .25s ease,filter .25s ease;overflow:visible!important}
+#voidling-widget{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:60;width:106px;height:124px;border:0!important;background:transparent!important;box-shadow:none!important;min-height:0!important;padding:0!important;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 8px 18px rgba(0,0,0,.75));transition:transform .25s ease,filter .25s ease;overflow:visible!important}
 #voidling-widget:hover{transform:translateY(-4px) scale(1.035);filter:drop-shadow(0 0 15px rgba(220,228,255,.24))}
 #voidling-widget:focus-visible{outline:2px solid #dce4ff!important;outline-offset:5px;border-radius:18px}
 #voidling-widget[data-rotation-mode="on"]{cursor:crosshair}
 .voidling-renderer{position:absolute;left:-4%;top:-4%;width:108%;height:108%;z-index:1;display:block;pointer-events:none;background:transparent;opacity:1}
 .voidling-art{position:absolute;inset:-2%;z-index:1;display:block;background-position:0% 50%;background-repeat:no-repeat;background-size:500% 100%;mix-blend-mode:screen;pointer-events:none;transform-origin:50% 52%;-webkit-mask-image:radial-gradient(ellipse 50% 62% at 50% 49%,#000 48%,rgba(0,0,0,.94) 66%,rgba(0,0,0,.38) 82%,transparent 100%);mask-image:radial-gradient(ellipse 50% 62% at 50% 49%,#000 48%,rgba(0,0,0,.94) 66%,rgba(0,0,0,.38) 82%,transparent 100%);filter:contrast(1.12) drop-shadow(0 5px 10px rgba(0,0,0,.58));animation:voidling-float 3.6s ease-in-out infinite}
 #voidling-widget[data-renderer="webgl"] .voidling-art{opacity:0;visibility:hidden}
-.voidling-orbit{position:absolute;pointer-events:none;z-index:2;left:-8%;top:28%;width:116%;height:40%;border:1px solid rgba(205,215,255,.19);border-radius:50%;transform:rotate(-25deg);opacity:.72;animation:voidling-orbit 9s linear infinite}
-.voidling-orbit:after{content:"";position:absolute;inset:16% -7%;border:1px solid rgba(218,224,244,.12);border-radius:50%;transform:rotate(42deg);box-shadow:0 0 8px rgba(210,220,245,.035)}
+.voidling-orbit{position:absolute;pointer-events:none;z-index:2;left:-8%;top:28%;width:116%;height:40%;border:1px solid rgba(205,215,255,.19);border-radius:50%;transform:rotate(-25deg);opacity:.34;animation:voidling-orbit 9s linear infinite}
+.voidling-orbit:after{content:"";position:absolute;inset:16% -7%;border:1px solid rgba(218,224,244,.075);border-radius:50%;transform:rotate(42deg);box-shadow:0 0 8px rgba(210,220,245,.025)}
 #voidling-widget[data-state="online"] .voidling-art{background-position:0% 50%}
 #voidling-widget[data-state="checking"] .voidling-art{background-position:25% 50%;animation:voidling-float 1.2s ease-in-out infinite;filter:drop-shadow(0 0 9px rgba(215,225,255,.35))}
 #voidling-widget[data-state="error"] .voidling-art{background-position:50% 50%;filter:drop-shadow(0 0 6px rgba(255,75,88,.55))}
@@ -2918,8 +2918,8 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 @keyframes voidling-react{0%{transform:scale(1)}35%{transform:scale(1.12) rotate(5deg)}100%{transform:scale(1)}}
 @keyframes voidling-nav-orbit{0%{transform:rotate(-25deg) scale(1)}45%{transform:rotate(155deg) scale(1.16)}100%{transform:rotate(335deg) scale(1)}}
 @keyframes voidling-nav-hop{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-10px) scale(1.06)}65%{transform:translateY(1px) scale(.98)}}
-@media(max-width:600px){#voidling-widget{right:12px;left:auto;top:max(137px,calc(env(safe-area-inset-top) + 125px));bottom:auto;width:40px;height:44px;transform:none;transform-origin:top right}#voidling-widget:hover{transform:translateY(-2px)}#voidling-status-popover{top:max(64px,calc(env(safe-area-inset-top) + 52px))!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto;max-width:none!important}}
-@media(min-width:601px) and (max-width:1100px){#voidling-widget{width:38px;height:44px;bottom:10px}}
+@media(max-width:600px){#voidling-widget{right:12px;left:auto;top:max(137px,calc(env(safe-area-inset-top) + 125px));bottom:auto;width:58px;height:68px;transform:none;transform-origin:top right}#voidling-widget:hover{transform:translateY(-2px)}#voidling-status-popover{top:max(64px,calc(env(safe-area-inset-top) + 52px))!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto;max-width:none!important}}
+@media(min-width:601px) and (max-width:1100px){#voidling-widget{width:54px;height:64px;bottom:10px}}
 @media(prefers-reduced-motion:reduce){.voidling-art,.voidling-orbit{animation:none!important}#voidling-widget{transition:none}}
 </style>"""
 ABYSS_VOIDLING_JS = r"""<script id="voidling-interactive-space-script">
@@ -2950,18 +2950,18 @@ function createVoidlingRenderer(host,rotation){
   ].join('\n');
   const fragmentSource=[
    'precision mediump float;','uniform vec3 uColor;','uniform vec3 uRim;','uniform vec3 uEmissive;','uniform float uAlpha;','uniform float uShine;','varying vec3 vNormal;','varying vec3 vWorld;',
-   'void main(){vec3 n=normalize(vNormal);vec3 l=normalize(vec3(-0.42,0.62,1.0));vec3 v=normalize(vec3(0.0,0.0,5.25)-vWorld);float d=max(dot(n,l),0.0);float s=pow(max(dot(reflect(-l,n),v),0.0),34.0)*uShine;float rim=pow(1.0-max(dot(n,v),0.0),2.25);vec3 c=uColor*(0.16+0.34*d)+vec3(0.68,0.76,0.98)*s*0.72+uRim*rim*0.68+uEmissive;gl_FragColor=vec4(c,uAlpha);}'
+   'void main(){vec3 n=normalize(vNormal);vec3 l=normalize(vec3(-0.42,0.62,1.0));vec3 l2=normalize(vec3(0.72,0.18,0.55));vec3 v=normalize(vec3(0.0,0.0,5.25)-vWorld);float d=max(dot(n,l),0.0);float d2=max(dot(n,l2),0.0);float s=pow(max(dot(reflect(-l,n),v),0.0),52.0)*uShine;float s2=pow(max(dot(reflect(-l2,n),v),0.0),38.0)*uShine*0.32;float rim=pow(1.0-max(dot(n,v),0.0),1.75);vec3 c=uColor*(0.12+0.31*d+0.12*d2)+vec3(0.72,0.79,0.96)*(s*0.88+s2*0.5)+uRim*rim*0.82+uEmissive;gl_FragColor=vec4(c,uAlpha);}'
   ].join('\n');
   function compile(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const error=gl.getShaderInfoLog(s)||'shader compile failed';gl.deleteShader(s);throw new Error(error)}return s}
   const vs=compile(gl.VERTEX_SHADER,vertexSource),fs=compile(gl.FRAGMENT_SHADER,fragmentSource);program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program)||'program link failed');
   const loc={p:gl.getAttribLocation(program,'aPosition'),n:gl.getAttribLocation(program,'aNormal'),mvp:gl.getUniformLocation(program,'uMVP'),model:gl.getUniformLocation(program,'uModel'),color:gl.getUniformLocation(program,'uColor'),rim:gl.getUniformLocation(program,'uRim'),emissive:gl.getUniformLocation(program,'uEmissive'),alpha:gl.getUniformLocation(program,'uAlpha'),shine:gl.getUniformLocation(program,'uShine')};
   function meshData(pos,normals,idx){const p=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,p);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);const n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,n);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(normals),gl.STATIC_DRAW);const i=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,i);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx),gl.STATIC_DRAW);return{p,n,i,count:idx.length}}
-  function sphereData(rows=18,cols=26){const p=[],n=[],idx=[];for(let y=0;y<=rows;y++){const t=y*Math.PI/rows;for(let x=0;x<=cols;x++){const a=x*Math.PI*2/cols,nx=Math.sin(t)*Math.cos(a),ny=Math.cos(t),nz=Math.sin(t)*Math.sin(a);p.push(nx,ny,nz);n.push(nx,ny,nz)}}for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const a=y*(cols+1)+x,b=a+cols+1;idx.push(a,a+1,b,b,a+1,b+1)}return meshData(p,n,idx)}
+  function sphereData(rows=30,cols=42){const p=[],n=[],idx=[];for(let y=0;y<=rows;y++){const t=y*Math.PI/rows;for(let x=0;x<=cols;x++){const a=x*Math.PI*2/cols,nx=Math.sin(t)*Math.cos(a),ny=Math.cos(t),nz=Math.sin(t)*Math.sin(a);p.push(nx,ny,nz);n.push(nx,ny,nz)}}for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const a=y*(cols+1)+x,b=a+cols+1;idx.push(a,a+1,b,b,a+1,b+1)}return meshData(p,n,idx)}
   function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
   function norm(v){const d=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/d,v[1]/d,v[2]/d]}
   function bezier(q,t){const u=1-t,a=u*u*u,b=3*u*u*t,c=3*u*t*t,d=t*t*t;return[0,1,2].map(k=>a*q[0][k]+b*q[1][k]+c*q[2][k]+d*q[3][k])}
   function tangent(q,t){const u=1-t;return norm([0,1,2].map(k=>3*u*u*(q[1][k]-q[0][k])+6*u*t*(q[2][k]-q[1][k])+3*t*t*(q[3][k]-q[2][k])))}
-  function tubeData(q,radius,steps=24,sides=7){const p=[],n=[],idx=[];for(let s=0;s<=steps;s++){const t=s/steps,c=bezier(q,t),tan=tangent(q,t),ref=Math.abs(tan[1])>.86?[0,0,1]:[0,1,0],u=norm(cross(tan,ref)),v=norm(cross(tan,u)),r=radius*(.06+.94*Math.pow(1-t,.72));for(let k=0;k<=sides;k++){const a=k*Math.PI*2/sides,rx=Math.cos(a),ry=Math.sin(a),nn=norm([u[0]*rx+v[0]*ry,u[1]*rx+v[1]*ry,u[2]*rx+v[2]*ry]);p.push(c[0]+nn[0]*r,c[1]+nn[1]*r,c[2]+nn[2]*r);n.push(...nn)}}for(let s=0;s<steps;s++)for(let k=0;k<sides;k++){const a=s*(sides+1)+k,b=a+sides+1;idx.push(a,a+1,b,b,a+1,b+1)}return meshData(p,n,idx)}
+  function tubeData(q,radius,steps=34,sides=10){const p=[],n=[],idx=[];for(let s=0;s<=steps;s++){const t=s/steps,c=bezier(q,t),tan=tangent(q,t),ref=Math.abs(tan[1])>.86?[0,0,1]:[0,1,0],u=norm(cross(tan,ref)),v=norm(cross(tan,u)),r=radius*(.06+.94*Math.pow(1-t,.72));for(let k=0;k<=sides;k++){const a=k*Math.PI*2/sides,rx=Math.cos(a),ry=Math.sin(a),nn=norm([u[0]*rx+v[0]*ry,u[1]*rx+v[1]*ry,u[2]*rx+v[2]*ry]);p.push(c[0]+nn[0]*r,c[1]+nn[1]*r,c[2]+nn[2]*r);n.push(...nn)}}for(let s=0;s<steps;s++)for(let k=0;k<sides;k++){const a=s*(sides+1)+k,b=a+sides+1;idx.push(a,a+1,b,b,a+1,b+1)}return meshData(p,n,idx)}
   const sphere=sphereData(),tubes=[];
   function addTube(q,r){const m=tubeData(q,r);tubes.push(m);return m}
   addTube([[.43,.54,.03],[.72,.59,.06],[.68,.89,.08],[.83,1.00,.06]],.105);
@@ -2977,6 +2977,12 @@ function createVoidlingRenderer(host,rotation){
    [[.02,-.80,-.15],[.27,-1.03,-.31],[-.10,-1.28,-.17],[-.22,-1.46,-.07]]
   ];
   tails.forEach((q,i)=>addTube(q,i===1||i===5?.085:.074));
+  const shellRibbons=[
+   addTube([[-.58,.30,.02],[-1.02,.72,.08],[-.63,1.19,.02],[-.14,1.08,.02]],.092),
+   addTube([[.52,.31,.01],[.96,.70,.08],[.73,1.14,.03],[.20,1.17,.01]],.082),
+   addTube([[-.60,.10,.43],[-.91,.43,.38],[-.64,.83,.22],[-.24,.72,.34]],.066),
+   addTube([[.59,.12,.40],[.91,.39,.32],[.69,.80,.22],[.29,.76,.35]],.062)
+  ];
   const closedEyes=[addTube([[-.46,.23,.70],[-.42,.15,.72],[-.31,.15,.72],[-.26,.23,.70]],.022),addTube([[.26,.23,.70],[.31,.15,.72],[.42,.15,.72],[.46,.23,.70]],.022)];
   const happyEyes=[addTube([[-.47,.09,.70],[-.42,.34,.73],[-.31,.34,.73],[-.25,.09,.70]],.029),addTube([[.25,.09,.70],[.31,.34,.73],[.42,.34,.73],[.47,.09,.70]],.029)];
   function ident(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1])}
@@ -2994,18 +3000,19 @@ function createVoidlingRenderer(host,rotation){
   function burst(){const now=performance.now();particles=[];for(let i=0;i<16;i++)particles.push({a:i/16*Math.PI*2+(Math.random()-.5)*.28,b:(Math.random()-.5)*1.35,start:now,life:reduceMotion?120:760});dirty=true;schedule()}
   function frame(now){rafId=0;if(disposed||document.visibilityState==='hidden')return;if(reduceMotion&&!dirty&&!particles.length)return;if(!reduceMotion&&now-lastFrame<33){schedule();return}lastFrame=now;dirty=false;gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(program);
    const w=canvas.width||1,h=canvas.height||1,proj=projection(w/h),view=trans(0,0,-5.25),vp=mul(proj,view),state=host.dataset.state||'online',t=reduceMotion?0:now*.001,pose=rotation(),bob=reduceMotion?0:Math.sin(t*1.9)*.035;
-   const root=mul(trans(0,bob,0),mul(ry(pose.yaw+(reduceMotion?0:Math.sin(t*.68)*.045)),mul(rx(pose.pitch+(reduceMotion?0:Math.sin(t*.54)*.022)),scaleM(.78,.78,.78))));
+   const root=mul(trans(0,bob,0),mul(ry(pose.yaw+(reduceMotion?0:Math.sin(t*.68)*.045)),mul(rx(pose.pitch+(reduceMotion?0:Math.sin(t*.54)*.022)),scaleM(.86,.86,.86))));
    let rim=[.24,.31,.52],glow=[.025,.04,.085],eye=[.78,.84,1],eyeGlow=[.42,.52,.9];
    if(state==='checking'){rim=[.40,.28,.92];glow=[.11,.045,.30];eye=[.83,.80,1];eyeGlow=[.48,.37,1]}
    if(state==='error'){rim=[.95,.055,.09];glow=[.32,.006,.018];eye=[1,.20,.24];eyeGlow=[1,.035,.06]}
    if(state==='sleep'){rim=[.13,.16,.25];glow=[.012,.018,.04];eye=[.38,.44,.60];eyeGlow=[.16,.20,.34]}
    if(state==='reacting'){rim=[.48,.58,.98];glow=[.05,.09,.20];eye=[.9,.94,1];eyeGlow=[.70,.78,1]}
-   const body=[.018,.021,.033],highlight=[.10,.13,.20];
+   const body=[.026,.030,.044],highlight=[.20,.24,.34];
    draw(sphere,root,vp,[0,-.50,.01],[.35,.43,.30],body,rim,glow,.82,1);
-   draw(sphere,root,vp,[0,.24,0],[.77,.69,.64*(1+(reduceMotion?0:Math.sin(t*1.9)*.012))],body,rim,glow,.92,1);
+   draw(sphere,root,vp,[0,.24,0],[.79,.73,.67*(1+(reduceMotion?0:Math.sin(t*1.9)*.012))],body,rim,glow,1.12,1);
    draw(sphere,root,vp,[0,-.30,.08],[.23,.20,.25],body,rim,glow,.70,.96);
    tubes.slice(0,4).forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],body,highlight,glow,.68,.92));
-   tails.forEach((_,i)=>draw(tubes[4+i],root,vp,[0,0,0],[1,1,1],[.014,.017,.028],rim,glow,.78,.94,[Math.sin(t*1.3+i*.8)*.04,0,Math.sin(t*1.1+i)*.035]));
+   tails.forEach((_,i)=>draw(tubes[4+i],root,vp,[0,0,0],[1,1,1],[.018,.021,.034],rim,glow,.96,.98,[Math.sin(t*1.3+i*.8)*.055,0,Math.sin(t*1.1+i)*.045]));
+   shellRibbons.forEach((g,i)=>draw(g,root,vp,[0,0,0],[1,1,1],[.026,.030,.045],i%2===0?[.43,.49,.64]:[.29,.35,.49],state==='error'?[.055,.006,.012]:state==='checking'?[.035,.025,.095]:[.018,.023,.040],1.15,.96,[Math.sin(t*.72+i*.6)*.025,Math.sin(t*.48+i)*.035,Math.sin(t*.63+i*.8)*.045]));
    if(state==='sleep'){closedEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.58,.98))}
    else if(state==='checking'||state==='reacting'){happyEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.64,.98))}
    else{[-1,1].forEach(side=>{const x=side*.29,rot=[0,0,side*.10];draw(sphere,root,vp,[x,.22,.64],[.205,.285,.075],eyeGlow,rim,eyeGlow,.25,.30,rot);draw(sphere,root,vp,[x,.22,.685],[.133,.205,.078],eye,rim,eyeGlow,.92,1,rot);draw(sphere,root,vp,[x-side*.035,.28,.746],[.026,.052,.018],[1,1,1],[1,1,1],[.82,.86,1],.2,.9,rot)})}
@@ -3014,7 +3021,7 @@ function createVoidlingRenderer(host,rotation){
   }
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();disposed=true;if(rafId)cancelAnimationFrame(rafId);host.dataset.renderer='fallback';},{passive:false});
   addEventListener('resize',resize,{passive:true});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){if(rafId)cancelAnimationFrame(rafId);rafId=0}else{dirty=true;schedule()}});
-  host.dataset.renderer='webgl';host.dataset.model='procedural-webgl';host.dataset.meshCount=String(1+tubes.length+closedEyes.length);resize();dirty=true;schedule();
+  host.dataset.renderer='webgl';host.dataset.model='procedural-webgl';host.dataset.meshCount=String(1+tubes.length+closedEyes.length+shellRibbons.length);resize();dirty=true;schedule();
   return{burst,refresh(){dirty=true;schedule()},destroy(){disposed=true;if(rafId)cancelAnimationFrame(rafId)}}
  }catch(error){host.dataset.renderer='fallback';canvas.dataset.error=String(error&&error.message||error).slice(0,120);return null}
 }
