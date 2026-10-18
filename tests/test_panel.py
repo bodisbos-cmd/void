@@ -167,6 +167,8 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "latestBackup:'آخرین پشتیبان'" in dashboard_script.text
     assert "function showPanelHelp()" in dashboard_script.text
     assert "function loadServerStatus()" in dashboard_script.text
+    assert "setTimeout(()=>controller.abort(),20000)" in dashboard_script.text
+    assert "درخواست API پس از ۲۰ ثانیه پاسخ نداد." in dashboard_script.text
     assert "function loadReports()" in dashboard_script.text
     assert "report-event-table" in dashboard_script.text
     assert '<bdi dir="ltr">' in dashboard_script.text
@@ -211,6 +213,20 @@ def test_dashboard_requires_login(client):
     assert response.status_code == 303
     assert response.headers["location"] == "/login"
     assert client.get("/api/overview").status_code == 401
+
+
+def test_system_metrics_exposes_traffic_history_for_dashboard_chart(client):
+    admin_client(client)
+    response = client.get("/api/system/metrics?period=24h")
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["period"] == "24h"
+    assert isinstance(payload.get("history"), list)
+    history = payload.get("traffic_history")
+    assert isinstance(history, list)
+    assert history
+    assert payload["traffic_history_count"] >= len(history)
+    assert {"at", "recorded_traffic_bytes"} <= set(history[-1])
 
 
 def test_create_pause_subscription_and_revoke(client):
