@@ -267,7 +267,7 @@ jobs:
                 const widget=document.getElementById('voidling-widget'), canvas=widget?.querySelector('canvas.voidling-renderer');
                 let gl=null; try { gl=canvas?.getContext('webgl'); } catch (_) {}
                 return {exists:!!widget,renderer:widget?.dataset.renderer,model:widget?.dataset.model,
-                  geometry:canvas?.dataset.geometry,webgl:!!gl,meshCount:Number(widget?.dataset.meshCount)||0,
+                  geometry:canvas?.dataset.geometry,webgl:!!gl,meshCount:Number(widget?.dataset.meshCount)||0,rendererError:canvas?.dataset.error||null,
                   width:canvas?.width||0,height:canvas?.height||0};
               }""")
               print("VOIDLING_WEBGL_MODEL=" + repr(voidling_3d))
@@ -287,6 +287,7 @@ jobs:
               page.locator("#voidling-widget").click()
               if page.locator("#voidling-widget").get_attribute("data-state") != "error":
                   raise SystemExit("User interaction hid an active service error")
+              page.locator("#voidling-dismiss").click()
               status_cards.first.evaluate("(el) => { el.textContent = 'Xray loading'; }")
               page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'checking'", timeout=4000)
               page.evaluate("(items) => document.querySelectorAll('#dashboardComponentStatus .dashboard-component').forEach((el,i) => { if(items[i] !== undefined) el.innerHTML=items[i]; })", saved_card_html)
