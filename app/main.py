@@ -2502,7 +2502,7 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
 @media(min-width:851px){
  html body:has(.login-layout) .login-visual .visual-orbit{
   top:10%!important;left:50%!important;transform:translateX(-50%)!important;
-  width:min(43vw,320px)!important;max-width:320px!important;opacity:.62!important;
+  width:min(43vw,320px)!important;max-width:320px!important;opacity:.84!important;
  }
  html body:has(.login-layout) .login-visual .visual-eyebrow{
   display:block!important;position:absolute!important;z-index:2!important;
