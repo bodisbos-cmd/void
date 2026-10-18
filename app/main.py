@@ -2790,6 +2790,26 @@ html body .login-visual .visual-orbit{display:block!important;position:relative!
 html body .login-visual .visual-orbit:before,html body .login-visual .visual-orbit:after{display:none!important;content:none!important}
 html body .login-visual .visual-eyebrow,html body .login-visual h2,html body .login-visual p{display:none!important}
 @media(max-width:900px){html body .login-visual .visual-orbit{width:min(34vw,330px)!important;max-width:330px!important}}
+
+/* Desktop/tablet reference layout: the navigation rail stays visible beside the workspace. */
+@media(min-width:851px){
+ html body main.app-shell .sidebar{
+  transform:translateX(0)!important;
+  width:clamp(178px,15vw,220px)!important;
+  left:0!important;right:auto!important;
+  overflow-y:auto!important;
+ }
+ html body main.app-shell #menuToggle{display:none!important}
+ html body main.app-shell .workspace{
+  margin-left:clamp(178px,15vw,220px)!important;
+  width:calc(100% - clamp(178px,15vw,220px))!important;
+  max-width:none!important;
+  padding:24px clamp(18px,2vw,32px) 42px!important;
+ }
+ html body main.app-shell .workspace .top{padding-top:0!important}
+}
+/* Preserve the supplied logo while reducing the compressed JPEG's near-black square edge. */
+html body .login-visual .visual-orbit{filter:contrast(1.4) brightness(1.04)!important}
 </style>"""
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
