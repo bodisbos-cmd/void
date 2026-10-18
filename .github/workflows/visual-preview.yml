@@ -102,6 +102,10 @@ jobs:
           with sync_playwright() as p:
               browser = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist", "--enable-unsafe-swiftshader"])
               page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
+              page.add_init_script("""(() => {
+                const nativeSetTimeout=window.setTimeout.bind(window);
+                window.setTimeout=(fn,delay,...args)=>nativeSetTimeout(fn,window.__voidlingFastSleepTest&&delay===45000?25:delay,...args);
+              })()""")
               errors = []
               page.on("pageerror", lambda e: errors.append(str(e) + " | " + str(getattr(e, "stack", ""))))
               page.goto(base + "/login", wait_until="domcontentloaded")
@@ -311,6 +315,21 @@ jobs:
                   raise SystemExit("Dragging in rotation mode did not rotate and persist the 3D pose independently of widget position: " + repr(rotation_data))
               rotation_toggle.click()
               page.locator("#voidling-dismiss").click()
+              # Accelerate only the 45-second idle timer for this isolated test; normal panel timing is unchanged.
+              page.evaluate("""() => {
+                window.__voidlingFastSleepTest=true;
+                document.body.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:4,clientY:4}));
+              }""")
+              page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'sleep'", timeout=3000)
+              print("VOIDLING_IDLE_SLEEP=" + repr(page.locator("#voidling-widget").get_attribute("data-state")))
+              page.evaluate("""() => {
+                window.__voidlingFastSleepTest=false;
+                document.getElementById('voidling-widget').click();
+              }""")
+              page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'reacting'", timeout=3000)
+              page.wait_for_function("document.getElementById('voidling-widget')?.dataset.state === 'online'", timeout=3000)
+              if page.locator("#voidling-dismiss").count():
+                  page.locator("#voidling-dismiss").click()
               page.screenshot(path=str(out / "02-dashboard-desktop.png"), full_page=False, animations="disabled")
               for nav, filename in [("clients","03-users-desktop.png"),("create","04-create-desktop.png"),("servers","05-servers-desktop.png"),("protocols","06-protocols-desktop.png"),("reports","07-reports-desktop.png"),("settings","08-settings-desktop.png")]:
                   locator = page.locator('[data-nav="' + nav + '"]').first
