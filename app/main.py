@@ -3030,6 +3030,8 @@ function readStatus(){
  const healthyRe=/(?:\b(?:online|healthy|running|active)\b|فعال|آنلاین|متصل|در دسترس|آماده|سالم|در حال اجرا)/i;
  const healthyServices=services.length>0&&services.every(el=>healthyRe.test(textOf(el))&&!errorRe.test(textOf(el)));
  if(healthyServices||statusEl&&healthyRe.test(textOf(statusEl))){panelState='online';updateVisualState();return}
+ // No explicit error/busy/loading indicator remains, so clear the stale transient state.
+ panelState='online';updateVisualState();
 }
 const observer=new MutationObserver(readStatus);['status','dashboardComponentStatus'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','data-status','data-loading','aria-busy']})});setTimeout(readStatus,900);setInterval(readStatus,15000);
 let drag=null,moved=false,movedByRotation=false,soundEnabled=false,audioCtx=null,idleSleepTimer=0,panelState='online',sleeping=false,reactionUntil=0;
