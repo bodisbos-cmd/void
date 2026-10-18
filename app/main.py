@@ -2678,6 +2678,7 @@ html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6p
   min-width:620px!important;
  }
 }html body main.app-shell>.workspace>#dashboardQuickCard .quick-detail-copy{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:2px!important;min-width:0!important;flex:1 1 auto!important;text-align:right!important}
+html body main.app-shell>.workspace>#dashboardQuickCard #recentActivityList[hidden]{display:none!important}
 html body main.app-shell>.workspace>#dashboardQuickCard .quick-detail-meta{display:block!important;min-width:0!important;color:var(--ab-muted)!important;font-size:9px!important;line-height:1.35!important;overflow-wrap:anywhere!important}
 
 /* Desktop proportions from the reference dashboard: chart dominant, compact health and quick-details rails. */
