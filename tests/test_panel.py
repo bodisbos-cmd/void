@@ -98,7 +98,12 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'id="dashboardUsageCard"' in response.text
     assert 'id="panelHealthCard"' in response.text
     assert "grid-template-columns:repeat(4,minmax(0,1fr))!important" in response.text
-    assert '<img class="abyss-logo-image" src="/brand-logo" alt="" aria-hidden="true">' in response.text
+    assert '<img class="abyss-logo-image" src="/brand-logo" alt="" aria-hidden="true">' not in response.text
+    assert '<div class="abyss-utility-links" aria-label="پیوندهای پروژه">' in response.text
+    assert response.text.index('</nav>') < response.text.index('aria-label="پیوندهای پروژه"') < response.text.index('aria-label="حساب فعلی"')
+    assert '.client-details-panel{grid-row:2!important}' in response.text
+    login_page = client.get("/login")
+    assert '<img class="abyss-logo-image" src="/brand-logo" alt="" aria-hidden="true">' in login_page.text
     logo = client.get("/brand-logo")
     assert logo.status_code == 200
     assert logo.headers.get("content-type", "").startswith("image/jpeg")
