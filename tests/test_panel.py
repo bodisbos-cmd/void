@@ -244,6 +244,44 @@ def test_same_subscription_url_serves_branded_page_to_browsers(client):
     assert client.get(f"/api/clients/{created.json()['id']}/subscription").json()["page_url"] == url
 
 
+def test_subscription_usage_chart_uses_scoped_real_client_history(client):
+    csrf = admin_client(client)
+    headers = {"X-CSRF-Token": csrf}
+    first = client.post("/api/clients", json={"name": "History A", "quota_gb": 20}, headers=headers)
+    second = client.post("/api/clients", json={"name": "History B", "quota_gb": 20}, headers=headers)
+    assert first.status_code == 200 and second.status_code == 200
+    first_id, second_id = first.json()["id"], second.json()["id"]
+
+    with panel.db() as conn:
+        conn.execute("UPDATE clients SET used_bytes=? WHERE id=?", (5 * 1024**3, first_id))
+        conn.execute("UPDATE clients SET used_bytes=? WHERE id=?", (3 * 1024**3, second_id))
+
+    now = int(panel.time.time()) - 7200
+    panel.record_client_usage_history(now=now)
+    with panel.db() as conn:
+        conn.execute("UPDATE clients SET used_bytes=? WHERE id=?", (6 * 1024**3, first_id))
+    panel.record_client_usage_history(now=now + panel.CLIENT_USAGE_HISTORY_SAMPLE_SECONDS + 1)
+
+    sample_time = now + panel.CLIENT_USAGE_HISTORY_SAMPLE_SECONDS + 1
+    first_history = panel.get_client_usage_history(first_id, now=sample_time)
+    second_history = panel.get_client_usage_history(second_id, now=sample_time)
+    assert [row["used_bytes"] for row in first_history] == [5 * 1024**3, 6 * 1024**3]
+    assert [row["used_bytes"] for row in second_history] == [3 * 1024**3, 3 * 1024**3]
+
+    token = client.get(f"/api/clients/{first_id}/subscription").json()["url"].rsplit("/sub/", 1)[1]
+    browser = client.get(
+        f"/sub/{token}",
+        headers={"Accept": "text/html,application/xhtml+xml", "User-Agent": "Mozilla/5.0 Chrome/130"},
+    )
+    assert browser.status_code == 200
+    assert 'id="clientUsageChart"' in browser.text
+    assert 'data-usage-days="7"' in browser.text
+    assert 'data-usage-days="30"' in browser.text
+    assert 'data-usage-days="90"' in browser.text
+    assert "__USAGE_HISTORY__" not in browser.text
+    assert f'"used_bytes":{6 * 1024**3}' in browser.text
+
+
 def _token_from_url(url):
     return url.rsplit("/sub/", 1)[1]
 
