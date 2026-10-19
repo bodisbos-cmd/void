@@ -93,7 +93,7 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(json_type, 0x4E4F534A)
         doc = json.loads(data[20:20 + json_length].decode("utf-8"))
         self.assertEqual(doc["asset"]["version"], "2.0")
-        if mod.VOIDLING_SOURCE_PATH.is_file():
+        if Path(mod.__file__).with_name("voidling-source.glb").is_file():
             # When the authentic source is packaged, the endpoint must serve the
             # original one-mesh textured model instead of rebuilding a substitute.
             self.assertEqual(len(doc["meshes"][0]["primitives"]), 1)
