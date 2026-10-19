@@ -4,6 +4,10 @@ Uses only the Python standard library and creates the cached GLB on first reques
 from __future__ import annotations
 import json, math, struct
 from functools import lru_cache
+from pathlib import Path
+
+# The authentic textured model is served byte-for-byte when packaged in app/.
+VOIDLING_SOURCE_PATH = Path(__file__).with_name("voidling-source.glb")
 
 V = tuple[float, float, float]
 GROUPS: dict[str, list[tuple[list[V], list[V], list[tuple[int,int,int]]]]] = {}
@@ -200,6 +204,70 @@ def build_glb()->bytes:
     if data[:4]!=b'glTF' or struct.unpack('<I',data[8:12])[0]!=len(data):raise RuntimeError('Invalid Voidling GLB')
     return data
 
+def _load_reference_glb() -> bytes | None:
+    """Load the real textured source model unchanged when it is packaged in app/."""
+    if not VOIDLING_SOURCE_PATH.is_file():
+        return None
+    data = VOIDLING_SOURCE_PATH.read_bytes()
+    if len(data) < 20 or data[:4] != b"glTF":
+        raise ValueError(f"Invalid Voidling source GLB header: {VOIDLING_SOURCE_PATH}")
+    version, declared_length = struct.unpack("<II", data[4:12])
+    if version != 2 or declared_length != len(data):
+        raise ValueError(f"Invalid Voidling source GLB size/version: {VOIDLING_SOURCE_PATH}")
+    offset = 12
+    document = None
+    binary_range = None
+    while offset + 8 <= len(data):
+        chunk_length, chunk_type = struct.unpack_from("<II", data, offset)
+        start = offset + 8
+        end = start + chunk_length
+        if end > len(data):
+            raise ValueError("Voidling source GLB contains a truncated chunk")
+        if chunk_type == 0x4E4F534A:
+            document = json.loads(data[start:end].decode("utf-8").rstrip(" "))
+        elif chunk_type == 0x004E4942:
+            binary_range = (start, end)
+        offset = end
+    if not isinstance(document, dict) or binary_range is None:
+        raise ValueError("Voidling source GLB is missing JSON or BIN data")
+    if document.get("asset", {}).get("version") != "2.0" or not document.get("meshes"):
+        raise ValueError("Voidling source GLB is not a valid glTF 2.0 mesh")
+    primitives = document["meshes"][0].get("primitives") or []
+    if not primitives:
+        raise ValueError("Voidling source GLB has no renderable primitive")
+    for primitive in primitives:
+        attributes = primitive.get("attributes") or {}
+        if not {"POSITION", "NORMAL", "TEXCOORD_0"}.issubset(attributes):
+            raise ValueError("Voidling source GLB must retain position, normal, and UV data")
+        if "indices" not in primitive or primitive.get("material") is None:
+            raise ValueError("Voidling source GLB must retain indices and its material")
+        index_accessor = document["accessors"][primitive["indices"]]
+        if index_accessor.get("componentType") not in (5123, 5125):
+            raise ValueError("Unsupported Voidling source GLB index component")
+    for material in document.get("materials", []):
+        pbr = material.get("pbrMetallicRoughness") or {}
+        if ("baseColorTexture" not in pbr
+                or "metallicRoughnessTexture" not in pbr
+                or "normalTexture" not in material):
+            raise ValueError("Voidling source GLB must preserve base-color, roughness/metallic, and normal textures")
+    binary_length = binary_range[1] - binary_range[0]
+    for image in document.get("images", []):
+        if "bufferView" not in image:
+            raise ValueError("Voidling source GLB textures must be embedded in the GLB")
+        view = document["bufferViews"][image["bufferView"]]
+        image_start = int(view.get("byteOffset", 0))
+        image_end = image_start + int(view.get("byteLength", 0))
+        if image_start < 0 or image_end > binary_length or not image.get("mimeType"):
+            raise ValueError("Voidling source GLB contains an invalid embedded texture")
+    return data
+
+
 @lru_cache(maxsize=1)
 def get_voidling_glb()->bytes:
+    reference_model = _load_reference_glb()
+    if reference_model is not None:
+        return reference_model
+    # Development fallback only. The reference model must be packaged as
+    # app/voidling-source.glb for original textures to reach the renderer.
     return build_glb()
+
