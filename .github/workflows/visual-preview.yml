@@ -669,7 +669,7 @@ jobs:
               expected_frames={"online":"0% 50%","checking":"25% 50%","error":"50% 50%","sleep":"75% 50%","click":"100% 50%"}
               if state_frames.get("missing") or state_frames.get("frames") != expected_frames:
                   raise SystemExit("Voidling status poses do not map to all five source reference variants: " + repr(state_frames))
-              if (voidling_layout["image"]["width"] != 770 or voidling_layout["image"]["height"] != 177
+              if (voidling_layout["image"]["width"] != 500 or voidling_layout["image"]["height"] != 110
                       or voidling_layout["image"]["width"] % 5 != 0):
                   raise SystemExit("Voidling must use the five-frame reference sprite strip: " + repr(voidling_layout["image"]))
               mobile.evaluate("() => { const w=document.getElementById('voidling-widget'); w.dataset.state='sleep'; w.click(); }")
