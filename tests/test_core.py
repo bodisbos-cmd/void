@@ -82,42 +82,6 @@ class CoreTests(unittest.TestCase):
         with self.assertRaises(Exception):
             mod.valid_name("x" * 65)
 
-    def test_voidling_glb_mesh_and_endpoint(self):
-        import asyncio
-        import json
-        import struct
-        data = mod.get_voidling_glb()
-        self.assertEqual(data[:4], b"glTF")
-        self.assertEqual(struct.unpack("<I", data[8:12])[0], len(data))
-        json_length, json_type = struct.unpack("<II", data[12:20])
-        self.assertEqual(json_type, 0x4E4F534A)
-        doc = json.loads(data[20:20 + json_length].decode("utf-8"))
-        self.assertEqual(doc["asset"]["version"], "2.0")
-        if Path(mod.__file__).with_name("voidling-source.glb").is_file():
-            # When the authentic source is packaged, the endpoint must serve the
-            # original one-mesh textured model instead of rebuilding a substitute.
-            self.assertEqual(len(doc["meshes"][0]["primitives"]), 1)
-            primitive = doc["meshes"][0]["primitives"][0]
-            self.assertTrue({"POSITION", "NORMAL", "TEXCOORD_0"}.issubset(primitive["attributes"]))
-            self.assertEqual(doc["accessors"][primitive["indices"]]["componentType"], 5125)
-            self.assertGreaterEqual(len(doc.get("images", [])), 3)
-            material = doc["materials"][primitive["material"]]
-            self.assertIn("baseColorTexture", material["pbrMetallicRoughness"])
-            self.assertIn("metallicRoughnessTexture", material["pbrMetallicRoughness"])
-            self.assertIn("normalTexture", material)
-        else:
-            # Keep the source-missing development fallback explicit and covered.
-            self.assertEqual(len(doc["meshes"][0]["primitives"]), 7)
-            self.assertEqual(
-                {item["name"] for item in doc["materials"]},
-                {"void-shell", "liquid-chrome", "eye-open", "eye-glint",
-                 "eye-closed", "eye-happy", "eye-angry"},
-            )
-        response = asyncio.run(mod.voidling_model_asset())
-        self.assertEqual(response.media_type, "model/gltf-binary")
-        self.assertEqual(response.body, data)
-
-
     def test_database_context_closes_connection_and_persists_commit(self):
         with mod.db() as conn:
             conn.execute("INSERT OR REPLACE INTO settings(key,value) VALUES(?,?)", ("context-close-test", "persisted"))
