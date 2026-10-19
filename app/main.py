@@ -2897,14 +2897,14 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 #voidling-widget[data-rotation-mode="on"]{cursor:crosshair}
 .voidling-renderer{position:absolute;left:-4%;top:-4%;width:108%;height:108%;z-index:3;display:block;pointer-events:none;background:transparent;opacity:.18;transition:opacity .18s ease}
 #voidling-widget[data-rotation-mode="on"] .voidling-renderer{opacity:1}
-.voidling-art{position:absolute;inset:-2%;z-index:1;display:block;background-position:0% 50%;background-repeat:no-repeat;background-size:500% 100%;mix-blend-mode:screen;pointer-events:none;transform-origin:50% 52%;-webkit-mask-image:radial-gradient(ellipse 57% 68% at 50% 48%,#000 52%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.34) 84%,transparent 100%);mask-image:radial-gradient(ellipse 57% 68% at 50% 48%,#000 52%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.34) 84%,transparent 100%);filter:brightness(1.22) contrast(1.14) saturate(.72) drop-shadow(0 5px 10px rgba(0,0,0,.58));animation:voidling-float 3.6s ease-in-out infinite,voidling-breath 4.8s ease-in-out infinite}
+.voidling-art{position:absolute;inset:-2%;z-index:1;display:block;background-position:0% 50%;background-repeat:no-repeat;background-size:500% 100%;mix-blend-mode:screen;pointer-events:none;transform-origin:50% 52%;-webkit-mask-image:radial-gradient(ellipse 57% 68% at 50% 48%,#000 52%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.34) 84%,transparent 100%);mask-image:radial-gradient(ellipse 57% 68% at 50% 48%,#000 52%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.34) 84%,transparent 100%);filter:brightness(1.22) contrast(1.14) saturate(.72) drop-shadow(0 5px 10px rgba(0,0,0,.58));animation:voidling-float 3.6s ease-in-out infinite,voidling-breath 4.8s ease-in-out infinite;transition:filter .28s ease,transform .28s ease}
 #voidling-widget[data-renderer="webgl"] .voidling-art{opacity:.92;visibility:visible;z-index:1}
 #voidling-widget[data-rotation-mode="on"] .voidling-art{opacity:0;visibility:hidden}
 .voidling-orbit{position:absolute;pointer-events:none;z-index:2;left:-12%;top:67%;width:124%;height:23%;border:1px solid rgba(205,215,255,.24);border-radius:50%;transform:rotate(-8deg);opacity:.34;animation:voidling-orbit 12s linear infinite}
 .voidling-orbit:after{content:"";position:absolute;inset:14% -8%;border:1px solid rgba(218,224,244,.12);border-radius:50%;transform:rotate(12deg);box-shadow:0 0 8px rgba(210,220,245,.035)}
 #voidling-widget[data-state="online"] .voidling-art{background-position:0% 50%}
 #voidling-widget[data-state="checking"] .voidling-art{background-position:25% 50%;animation:voidling-float 1.2s ease-in-out infinite;filter:drop-shadow(0 0 9px rgba(215,225,255,.35))}
-#voidling-widget[data-state="error"] .voidling-art{background-position:50% 50%;filter:drop-shadow(0 0 6px rgba(255,75,88,.55))}
+#voidling-widget[data-state="error"] .voidling-art{background-position:50% 50%;filter:brightness(1.08) contrast(1.18) drop-shadow(0 0 6px rgba(255,75,88,.55));animation:voidling-fault .92s ease-in-out infinite}
 #voidling-widget[data-state="sleep"] .voidling-art{background-position:75% 50%}
 #voidling-widget[data-state="sleep"]{opacity:.84}
 #voidling-widget.is-reacting .voidling-art{background-position:100% 50%!important;animation:voidling-react .55s ease-out 1}
@@ -2919,6 +2919,7 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 @keyframes voidling-breath{0%,100%{filter:contrast(1.12) drop-shadow(0 5px 10px rgba(0,0,0,.58)) drop-shadow(0 0 2px rgba(190,205,255,.06))}50%{filter:contrast(1.16) drop-shadow(0 5px 10px rgba(0,0,0,.58)) drop-shadow(0 0 8px rgba(190,205,255,.17)}}
 @keyframes voidling-orbit{from{transform:rotate(-8deg)}to{transform:rotate(352deg)}}
 @keyframes voidling-react{0%{transform:scale(1)}35%{transform:scale(1.12) rotate(5deg)}100%{transform:scale(1)}}
+@keyframes voidling-fault{0%,100%{transform:translateX(0) rotate(0) scale(1)}18%{transform:translateX(-1.6px) rotate(-1.5deg) scale(1.025)}38%{transform:translateX(1.3px) rotate(1.2deg) scale(1.035)}58%{transform:translateX(-.8px) rotate(-.7deg) scale(1.02)}78%{transform:translateX(.5px) rotate(.4deg) scale(1.01)}}
 @keyframes voidling-nav-orbit{0%{transform:rotate(-25deg) scale(1)}45%{transform:rotate(155deg) scale(1.16)}100%{transform:rotate(335deg) scale(1)}}
 @keyframes voidling-nav-hop{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-10px) scale(1.06)}65%{transform:translateY(1px) scale(.98)}}
 @media(max-width:600px){#voidling-widget{right:12px;left:auto;top:max(137px,calc(env(safe-area-inset-top) + 125px));bottom:auto;width:40px;height:44px;transform:none;transform-origin:top right}#voidling-widget:hover{transform:translateY(-2px)}#voidling-status-popover{top:max(64px,calc(env(safe-area-inset-top) + 52px))!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto;max-width:none!important}}
@@ -2988,6 +2989,7 @@ function createVoidlingRenderer(host,rotation){
   ];
   const closedEyes=[addTube([[-.46,.23,.70],[-.42,.15,.72],[-.31,.15,.72],[-.26,.23,.70]],.022),addTube([[.26,.23,.70],[.31,.15,.72],[.42,.15,.72],[.46,.23,.70]],.022)];
   const happyEyes=[addTube([[-.47,.09,.70],[-.42,.34,.73],[-.31,.34,.73],[-.25,.09,.70]],.029),addTube([[.25,.09,.70],[.31,.34,.73],[.42,.34,.73],[.47,.09,.70]],.029)];
+  const angryEyes=[addTube([[-.49,.35,.70],[-.41,.24,.73],[-.31,.16,.73],[-.25,.18,.70]],.036),addTube([[.25,.18,.70],[.31,.16,.73],[.41,.24,.73],[.49,.35,.70]],.036)];
   function ident(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1])}
   function mul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
   function trans(x,y,z){const m=ident();m[12]=x;m[13]=y;m[14]=z;return m}
@@ -3003,7 +3005,7 @@ function createVoidlingRenderer(host,rotation){
   function burst(){const now=performance.now();particles=[];for(let i=0;i<16;i++)particles.push({a:i/16*Math.PI*2+(Math.random()-.5)*.28,b:(Math.random()-.5)*1.35,start:now,life:reduceMotion?120:760});dirty=true;schedule()}
   function frame(now){rafId=0;if(disposed||document.visibilityState==='hidden')return;if(reduceMotion&&!dirty&&!particles.length)return;if(!reduceMotion&&now-lastFrame<33){schedule();return}lastFrame=now;dirty=false;gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(program);
    const w=canvas.width||1,h=canvas.height||1,proj=projection(w/h),view=trans(0,0,-5.25),vp=mul(proj,view),state=host.dataset.state||'online',t=reduceMotion?0:now*.001,pose=rotation(),bob=reduceMotion?0:Math.sin(t*1.9)*.035;
-   const root=mul(trans(0,bob,0),mul(ry(pose.yaw+(reduceMotion?0:Math.sin(t*.68)*.045)),mul(rx(pose.pitch+(reduceMotion?0:Math.sin(t*.54)*.022)),scaleM(.86,.86,.86))));
+   const faultMotion=state==='error'&&!reduceMotion?Math.sin(t*18)*.035:0;const root=mul(trans(state==='error'&&!reduceMotion?Math.sin(t*15)*.025:0,bob,0),mul(ry(pose.yaw+(reduceMotion?0:Math.sin(t*.68)*.045)+faultMotion),mul(rx(pose.pitch+(reduceMotion?0:Math.sin(t*.54)*.022)+(state==='error'&&!reduceMotion?-.07:state==='checking'&&!reduceMotion?Math.sin(t*2.4)*.045:0)),scaleM(.86,.86,.86))));
    let rim=[.24,.31,.52],glow=[.025,.04,.085],eye=[.78,.84,1],eyeGlow=[.42,.52,.9];
    if(state==='checking'){rim=[.40,.28,.92];glow=[.11,.045,.30];eye=[.83,.80,1];eyeGlow=[.48,.37,1]}
    if(state==='error'){rim=[.95,.055,.09];glow=[.32,.006,.018];eye=[1,.20,.24];eyeGlow=[1,.035,.06]}
@@ -3017,6 +3019,7 @@ function createVoidlingRenderer(host,rotation){
    tails.forEach((_,i)=>draw(tubes[4+i],root,vp,[0,0,0],[1,1,1],[.018,.021,.034],rim,glow,.96,.98,[Math.sin(t*1.3+i*.8)*.055,0,Math.sin(t*1.1+i)*.045]));
    shellRibbons.forEach((g,i)=>draw(g,root,vp,[0,0,0],[1,1,1],[.026,.030,.045],i%2===0?[.43,.49,.64]:[.29,.35,.49],state==='error'?[.055,.006,.012]:state==='checking'?[.035,.025,.095]:[.018,.023,.040],1.15,.96,[Math.sin(t*.72+i*.6)*.025,Math.sin(t*.48+i)*.035,Math.sin(t*.63+i*.8)*.045]));
    if(state==='sleep'){closedEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.58,.98))}
+   else if(state==='error'){angryEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.82,1))}
    else if(state==='checking'||state==='reacting'){happyEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.64,.98))}
    else{[-1,1].forEach(side=>{const x=side*.305,rot=[0,0,side*.10];draw(sphere,root,vp,[x,.22,.64],[.225,.30,.075],eyeGlow,rim,eyeGlow,.28,.32,rot);draw(sphere,root,vp,[x,.22,.685],[.155,.22,.078],eye,rim,eyeGlow,1.02,1,rot);draw(sphere,root,vp,[x-side*.038,.28,.746],[.028,.055,.018],[1,1,1],[1,1,1],[.88,.91,1],.22,.94,rot)})}
    const alive=[];particles.forEach(p=>{const age=(now-p.start)/p.life;if(age>=1)return;alive.push(p);const r=.52+age*.72,x=Math.cos(p.a)*r,y=Math.sin(p.a)*r*.75+p.b*.24,z=.2+Math.sin(p.a*1.7)*.26+age*.18,fade=1-age,size=.024*fade+.004;draw(sphere,root,vp,[x,y,z],[size,size,size],[.70,.78,1],[.72,.82,1],[.58,.68,1],.2,fade*.95)});particles=alive;
