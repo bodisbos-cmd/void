@@ -2889,15 +2889,8 @@ html body .login-visual .visual-orbit{
 }
 /* Smoothness budget: keep compositor-driven motion and avoid costly backdrop filters on touch devices. */
 #abyssParticleCanvas{position:fixed!important;inset:0!important;z-index:0!important;width:100%!important;height:100%!important;pointer-events:none!important}
-#abyssMenuShade{will-change:opacity;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#abyssMenuShade{will-change:opacity}
 .sidebar{will-change:transform}
-@media(pointer:coarse), (max-width:850px){
- html body main.app-shell .sidebar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
- html body main.app-shell .sidebar{box-shadow:10px 0 28px rgba(0,0,0,.24)!important}
- html body main.app-shell .workspace .card,
- html body main.app-shell .workspace .panel,
- html body main.app-shell .workspace .box{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-}
 @media(prefers-reduced-motion:reduce){
  html body:before{animation:none!important;transform:none!important}
  #abyssParticleCanvas{display:none!important}
