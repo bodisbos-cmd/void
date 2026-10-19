@@ -118,7 +118,7 @@ add('liquid-chrome',tube(((.15,-.37,-.08),(.29,-.49,-.16),(.30,-.61,-.19),(.20,-
 # Broad cowl/crown blade. It rises from behind the hood and curls back toward
 # the face; the large ribbon silhouette is intentional, not a horn made from a tube.
 # Wider swept crown ribbon: attached at the upper-left shell, arcing over the head, and curling down the far side.
-add('liquid-chrome',blade(((-.40,.45,.52),(-.65,1.10,.32),(.18,1.70,.015),(.64,.88,.14)),.115,16,48,.028,.035))
+add('liquid-chrome',blade(((-.40,.45,.52),(-.65,1.10,.32),(.18,1.70,.015),(.64,.88,.14)),.095,16,48,.025,.030))
 # Outer cheek fins flare from the hood and taper into soft tips.
 # Shell-hugging cheek fins: keep them below the crown so they read as swept chrome edges, not round ears.
 add('liquid-chrome',blade(((-.61,.15,.49),(-1.03,.34,.42),(-1.05,.70,.20),(-.75,.78,.20)),.112,12,38,.035,.035))
@@ -126,7 +126,7 @@ add('liquid-chrome',blade(((.57,.15,.46),(.95,.36,.38),(.91,.63,.20),(.70,.72,.1
 # Smaller inner curls create a layered, hooked silhouette close to the shell.
 add('liquid-chrome',blade(((-.59,.00,.50),(-.91,.24,.44),(-.78,.50,.34),(-.50,.48,.42)),.078,10,32,.035,.029))
 # The signature cheek cowl sweeps across the near side of the face and hugs the shell instead of forming a separate ear.
-add('liquid-chrome',blade(((-.78,.20,.32),(-1.00,.32,.40),(-.79,-.08,.56),(-.48,-.02,.61)),.120,14,42,.025,.032))
+add('liquid-chrome',blade(((-.78,.20,.32),(-1.00,.32,.40),(-.79,-.08,.56),(-.48,-.02,.61)),.100,14,42,.025,.030))
 # Rear planes remain offset in depth so the model still reads cleanly from side and back views.
 add('liquid-chrome',blade(((-.47,.18,-.34),(-.87,.42,-.38),(-.73,.82,-.30),(-.32,.93,-.18)),.155,10,34,.035,.036))
 add('liquid-chrome',blade(((.47,.18,-.34),(.84,.40,-.38),(.69,.77,-.30),(.32,.90,-.18)),.142,10,34,.035,.034))
@@ -143,7 +143,7 @@ tails=[
  ((.085,-.61,.22),(.33,-.82,.34),(.08,-1.11,.18),(.39,-1.38,-.02)),
  ((.18,-.55,.14),(.51,-.69,.24),(.25,-.99,.08),(.68,-1.29,-.06)),
 ]
-for q,width in zip(tails,(.145,.128,.146,.122)):
+for q,width in zip(tails,(.112,.100,.114,.096)):
     add('liquid-chrome',blade(q,width,12,36,.035,.038))
 
 # Eyes are recessed, tapered luminous lenses aligned to the hood's front surface.
