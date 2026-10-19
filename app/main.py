@@ -6,7 +6,18 @@ from html import escape as html_escape
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlsplit
-from app.voidling_model import get_voidling_glb
+try:
+    from app.voidling_model import get_voidling_glb
+except ModuleNotFoundError:
+    # The test suite imports main.py by file path, outside the app package.
+    import importlib.util as _importlib_util
+    _voidling_spec = _importlib_util.spec_from_file_location(
+        "voidling_model", Path(__file__).with_name("voidling_model.py"))
+    if _voidling_spec is None or _voidling_spec.loader is None:
+        raise
+    _voidling_module = _importlib_util.module_from_spec(_voidling_spec)
+    _voidling_spec.loader.exec_module(_voidling_module)
+    get_voidling_glb = _voidling_module.get_voidling_glb
 import qrcode
 from qrcode.image.svg import SvgPathImage
 from fastapi import FastAPI, Form, HTTPException, Request

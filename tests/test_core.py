@@ -82,6 +82,26 @@ class CoreTests(unittest.TestCase):
         with self.assertRaises(Exception):
             mod.valid_name("x" * 65)
 
+    def test_voidling_glb_mesh_and_endpoint(self):
+        import json
+        import struct
+        data = mod.get_voidling_glb()
+        self.assertEqual(data[:4], b"glTF")
+        self.assertEqual(struct.unpack("<I", data[8:12])[0], len(data))
+        json_length, json_type = struct.unpack("<II", data[12:20])
+        self.assertEqual(json_type, 0x4E4F534A)
+        doc = json.loads(data[20:20 + json_length].decode("utf-8"))
+        self.assertEqual(doc["asset"]["version"], "2.0")
+        self.assertEqual(len(doc["meshes"][0]["primitives"]), 7)
+        self.assertEqual(
+            {item["name"] for item in doc["materials"]},
+            {"void-shell", "liquid-chrome", "eye-open", "eye-glint",
+             "eye-closed", "eye-happy", "eye-angry"},
+        )
+        response = asyncio.run(mod.voidling_model_asset())
+        self.assertEqual(response.media_type, "model/gltf-binary")
+        self.assertEqual(response.body, data)
+
 
     def test_database_context_closes_connection_and_persists_commit(self):
         with mod.db() as conn:
