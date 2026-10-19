@@ -55,14 +55,17 @@ def tube(q, radius, sides=9, steps=25, taper=.08, flatten=(.78,1.,1.)):
         f.append((first,(j+1)%sides,j));base=steps*sides;f.append((last,base+j,base+(j+1)%sides))
     return p,n,f
 
-def almond(center,rx,ry,depth,tilt=0.,rings=7,sides=24):
+def almond(center,rx,ry,depth,tilt=0.,rings=10,sides=32):
+    """A thin, tapered lens surface; keep depth low so the eyes read as inlaid light, not eyeballs."""
     p=[];n=[];f=[]
     for back in (False,True):
         for ir in range(rings+1):
             r=ir/rings
             for j in range(sides):
-                t=2*math.pi*j/sides;cx=math.cos(t);sy=math.sin(t);x=rx*r*cx*(abs(cx)**.35);y=ry*r*sy*(abs(sy)**.08)
-                z=(-.20 if back else 1.)*depth*math.sqrt(max(0.,1-r*r))
+                t=2*math.pi*j/sides;cx=math.cos(t);sy=math.sin(t)
+                # Stronger horizontal taper makes the ends sharp and almond-shaped.
+                x=rx*r*cx*(abs(cx)**.58);y=ry*r*sy*(abs(sy)**.06)
+                z=(-.16 if back else 1.)*depth*math.sqrt(max(0.,1-r*r))
                 xx=x*math.cos(tilt)-y*math.sin(tilt);yy=x*math.sin(tilt)+y*math.cos(tilt)
                 p.append((center[0]+xx,center[1]+yy,center[2]+z))
                 n.append(unit((xx/(rx*rx),yy/(ry*ry),z/(depth*depth+1e-9))))
@@ -102,49 +105,50 @@ def blade(q, width, sides=8, steps=28, tip=.035, thickness=.024, axis=(0.,0.,1.)
                 f.extend(((a,b,c),(c,b,d)))
     return p,n,f
 
-# Main silhouette: broad, slightly flattened black-chrome head and a small tucked torso.
-add('void-shell',ellipsoid((-.015,.27,0),(.86,.76,.655),30,48,True))
-add('void-shell',ellipsoid((0,-.56,.015),(.275,.345,.255),20,32,True))
-add('void-shell',ellipsoid((0,-.34,.055),(.185,.18,.19),16,24))
+# Reference-led silhouette: a large smooth hood, tucked torso, a single high crown
+# sweep, broad cheek flares, and a few layered liquid-metal tails.
+add('void-shell',ellipsoid((-.015,.25,0),(.86,.755,.655),40,64,True))
+add('void-shell',ellipsoid((0,-.535,.012),(.235,.292,.218),24,36,True))
+add('void-shell',ellipsoid((0,-.355,.045),(.145,.165,.145),20,28))
 
-# Two quiet, rear-offset filaments give the torso depth without creating a tangled wire bundle.
-add('liquid-chrome',tube(((-.22,-.39,-.08),(-.50,-.47,-.23),(-.46,-.68,-.30),(-.28,-.83,-.22)),.034,8,26,.10))
-add('liquid-chrome',tube(((.22,-.38,-.08),(.51,-.47,-.23),(.44,-.69,-.30),(.28,-.84,-.22)),.032,8,26,.10))
+# A tucked, low-gloss connection rather than a bundle of thin wires.
+add('liquid-chrome',tube(((-.15,-.37,-.08),(-.29,-.49,-.16),(-.30,-.61,-.19),(-.20,-.70,-.12)),.024,8,22,.12))
+add('liquid-chrome',tube(((.15,-.37,-.08),(.29,-.49,-.16),(.30,-.61,-.19),(.20,-.70,-.12)),.024,8,22,.12))
 
-# Crown and cheek fins: swept leaf-shaped surfaces that emerge from the shell,
-# with distinct front/back depth instead of round loops sitting on top of the head.
-add('liquid-chrome',blade(((-.54,.25,.53),(-.98,.34,.54),(-.91,.78,.33),(-.43,1.04,.12)),.125,10,32,.035,.024))
-add('liquid-chrome',blade(((-.43,.55,.57),(-.30,1.04,.56),(.15,1.17,.13),(.40,.86,.20)),.095,10,32,.035,.020))
-add('liquid-chrome',blade(((.51,.27,.53),(.99,.45,.48),(.88,.84,.25),(.56,1.00,.10)),.105,9,30,.035,.021))
-add('liquid-chrome',blade(((-.66,.05,.46),(-.91,.31,.48),(-.82,.57,.35),(-.58,.73,.30)),.075,8,26,.05,.019))
-# Rear-side fins remain visible when rotated to profile or back view.
-add('liquid-chrome',blade(((-.48,.22,-.36),(-.79,.48,-.43),(-.70,.79,-.38),(-.36,.91,-.20)),.085,8,28,.04,.019))
-add('liquid-chrome',blade(((.48,.22,-.36),(.78,.48,-.43),(.69,.78,-.38),(.36,.91,-.20)),.08,8,28,.04,.019))
+# Broad cowl/crown blade. It rises from behind the hood and curls back toward
+# the face; the large ribbon silhouette is intentional, not a horn made from a tube.
+add('liquid-chrome',blade(((-.36,.52,.39),(-.49,1.10,.30),(.10,1.61,.065),(.44,1.16,.18)),.205,14,44,.055,.050))
+# Outer cheek fins flare from the hood and taper into soft tips.
+add('liquid-chrome',blade(((-.59,.22,.47),(-1.10,.47,.38),(-1.08,.91,.16),(-.63,1.02,.16)),.178,12,38,.045,.043))
+add('liquid-chrome',blade(((.55,.25,.45),(.99,.49,.35),(.98,.84,.16),(.64,.99,.16)),.158,12,36,.045,.040))
+# A shorter inner curl gives the front silhouette a layered, liquid-metal edge.
+add('liquid-chrome',blade(((-.61,.015,.48),(-.91,.20,.44),(-.86,.48,.35),(-.54,.65,.31)),.118,10,32,.055,.032))
+# Rear planes are offset in depth so the model reads as a creature from side/back views.
+add('liquid-chrome',blade(((-.47,.18,-.34),(-.83,.44,-.38),(-.72,.82,-.30),(-.35,.92,-.18)),.142,10,34,.045,.033))
+add('liquid-chrome',blade(((.47,.18,-.34),(.81,.43,-.38),(.72,.79,-.30),(.35,.90,-.18)),.132,10,34,.045,.032))
 
-# A single low, asymmetric ribbon curls around the torso like the reference's liquid-metal sweep.
-add('liquid-chrome',blade(((-.18,-.34,.28),(-.61,-.20,.29),(-.73,-.51,.15),(-.39,-.66,.12)),.055,8,26,.06,.018))
-# Four broad liquid-metal tail ribbons form a clean layered silhouette beneath the torso.
+# One low curved band wraps the torso, then four broad ribbons form an orderly tail silhouette.
+add('liquid-chrome',blade(((-.18,-.35,.22),(-.55,-.25,.23),(-.62,-.49,.12),(-.31,-.64,.09)),.082,10,30,.06,.028))
 tails=[
- ((-.18,-.53,.28),(-.62,-.74,.43),(-.25,-1.08,.27),(-.84,-1.36,-.025)),
- ((-.09,-.59,.35),(-.40,-.82,.47),(.06,-1.12,.23),(-.18,-1.43,.015)),
- ((.10,-.58,.34),(.47,-.79,.45),(.05,-1.10,.21),(.65,-1.38,-.035)),
- ((.25,-.52,.24),(.72,-.72,.35),(.40,-1.00,.11),(.88,-1.32,-.065)),
+ ((-.15,-.57,.20),(-.56,-.79,.35),(-.26,-1.10,.22),(-.82,-1.39,-.015)),
+ ((-.06,-.62,.24),(-.34,-.87,.38),(-.04,-1.16,.24),(-.19,-1.49,.02)),
+ ((.09,-.61,.22),(.46,-.83,.34),(.08,-1.14,.19),(.62,-1.39,-.03)),
+ ((.23,-.55,.14),(.70,-.72,.23),(.40,-1.03,.09),(.88,-1.32,-.06)),
 ]
-for q,width in zip(tails,(.105,.086,.105,.092)):
-    add('liquid-chrome',blade(q,width,9,30,.025,.026))
-# One fine edge filament trails behind the right fin, keeping the reference's delicate tendril detail.
-add('liquid-chrome',tube(((.23,-.62,-.17),(.49,-.88,-.31),(.12,-1.18,-.25),(.25,-1.45,-.08)),.023,7,26,.06))
+for q,width in zip(tails,(.142,.128,.148,.116)):
+    add('liquid-chrome',blade(q,width,12,36,.035,.038))
 
-# Large, angled almond lenses sit in front of the shell. Alternate eyelid meshes
-# are separate real geometry used by the online/checking/error/sleep/response states.
+# Eyes are recessed, tapered luminous lenses aligned to the hood's front surface.
+# The alternate eyelids are separate geometry so expressions genuinely change shape.
 for s in (-1,1):
-    tilt=s*.62
-    add('eye-open',almond((s*.315,.17,.755),.194,.232,.078,tilt))
-    add('eye-glint',ellipsoid((s*.315-s*.045,.238,.833),(.021,.034,.012),8,12))
-    add('eye-closed',tube(((s*.48,.17,.78),(s*.42,.115,.80),(s*.32,.115,.81),(s*.25,.17,.78)),.024,8,22,.82,(.65,1.,1.)))
-    add('eye-happy',tube(((s*.49,.10,.78),(s*.43,.30,.81),(s*.32,.30,.82),(s*.245,.10,.78)),.028,8,22,.88,(.65,1.,1.)))
-    q=((- .49,.34,.77),(-.42,.27,.81),(-.32,.16,.82),(-.245,.16,.78)) if s<0 else ((.245,.16,.78),(.32,.16,.82),(.42,.27,.81),(.49,.34,.77))
-    add('eye-angry',tube(q,.033,8,22,.86,(.65,1.,1.)))
+    tilt=s*.38
+    cx=s*.32
+    add('eye-open',almond((cx,.18,.635),.15,.25,.032,tilt,10,32))
+    add('eye-glint',ellipsoid((cx-s*.026,.245,.671),(.012,.022,.006),10,16))
+    add('eye-closed',tube(((s*.51,.18,.666),(s*.43,.105,.676),(s*.31,.105,.676),(s*.24,.18,.666)),.017,8,24,.86,(.55,1.,1.)))
+    add('eye-happy',tube(((s*.51,.08,.666),(s*.43,.305,.676),(s*.30,.305,.676),(s*.235,.08,.666)),.022,8,24,.90,(.55,1.,1.)))
+    q=((- .51,.33,.666),(-.43,.25,.677),(-.32,.16,.681),(-.24,.16,.666)) if s<0 else ((.24,.16,.666),(.32,.16,.681),(.43,.25,.677),(.51,.33,.666))
+    add('eye-angry',tube(q,.026,8,24,.88,(.55,1.,1.)))
 
 MAT={
  'void-shell':{'base':[.004,.005,.008,1.],'metal':.99,'rough':.085,'emit':[.001,.0015,.0025]},
