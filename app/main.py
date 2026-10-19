@@ -2951,6 +2951,13 @@ html body main.app-shell .workspace .client-card{
   -webkit-backdrop-filter:blur(6px) saturate(108%)!important;
  }
 }
+/* Preserve the reference login glass surface on touch devices with a restrained blur. */
+@media(hover:none),(pointer:coarse){
+ html body .login-layout>.card{
+  backdrop-filter:blur(6px) saturate(108%)!important;
+  -webkit-backdrop-filter:blur(6px) saturate(108%)!important;
+ }
+}
 @media(prefers-reduced-motion:reduce){
  html body:before{animation:none!important;transform:none!important}
  #abyssParticleCanvas{display:none!important}
