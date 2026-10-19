@@ -3003,7 +3003,7 @@ function createVoidlingRenderer(host,rotation){
     }
     assetParts=doc.meshes[0].primitives.map(primitive=>({g:meshData(accessor(primitive.attributes.POSITION),accessor(primitive.attributes.NORMAL),accessor(primitive.indices)),name:(doc.materials[primitive.material]||{}).name||(primitive.extras||{}).materialName||''}));
     if(!assetParts.length)throw new Error('Empty Voidling GLB');
-    host.dataset.model='glb-mesh';host.dataset.meshCount=String(assetParts.length);dirty=true;schedule();
+    canvas.dataset.geometry='glb-mesh';host.dataset.model='glb-mesh';host.dataset.meshCount=String(assetParts.length);dirty=true;schedule();
    }).catch(error=>{host.dataset.model='procedural-fallback';host.dataset.modelError=String(error&&error.message||error).slice(0,100);dirty=true;schedule()});
   }
   function sphereData(rows=30,cols=42){const p=[],n=[],idx=[];for(let y=0;y<=rows;y++){const t=y*Math.PI/rows;for(let x=0;x<=cols;x++){const a=x*Math.PI*2/cols,nx=Math.sin(t)*Math.cos(a),ny=Math.cos(t),nz=Math.sin(t)*Math.sin(a);p.push(nx,ny,nz);n.push(nx,ny,nz)}}for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const a=y*(cols+1)+x,b=a+cols+1;idx.push(a,a+1,b,b,a+1,b+1)}return meshData(p,n,idx)}

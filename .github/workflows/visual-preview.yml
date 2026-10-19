@@ -309,6 +309,11 @@ jobs:
                       or sidebar_logo["http"] != 200 or sidebar_logo["bytes"] < 1000
                       or "/brand/abyss-tunnel-logo.jpg" not in sidebar_logo["backgroundImage"]):
                   raise SystemExit("Sidebar is missing the supplied reference orbital logo: " + repr(sidebar_logo))
+              page.wait_for_function("""() => {
+                const w=document.getElementById('voidling-widget'), c=w?.querySelector('canvas.voidling-renderer');
+                return w?.dataset.renderer==='webgl' && w?.dataset.model==='glb-mesh'
+                  && Number(w?.dataset.meshCount)>=7 && c?.dataset.geometry==='glb-mesh' && !c?.dataset.error;
+              }""", timeout=10000)
               voidling_3d = page.evaluate("""() => {
                 const widget=document.getElementById('voidling-widget'), canvas=widget?.querySelector('canvas.voidling-renderer');
                 let gl=null; try { gl=canvas?.getContext('webgl'); } catch (_) {}
@@ -318,10 +323,10 @@ jobs:
               }""")
               print("VOIDLING_WEBGL_MODEL=" + repr(voidling_3d))
               if (not voidling_3d.get("exists") or voidling_3d.get("renderer") != "webgl"
-                      or voidling_3d.get("model") != "procedural-webgl" or not voidling_3d.get("webgl")
-                      or voidling_3d.get("geometry") != "procedural-mesh" or voidling_3d.get("meshCount", 0) < 10
+                      or voidling_3d.get("model") != "glb-mesh" or not voidling_3d.get("webgl")
+                      or voidling_3d.get("geometry") != "glb-mesh" or voidling_3d.get("meshCount", 0) < 7
                       or voidling_3d.get("width", 0) < 20 or voidling_3d.get("height", 0) < 20):
-                  raise SystemExit("Voidling did not render its procedural 3D WebGL mesh: " + repr(voidling_3d))
+                  raise SystemExit("Voidling did not load/render the GLB 3D mesh: " + repr(voidling_3d))
               # Capture the actual WebGL model in every reference state. The sprite strip is
               # hidden when WebGL succeeds, so CSS background-position checks alone are not
               # evidence that the 3D face/body state rendered.
@@ -338,7 +343,7 @@ jobs:
                       canvasWidth:c?.width||0,canvasHeight:c?.height||0,visible:!!r&&r.width>20&&r.height>20,
                       error:c?.dataset.error||null};
                   }""")
-                  if rendered["state"] != state_name or rendered["renderer"] != "webgl" or rendered["model"] != "procedural-webgl" or not rendered["visible"] or rendered["error"]:
+                  if rendered["state"] != state_name or rendered["renderer"] != "webgl" or rendered["model"] != "glb-mesh" or not rendered["visible"] or rendered["error"]:
                       raise SystemExit("Voidling visual state failed on the real WebGL renderer: " + repr(rendered))
                   screenshot_path = out / ("voidling-state-" + state_name + ".png")
                   state_preview.screenshot(path=str(screenshot_path), animations="disabled")
