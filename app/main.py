@@ -2949,7 +2949,11 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 @media(max-width:600px){#voidling-widget{right:12px;left:auto;top:max(137px,calc(env(safe-area-inset-top) + 125px));bottom:auto;width:40px;height:44px;transform:none;transform-origin:top right}#voidling-widget:hover{transform:translateY(-2px)}#voidling-status-popover{top:max(64px,calc(env(safe-area-inset-top) + 52px))!important;bottom:auto!important;left:12px!important;right:12px!important;width:auto;max-width:none!important}}
 @media(min-width:601px) and (max-width:1100px){#voidling-widget{width:38px!important;height:44px!important;right:10px!important;left:auto!important;top:auto!important;bottom:10px!important}}
 @media(prefers-reduced-motion:reduce){.voidling-art,.voidling-orbit{animation:none!important}#voidling-widget{transition:none}}
-</style>"""
+</style>""
+<style id="voidling-responsive-final">
+@media (min-width:601px) and (max-width:1100px){#voidling-widget{width:38px!important;height:44px!important;right:10px!important;left:auto!important;top:auto!important;bottom:10px!important}}
+@media (max-width:600px){#voidling-widget{width:40px!important;height:44px!important}}
+</style>"
 ABYSS_VOIDLING_JS = r"""<script id="voidling-interactive-space-script">
 (()=>{if(document.getElementById('void-space-canvas'))return;
 const canvas=document.createElement('canvas');canvas.id='void-space-canvas';canvas.setAttribute('aria-hidden','true');document.body.appendChild(canvas);
@@ -2978,7 +2982,7 @@ function createVoidlingRenderer(host,rotation){
   ].join('\n');
   const fragmentSource=[
    'precision mediump float;','uniform vec3 uColor;','uniform vec3 uRim;','uniform vec3 uEmissive;','uniform float uAlpha;','uniform float uShine;','varying vec3 vNormal;','varying vec3 vWorld;',
-   'void main(){vec3 n=normalize(vNormal);vec3 l=normalize(vec3(-0.42,0.62,1.0));vec3 l2=normalize(vec3(0.72,0.18,0.55));vec3 l3=normalize(vec3(-0.82,-0.16,0.72));vec3 v=normalize(vec3(0.0,0.0,4.65)-vWorld);float d=max(dot(n,l),0.0);float d2=max(dot(n,l2),0.0);float s=pow(max(dot(reflect(-l,n),v),0.0),78.0)*uShine;float s2=pow(max(dot(reflect(-l2,n),v),0.0),31.0)*uShine*0.34;float s3=pow(max(dot(reflect(-l3,n),v),0.0),112.0)*uShine*0.58;float soft=pow(max(dot(reflect(-l,n),v),0.0),7.0)*uShine*0.075;float rim=pow(1.0-max(dot(n,v),0.0),1.65);vec3 c=uColor*(0.075+0.25*d+0.095*d2)+vec3(0.83,0.88,1.0)*(s*0.85+s2*0.40+s3*0.70)+vec3(0.27,0.32,0.44)*soft+uRim*rim*0.88+uEmissive;gl_FragColor=vec4(c,uAlpha);}'
+   'void main(){vec3 n=normalize(vNormal);vec3 l=normalize(vec3(-0.42,0.62,1.0));vec3 l2=normalize(vec3(0.72,0.18,0.55));vec3 l3=normalize(vec3(-0.82,-0.16,0.72));vec3 l4=normalize(vec3(0.14,0.94,0.28));vec3 v=normalize(vec3(0.0,0.0,4.65)-vWorld);float d=max(dot(n,l),0.0);float d2=max(dot(n,l2),0.0);float s=pow(max(dot(reflect(-l,n),v),0.0),78.0)*uShine;float s2=pow(max(dot(reflect(-l2,n),v),0.0),31.0)*uShine*0.34;float s3=pow(max(dot(reflect(-l3,n),v),0.0),112.0)*uShine*0.58;float s4=pow(max(dot(reflect(-l4,n),v),0.0),46.0)*uShine*0.48;float soft=pow(max(dot(reflect(-l,n),v),0.0),7.0)*uShine*0.23;float rim=pow(1.0-max(dot(n,v),0.0),1.65);vec3 c=uColor*(0.045+0.20*d+0.075*d2)+vec3(0.87,0.90,0.98)*(s*0.85+s2*0.40+s3*0.70+s4)+vec3(0.36,0.38,0.44)*soft+uRim*rim*0.86+uEmissive;gl_FragColor=vec4(c,uAlpha);}'
   ].join('\n');
   function compile(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const error=gl.getShaderInfoLog(s)||'shader compile failed';gl.deleteShader(s);throw new Error(error)}return s}
   const vs=compile(gl.VERTEX_SHADER,vertexSource),fs=compile(gl.FRAGMENT_SHADER,fragmentSource);program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program)||'program link failed');
@@ -3052,11 +3056,11 @@ function createVoidlingRenderer(host,rotation){
   function frame(now){rafId=0;if(disposed||document.visibilityState==='hidden')return;if(reduceMotion&&!dirty&&!particles.length)return;if(!reduceMotion&&now-lastFrame<33){schedule();return}lastFrame=now;dirty=false;gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(program);
    const w=canvas.width||1,h=canvas.height||1,proj=projection(w/h),view=trans(0,0,-4.65),vp=mul(proj,view),state=host.dataset.state||'online',t=reduceMotion?0:now*.001,pose=rotation(),bob=reduceMotion?0:Math.sin(t*1.9)*.035;
    const faultMotion=state==='error'&&!reduceMotion?Math.sin(t*18)*.035:0;const root=mul(trans(state==='error'&&!reduceMotion?Math.sin(t*15)*.025:0,bob,0),mul(ry(pose.yaw+(reduceMotion?0:Math.sin(t*.68)*.045)+faultMotion),mul(rx(pose.pitch+(reduceMotion?0:Math.sin(t*.54)*.022)+(state==='error'&&!reduceMotion?-.07:state==='checking'&&!reduceMotion?Math.sin(t*2.4)*.045:0)),scaleM(.92,.92,.92))));
-   let rim=[.24,.31,.52],glow=[.025,.04,.085],eye=[.78,.84,1],eyeGlow=[.42,.52,.9];
-   if(state==='checking'){rim=[.40,.28,.92];glow=[.11,.045,.30];eye=[.83,.80,1];eyeGlow=[.48,.37,1]}
-   if(state==='error'){rim=[.72,.10,.14];glow=[.075,.004,.012];eye=[1,.24,.28];eyeGlow=[1,.055,.075]}
-   if(state==='sleep'){rim=[.13,.16,.25];glow=[.012,.018,.04];eye=[.38,.44,.60];eyeGlow=[.16,.20,.34]}
-   if(state==='reacting'){rim=[.48,.58,.98];glow=[.05,.09,.20];eye=[.9,.94,1];eyeGlow=[.70,.78,1]}
+   let rim=[.43,.46,.54],glow=[.002,.003,.006],eye=[.92,.94,1],eyeGlow=[.60,.64,.78];
+   if(state==='checking'){rim=[.52,.48,.70];glow=[.010,.006,.023];eye=[.91,.91,1];eyeGlow=[.58,.54,.82]}
+   if(state==='error'){rim=[.70,.18,.22];glow=[.006,.001,.0015];eye=[1,.24,.28];eyeGlow=[1,.055,.075]}
+   if(state==='sleep'){rim=[.22,.24,.29];glow=[.001,.0015,.003];eye=[.40,.43,.51];eyeGlow=[.16,.18,.24]}
+   if(state==='reacting'){rim=[.55,.61,.78];glow=[.008,.012,.026];eye=[.94,.96,1];eyeGlow=[.70,.76,.90]}
    if(assetParts){
     assetParts.forEach(part=>{
      const n=part.name;
@@ -3066,8 +3070,8 @@ function createVoidlingRenderer(host,rotation){
      if(n==='eye-happy'&&state!=='checking'&&state!=='reacting')return;
      if(n==='eye-angry'&&state!=='error')return;
      let c=[.055,.065,.09],hr=[.48,.53,.63],em=glow,shine=1.1,alpha=.98;
-     if(n==='void-shell'){c=state==='sleep'?[.030,.034,.046]:[.014,.019,.030];hr=rim;em=glow;shine=1.55}
-     else if(n==='liquid-chrome'){c=[.040,.050,.077];hr=[.68,.74,.88];em=state==='error'?[.025,.002,.005]:glow;shine=1.85}
+     if(n==='void-shell'){c=state==='sleep'?[.018,.020,.026]:[.006,.008,.012];hr=rim;em=glow;shine=1.85}
+     else if(n==='liquid-chrome'){c=[.050,.058,.073];hr=[.75,.78,.87];em=state==='error'?[.012,.001,.002]:glow;shine=2.25}
      else if(n==='eye-open'||n==='eye-happy'||n==='eye-closed'||n==='eye-angry'){
       c=eye;hr=rim;em=eyeGlow;shine=.88;alpha=1;
      }else if(n==='eye-glint'){c=[1,1,1];hr=[1,1,1];em=[.9,.94,1];shine=.25;alpha=.98}
