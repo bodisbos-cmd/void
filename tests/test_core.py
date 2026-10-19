@@ -83,6 +83,7 @@ class CoreTests(unittest.TestCase):
             mod.valid_name("x" * 65)
 
     def test_voidling_glb_mesh_and_endpoint(self):
+        import asyncio
         import json
         import struct
         data = mod.get_voidling_glb()
