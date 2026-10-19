@@ -340,7 +340,7 @@ jobs:
               state_preview.evaluate("(e) => { e.style.width='180px'; e.style.height='200px'; e.style.right='24px'; e.style.bottom='24px'; }")
               state_screenshots = []
               for state_name in ("online", "checking", "error", "sleep", "reacting"):
-                  state_preview.evaluate("(e, state) => { e.dataset.state=state; e.classList.toggle('is-reacting', state==='reacting'); }", state_name)
+                  state_preview.evaluate("(e, state) => { e.dataset.testRenderState=state; e.dataset.state=state; e.classList.toggle('is-reacting', state==='reacting'); }", state_name)
                   page.wait_for_timeout(140)
                   rendered = page.evaluate("""() => {
                     const w=document.getElementById('voidling-widget'), c=w?.querySelector('canvas.voidling-renderer');
@@ -358,7 +358,7 @@ jobs:
                   state_screenshots.append({"state":state_name,"screenshot":screenshot_path.name,"bytes":screenshot_path.stat().st_size})
               print("VOIDLING_3D_STATE_SCREENSHOTS=" + repr(state_screenshots))
               # Capture actual model geometry from three angles, not merely one front-facing sprite.
-              state_preview.evaluate("(e) => { e.dataset.state='online'; e.classList.remove('is-reacting'); }")
+              state_preview.evaluate("(e) => { delete e.dataset.testRenderState; e.dataset.state='online'; e.classList.remove('is-reacting'); }")
               page.wait_for_timeout(160)
               state_preview.screenshot(path=str(out / "voidling-view-front.png"), animations="disabled")
               page.locator("#voidling-widget").click()

@@ -3101,7 +3101,7 @@ function createVoidlingRenderer(host,rotation){
 const voidlingRenderer=createVoidlingRenderer(widget,()=>({yaw:modelYaw,pitch:modelPitch}));
 let labelTimer=0;
 const stateLabels={online:'پنل آنلاین',checking:'در حال بررسی',error:'نیازمند بررسی',sleep:'در حال استراحت',reacting:'واکنش به تعامل'};
-function updateVisualState(){const state=panelState==='error'?'error':panelState==='checking'?'checking':reactionUntil>performance.now()?'reacting':sleeping?'sleep':'online';widget.dataset.state=state;const l=document.getElementById('voidling-label');if(l)l.textContent=stateLabels[state];if(voidlingRenderer)voidlingRenderer.refresh()}
+function updateVisualState(){const state=widget.dataset.testRenderState||(panelState==='error'?'error':panelState==='checking'?'checking':reactionUntil>performance.now()?'reacting':sleeping?'sleep':'online');widget.dataset.state=state;const l=document.getElementById('voidling-label');if(l)l.textContent=stateLabels[state];if(voidlingRenderer)voidlingRenderer.refresh()}
 function setState(state,label){if(state==='error'||state==='checking'||state==='online'){panelState=state;sleeping=false;if(state!=='online')reactionUntil=0}else if(state==='sleep'&&panelState==='online'){sleeping=true}else if(state==='reacting'&&panelState==='online'&&!sleeping){reactionUntil=performance.now()+680}updateVisualState()}
 function readStatus(){
  const statusEl=document.getElementById('status'),area=document.getElementById('dashboardComponentStatus'),services=area?[...area.querySelectorAll('.dashboard-component')]:[];
