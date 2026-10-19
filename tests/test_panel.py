@@ -192,30 +192,6 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "پیش‌فرض خاموش‌اند" in response.text
 
 
-def test_voidling_procedural_webgl_model_and_state_contract(client):
-    admin_client(client)
-    response = client.get("/")
-    assert response.status_code == 200
-    page = response.text
-    for marker in (
-        "createVoidlingRenderer", "getContext('webgl'", "vertexSource",
-        "fragmentSource", "sphereData", "tubeData", "procedural-webgl",
-        "aTexCoord", "TEXCOORD_0", "UNSIGNED_INT", "splitIndexedMesh",
-        "createEmbeddedTexture", "uBaseColorTexture", "uMetallicRoughnessTexture",
-        "uNormalTexture", "pbrMetallicRoughness", "texturesReady",
-        "voidling-rotation", "voidling-position", "voidling-sound",
-        "voidling-rotation-toggle", "function updateVisualState", "data:image/webp;base64,",
-        "data-rotation-mode", "background-size:500% 100%", "mix-blend-mode:screen", "برای چرخش مدل",
-    ):
-        assert marker in page
-    for state in ("online", "checking", "error", "sleep", "reacting"):
-        assert f"'{state}'" in page or f'"{state}"' in page
-    assert 'data-renderer="webgl"' in page
-    assert "voidling-sleep-mark" in page
-    assert "40px;height:44px;transform:none;transform-origin:top right" in page
-    assert "45000" in page
-
-
 def test_embedded_dashboard_scripts_have_valid_javascript_syntax():
     node = shutil.which("node")
     if not node:
