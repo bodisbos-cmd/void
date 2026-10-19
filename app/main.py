@@ -3018,7 +3018,7 @@ function createVoidlingRenderer(host,rotation){
    shellRibbons.forEach((g,i)=>draw(g,root,vp,[0,0,0],[1,1,1],[.026,.030,.045],i%2===0?[.43,.49,.64]:[.29,.35,.49],state==='error'?[.055,.006,.012]:state==='checking'?[.035,.025,.095]:[.018,.023,.040],1.15,.96,[Math.sin(t*.72+i*.6)*.025,Math.sin(t*.48+i)*.035,Math.sin(t*.63+i*.8)*.045]));
    if(state==='sleep'){closedEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.58,.98))}
    else if(state==='checking'||state==='reacting'){happyEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.64,.98))}
-   else{[-1,1].forEach(side=>{const x=side*.29,rot=[0,0,side*.10];draw(sphere,root,vp,[x,.22,.64],[.205,.285,.075],eyeGlow,rim,eyeGlow,.25,.30,rot);draw(sphere,root,vp,[x,.22,.685],[.133,.205,.078],eye,rim,eyeGlow,.92,1,rot);draw(sphere,root,vp,[x-side*.035,.28,.746],[.026,.052,.018],[1,1,1],[1,1,1],[.82,.86,1],.2,.9,rot)})}
+   else{[-1,1].forEach(side=>{const x=side*.305,rot=[0,0,side*.10];draw(sphere,root,vp,[x,.22,.64],[.225,.30,.075],eyeGlow,rim,eyeGlow,.28,.32,rot);draw(sphere,root,vp,[x,.22,.685],[.155,.22,.078],eye,rim,eyeGlow,1.02,1,rot);draw(sphere,root,vp,[x-side*.038,.28,.746],[.028,.055,.018],[1,1,1],[1,1,1],[.88,.91,1],.22,.94,rot)})}
    const alive=[];particles.forEach(p=>{const age=(now-p.start)/p.life;if(age>=1)return;alive.push(p);const r=.52+age*.72,x=Math.cos(p.a)*r,y=Math.sin(p.a)*r*.75+p.b*.24,z=.2+Math.sin(p.a*1.7)*.26+age*.18,fade=1-age,size=.024*fade+.004;draw(sphere,root,vp,[x,y,z],[size,size,size],[.70,.78,1],[.72,.82,1],[.58,.68,1],.2,fade*.95)});particles=alive;
    if(!reduceMotion||particles.length)schedule()
   }
