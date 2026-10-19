@@ -740,7 +740,9 @@ function drawUsageSparkline(history,period,totalSamples){
  const c=document.getElementById('usageSparkline');if(!c)return;
  const points=Array.isArray(history)?history:[];
  const w=Math.max(260,Math.floor(c.clientWidth||600)),h=Math.max(108,Math.floor(c.clientHeight||144)),dpr=Math.min(devicePixelRatio||1,1.25);
- c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);
+ const pixelWidth=Math.round(w*dpr),pixelHeight=Math.round(h*dpr);
+ if(c.width!==pixelWidth)c.width=pixelWidth;
+ if(c.height!==pixelHeight)c.height=pixelHeight;
  const ctx=c.getContext('2d');if(!ctx)return;
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
  const root=getComputedStyle(document.documentElement);
