@@ -2897,6 +2897,8 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 #voidling-widget[data-rotation-mode="on"]{cursor:crosshair}
 .voidling-renderer{position:absolute;left:-4%;top:-4%;width:108%;height:108%;z-index:3;display:block;pointer-events:none;background:transparent;opacity:.18;transition:opacity .18s ease}
 #voidling-widget[data-rotation-mode="on"] .voidling-renderer{opacity:1}
+#voidling-widget[data-state="error"] .voidling-renderer{opacity:.72}
+#voidling-widget[data-state="error"] .voidling-orbit{border-color:rgba(255,75,88,.48);box-shadow:0 0 10px rgba(255,55,70,.12);animation-duration:3.2s}
 .voidling-art{position:absolute;inset:-2%;z-index:1;display:block;background-position:0% 50%;background-repeat:no-repeat;background-size:500% 100%;mix-blend-mode:screen;pointer-events:none;transform-origin:50% 52%;-webkit-mask-image:radial-gradient(ellipse 57% 68% at 50% 48%,#000 52%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.34) 84%,transparent 100%);mask-image:radial-gradient(ellipse 57% 68% at 50% 48%,#000 52%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.34) 84%,transparent 100%);filter:brightness(1.22) contrast(1.14) saturate(.72) drop-shadow(0 5px 10px rgba(0,0,0,.58));animation:voidling-float 3.6s ease-in-out infinite,voidling-breath 4.8s ease-in-out infinite;transition:filter .28s ease,transform .28s ease}
 #voidling-widget[data-renderer="webgl"] .voidling-art{opacity:.92;visibility:visible;z-index:1}
 #voidling-widget[data-rotation-mode="on"] .voidling-art{opacity:0;visibility:hidden}
