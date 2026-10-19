@@ -109,7 +109,7 @@ def blade(q, width, sides=8, steps=28, tip=.035, thickness=.024, axis=(0.,0.,1.)
 # sweep, broad cheek flares, and a few layered liquid-metal tails.
 add('void-shell',ellipsoid((-.015,.25,0),(.86,.755,.655),40,64,True))
 # Fuller, softly tapered torso: the reference reads as one small pear-like body, not two stacked beads.
-add('void-shell',ellipsoid((0,-.49,.012),(.275,.305,.222),28,40,True))
+add('void-shell',ellipsoid((0,-.49,.012),(.285,.305,.222),28,40,True))
 
 # A tucked, low-gloss connection rather than a bundle of thin wires.
 add('liquid-chrome',tube(((-.15,-.37,-.08),(-.29,-.49,-.16),(-.30,-.61,-.19),(-.20,-.70,-.12)),.024,8,22,.12))
@@ -118,7 +118,7 @@ add('liquid-chrome',tube(((.15,-.37,-.08),(.29,-.49,-.16),(.30,-.61,-.19),(.20,-
 # Broad cowl/crown blade. It rises from behind the hood and curls back toward
 # the face; the large ribbon silhouette is intentional, not a horn made from a tube.
 # Wider swept crown ribbon: attached at the upper-left shell, arcing over the head, and curling down the far side.
-add('liquid-chrome',blade(((-.54,.43,.54),(-.80,1.16,.30),(.12,1.72,.00),(.64,.88,.14)),.230,16,48,.035,.052))
+add('liquid-chrome',blade(((-.40,.45,.52),(-.65,1.10,.32),(.18,1.70,.015),(.64,.88,.14)),.115,16,48,.028,.035))
 # Outer cheek fins flare from the hood and taper into soft tips.
 # Shell-hugging cheek fins: keep them below the crown so they read as swept chrome edges, not round ears.
 add('liquid-chrome',blade(((-.61,.15,.49),(-1.03,.34,.42),(-1.05,.70,.20),(-.75,.78,.20)),.112,12,38,.035,.035))
@@ -126,7 +126,7 @@ add('liquid-chrome',blade(((.57,.15,.46),(.95,.36,.38),(.91,.63,.20),(.70,.72,.1
 # Smaller inner curls create a layered, hooked silhouette close to the shell.
 add('liquid-chrome',blade(((-.59,.00,.50),(-.91,.24,.44),(-.78,.50,.34),(-.50,.48,.42)),.078,10,32,.035,.029))
 # The signature cheek cowl sweeps across the near side of the face and hugs the shell instead of forming a separate ear.
-add('liquid-chrome',blade(((-.78,.20,.32),(-1.00,.32,.40),(-.79,-.08,.56),(-.48,-.02,.61)),.145,14,42,.025,.038))
+add('liquid-chrome',blade(((-.78,.20,.32),(-1.00,.32,.40),(-.79,-.08,.56),(-.48,-.02,.61)),.120,14,42,.025,.032))
 # Rear planes remain offset in depth so the model still reads cleanly from side and back views.
 add('liquid-chrome',blade(((-.47,.18,-.34),(-.87,.42,-.38),(-.73,.82,-.30),(-.32,.93,-.18)),.155,10,34,.035,.036))
 add('liquid-chrome',blade(((.47,.18,-.34),(.84,.40,-.38),(.69,.77,-.30),(.32,.90,-.18)),.142,10,34,.035,.034))
@@ -134,16 +134,16 @@ add('liquid-chrome',blade(((.47,.18,-.34),(.84,.40,-.38),(.69,.77,-.30),(.32,.90
 # One low curved band wraps the torso, then four broad ribbons form an orderly tail silhouette.
 add('liquid-chrome',blade(((-.18,-.35,.22),(-.55,-.25,.23),(-.62,-.49,.12),(-.31,-.64,.09)),.082,10,30,.06,.028))
 # A slender shoulder-level sweep passes behind the torso and emerges on both sides like the reference's liquid orbit.
-add('liquid-chrome',blade(((-.62,-.22,.07),(-1.02,-.02,.10),(.91,-.17,-.12),(.69,-.43,-.06)),.058,10,44,.025,.022))
+add('liquid-chrome',blade(((-.62,-.22,.07),(-1.02,-.02,.10),(.91,-.17,-.12),(.69,-.43,-.06)),.040,10,44,.025,.018))
 
 # Four distinct, wider S-curved ribbons that taper into flowing tips instead of thin straight tendrils.
 tails=[
- ((-.15,-.56,.20),(-.58,-.79,.34),(-.18,-1.11,.23),(-.78,-1.43,-.015)),
- ((-.04,-.62,.25),(-.34,-.89,.39),(.02,-1.14,.21),(-.25,-1.52,.015)),
- ((.10,-.61,.22),(.46,-.82,.34),(.08,-1.12,.18),(.56,-1.40,-.02)),
- ((.23,-.55,.14),(.72,-.69,.24),(.34,-1.00,.08),(.95,-1.34,-.06)),
+ ((-.12,-.56,.20),(-.40,-.79,.34),(-.16,-1.10,.23),(-.60,-1.40,-.015)),
+ ((-.035,-.62,.25),(-.24,-.88,.39),(.015,-1.13,.21),(-.14,-1.49,.015)),
+ ((.085,-.61,.22),(.33,-.82,.34),(.08,-1.11,.18),(.39,-1.38,-.02)),
+ ((.18,-.55,.14),(.51,-.69,.24),(.25,-.99,.08),(.68,-1.29,-.06)),
 ]
-for q,width in zip(tails,(.170,.152,.171,.142)):
+for q,width in zip(tails,(.145,.128,.146,.122)):
     add('liquid-chrome',blade(q,width,12,36,.035,.038))
 
 # Eyes are recessed, tapered luminous lenses aligned to the hood's front surface.
