@@ -703,7 +703,8 @@ jobs:
                 }
                 return {missing:false,rect:{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height},
                   stats:stats?{top:stats.top,bottom:stats.bottom}:null,backgroundIsEmbeddedWebp:source.startsWith('data:image/webp;base64,'),
-                  image,position: getComputedStyle(widget).position};
+                  image,position:getComputedStyle(widget).position,top:getComputedStyle(widget).top,bottom:getComputedStyle(widget).bottom,
+                  inlineStyle:widget.getAttribute('style'),storedPosition:(()=>{try{return JSON.parse(localStorage.getItem('voidling-position')||'null')}catch(_){return null}})()};
               }""")
               print("VOIDLING_MOBILE_LAYOUT=" + repr(voidling_layout))
               if voidling_layout.get("missing") or not voidling_layout["backgroundIsEmbeddedWebp"] or not voidling_layout["image"]["loaded"] or voidling_layout["image"]["width"] < 80:
