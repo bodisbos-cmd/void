@@ -2898,11 +2898,11 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 .voidling-renderer{position:absolute;left:-4%;top:-4%;width:108%;height:108%;z-index:3;display:block;pointer-events:none;background:transparent;opacity:1;transition:opacity .18s ease;filter:drop-shadow(0 8px 12px rgba(0,0,0,.32))}
 #voidling-widget[data-rotation-mode="on"] .voidling-renderer{opacity:1}
 #voidling-widget[data-state="error"] .voidling-renderer{opacity:1;filter:drop-shadow(0 0 8px rgba(255,55,70,.3))}
-#voidling-widget[data-state="error"] .voidling-orbit{border-color:rgba(255,75,88,.48);box-shadow:0 0 10px rgba(255,55,70,.12);animation-duration:3.2s}
+
 .voidling-art{position:absolute;inset:-2%;z-index:1;display:block;background-position:0% 50%;background-repeat:no-repeat;background-size:500% 100%;mix-blend-mode:screen;pointer-events:none;transform-origin:50% 52%;-webkit-mask-image:radial-gradient(ellipse 57% 68% at 50% 48%,#000 52%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.34) 84%,transparent 100%);mask-image:radial-gradient(ellipse 57% 68% at 50% 48%,#000 52%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.34) 84%,transparent 100%);filter:brightness(1.22) contrast(1.14) saturate(.72) drop-shadow(0 5px 10px rgba(0,0,0,.58));animation:voidling-float 3.6s ease-in-out infinite,voidling-breath 4.8s ease-in-out infinite;transition:filter .28s ease,transform .28s ease}
 #voidling-widget[data-renderer="webgl"] .voidling-art{opacity:0!important;visibility:hidden!important;z-index:1;filter:none!important}
 #voidling-widget[data-rotation-mode="on"] .voidling-art{opacity:0!important;visibility:hidden!important;filter:none!important}
-.voidling-orbit{position:absolute;pointer-events:none;z-index:2;left:-12%;top:67%;width:124%;height:23%;border:1px solid rgba(205,215,255,.24);border-radius:50%;transform:rotate(-8deg);opacity:.34;animation:voidling-orbit 12s linear infinite}
+.voidling-orbit{display:none!important}
 .voidling-orbit:after{content:"";position:absolute;inset:14% -8%;border:1px solid rgba(218,224,244,.12);border-radius:50%;transform:rotate(12deg);box-shadow:0 0 8px rgba(210,220,245,.035)}
 #voidling-widget[data-state="online"] .voidling-art{background-position:0% 50%}
 #voidling-widget[data-state="checking"] .voidling-art{background-position:25% 50%;animation:voidling-float 1.2s ease-in-out infinite;filter:drop-shadow(0 0 9px rgba(215,225,255,.35))}
@@ -3010,16 +3010,16 @@ function createVoidlingRenderer(host,rotation){
    const faultMotion=state==='error'&&!reduceMotion?Math.sin(t*18)*.035:0;const root=mul(trans(state==='error'&&!reduceMotion?Math.sin(t*15)*.025:0,bob,0),mul(ry(pose.yaw+(reduceMotion?0:Math.sin(t*.68)*.045)+faultMotion),mul(rx(pose.pitch+(reduceMotion?0:Math.sin(t*.54)*.022)+(state==='error'&&!reduceMotion?-.07:state==='checking'&&!reduceMotion?Math.sin(t*2.4)*.045:0)),scaleM(.86,.86,.86))));
    let rim=[.24,.31,.52],glow=[.025,.04,.085],eye=[.78,.84,1],eyeGlow=[.42,.52,.9];
    if(state==='checking'){rim=[.40,.28,.92];glow=[.11,.045,.30];eye=[.83,.80,1];eyeGlow=[.48,.37,1]}
-   if(state==='error'){rim=[.95,.055,.09];glow=[.32,.006,.018];eye=[1,.20,.24];eyeGlow=[1,.035,.06]}
+   if(state==='error'){rim=[.72,.10,.14];glow=[.075,.004,.012];eye=[1,.24,.28];eyeGlow=[1,.055,.075]}
    if(state==='sleep'){rim=[.13,.16,.25];glow=[.012,.018,.04];eye=[.38,.44,.60];eyeGlow=[.16,.20,.34]}
    if(state==='reacting'){rim=[.48,.58,.98];glow=[.05,.09,.20];eye=[.9,.94,1];eyeGlow=[.70,.78,1]}
-   const body=[.026,.030,.044],highlight=[.20,.24,.34];
+   const body=[.095,.108,.135],highlight=[.48,.53,.63];
    draw(sphere,root,vp,[0,-.50,.01],[.35,.43,.30],body,rim,glow,.82,1);
    draw(sphere,root,vp,[0,.24,0],[.79,.73,.67*(1+(reduceMotion?0:Math.sin(t*1.9)*.012))],body,rim,glow,1.12,1);
    draw(sphere,root,vp,[0,-.30,.08],[.23,.20,.25],body,rim,glow,.70,.96);
    tubes.slice(0,4).forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],body,highlight,glow,.68,.92));
    tails.forEach((_,i)=>draw(tubes[4+i],root,vp,[0,0,0],[1,1,1],[.018,.021,.034],rim,glow,.96,.98,[Math.sin(t*1.3+i*.8)*.055,0,Math.sin(t*1.1+i)*.045]));
-   shellRibbons.forEach((g,i)=>draw(g,root,vp,[0,0,0],[1,1,1],[.026,.030,.045],i%2===0?[.43,.49,.64]:[.29,.35,.49],state==='error'?[.055,.006,.012]:state==='checking'?[.035,.025,.095]:[.018,.023,.040],1.15,.96,[Math.sin(t*.72+i*.6)*.025,Math.sin(t*.48+i)*.035,Math.sin(t*.63+i*.8)*.045]));
+   shellRibbons.forEach((g,i)=>draw(g,root,vp,[0,0,0],[1,1,1],i%2===0?[.075,.085,.11]:[.045,.052,.075],i%2===0?[.62,.68,.78]:[.39,.45,.57],state==='error'?[.025,.002,.005]:state==='checking'?[.025,.018,.065]:[.025,.031,.048],1.35,.98,[Math.sin(t*.72+i*.6)*.025,Math.sin(t*.48+i)*.035,Math.sin(t*.63+i*.8)*.045]));
    if(state==='sleep'){closedEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.58,.98))}
    else if(state==='error'){angryEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.82,1))}
    else if(state==='checking'||state==='reacting'){happyEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.64,.98))}
