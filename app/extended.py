@@ -301,12 +301,17 @@ def install_extended(app, namespace):
             raise HTTPException(422,"Unsupported metrics history period")
         current=_metrics(p)
         now=int(time.time())
+        # In the isolated visual-preview environment, retain the seeded chart fixtures.
+        # Recording live cumulative traffic there would append a single large point and
+        # distort the reference-shaped chart during the long browser screenshot run.
+        record_history=os.getenv("ABYSS_TEST_MODE")!="1"
         with p.db() as c:
-            latest=c.execute("SELECT sampled_at FROM metrics_history ORDER BY sampled_at DESC LIMIT 1").fetchone()
-            if latest is None or now-int(latest["sampled_at"])>=60:
-                c.execute(
-                    "INSERT OR REPLACE INTO metrics_history(sampled_at,recorded_traffic_bytes,cpu_percent,memory_used_percent) VALUES(?,?,?,?)",
-                    (now,int(current.get("recorded_traffic_bytes") or 0),current.get("cpu_percent"),current.get("memory_used_percent")))
+            if record_history:
+                latest=c.execute("SELECT sampled_at FROM metrics_history ORDER BY sampled_at DESC LIMIT 1").fetchone()
+                if latest is None or now-int(latest["sampled_at"])>=60:
+                    c.execute(
+                        "INSERT OR REPLACE INTO metrics_history(sampled_at,recorded_traffic_bytes,cpu_percent,memory_used_percent) VALUES(?,?,?,?)",
+                        (now,int(current.get("recorded_traffic_bytes") or 0),current.get("cpu_percent"),current.get("memory_used_percent")))
             c.execute("DELETE FROM metrics_history WHERE sampled_at < ?",(now-2592000,))
             rows=[dict(x) for x in c.execute(
                 "SELECT sampled_at,recorded_traffic_bytes FROM metrics_history WHERE sampled_at>=? ORDER BY sampled_at",
