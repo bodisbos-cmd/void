@@ -506,7 +506,18 @@ jobs:
               mobile.locator('input[name="password"]').fill("admin")
               mobile.locator("form button").last.click()
               mobile.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
-              mobile.wait_for_timeout(500)
+              mobile.wait_for_function("""async () => {
+                const canvas=document.getElementById('usageSparkline');
+                if(!canvas)return false;
+                const response=await fetch('/api/system/metrics?period=24h',{cache:'no-store'});
+                if(!response.ok)return false;
+                const data=await response.json();
+                const label=canvas.getAttribute('aria-label')||'';
+                const count=Number(label.match(/;\\s*(\\d+)$/)?.[1]||0);
+                return Array.isArray(data.traffic_history)&&data.traffic_history.length>=2
+                  &&label.includes('(24h);')&&count===data.traffic_history.length;
+              }""", timeout=15000)
+              mobile.wait_for_timeout(100)
               mobile_overflow = mobile.evaluate("() => ({viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,headerHeight:document.querySelector('.workspace>.top')?.getBoundingClientRect().height})")
               print("MOBILE_OVERFLOW=" + repr(mobile_overflow))
               if max(mobile_overflow["documentWidth"],mobile_overflow["bodyWidth"]) > mobile_overflow["viewport"] + 1:
