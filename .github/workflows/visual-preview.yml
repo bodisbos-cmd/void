@@ -190,6 +190,28 @@ jobs:
                   print("ACTIVE_SECTION_" + name.upper() + "=" + repr(actual))
                   if not actual or any(section != name for section in actual):
                       raise SystemExit("Navigation showed inactive sections for " + name + ": " + repr(actual))
+              # Capture the live Voidling responsive cascade before navigation tests can abort the run.
+              page.set_viewport_size({"width":1024,"height":768})
+              page.wait_for_timeout(120)
+              early_voidling_css = page.evaluate("""() => {
+                const w=document.getElementById('voidling-widget'),s=document.getElementById('voidling-interactive-space');
+                if(!w)return {missing:true};
+                const c=getComputedStyle(w),rules=[];
+                const walk=(list,media='all')=>{for(const r of list){
+                  if(r.selectorText&&r.selectorText.includes('#voidling-widget'))rules.push({media,selector:r.selectorText,width:r.style.getPropertyValue('width'),height:r.style.getPropertyValue('height'),widthPriority:r.style.getPropertyPriority('width'),heightPriority:r.style.getPropertyPriority('height')});
+                  if(r.cssRules&&r.cssRules.length)walk(r.cssRules,r.conditionText||media);
+                }};
+                let sheetError=null,sheetRuleCount=-1;
+                try{if(s&&s.sheet){sheetRuleCount=s.sheet.cssRules.length;walk(s.sheet.cssRules)}}catch(e){sheetError=String(e)}
+                return {viewport:innerWidth,rect:(()=>{const r=w.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}})(),
+                  computed:{width:c.width,height:c.height,position:c.position,right:c.right,bottom:c.bottom},
+                  inlineStyle:w.getAttribute('style'),mediaMatches:matchMedia('(min-width:601px) and (max-width:1100px)').matches,
+                  styleTag:s?{tag:s.tagName,hasSheet:!!s.sheet,textLength:s.textContent.length,hasTabletRule:s.textContent.includes('@media(min-width:601px) and (max-width:1100px)')}:null,
+                  sheetRuleCount,sheetError,rules};
+              }""")
+              print("VOIDLING_EARLY_TABLET_CSS=" + repr(early_voidling_css))
+              page.set_viewport_size({"width":1440,"height":1000})
+              page.wait_for_timeout(120)
               assert_active_section("dashboard")
               dashboard_layout = page.evaluate("""() => {
                 const rect = id => { const e = document.getElementById(id); const r = e.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; };
