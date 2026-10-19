@@ -142,7 +142,7 @@ jobs:
               page.locator('input[name="username"]').fill("admin")
               page.locator('input[name="password"]').fill("admin")
               page.locator("form button").last.click()
-              page.wait_for_url(lambda url: "/login" not in url, timeout=15000)
+              page.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
               # The dashboard finishes its status/metrics requests asynchronously; wait for health data, then allow another real telemetry sample for the graph.
               page.wait_for_function("""() => {
                 const e=document.getElementById('dashboardComponentStatus');
@@ -718,7 +718,7 @@ jobs:
               mobile.locator('input[name="username"]').fill("admin")
               mobile.locator('input[name="password"]').fill("admin")
               mobile.locator("form button").last.click()
-              mobile.wait_for_url(lambda url: "/login" not in url, timeout=15000)
+              mobile.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
               mobile.wait_for_timeout(500)
               mobile_overflow = mobile.evaluate("() => ({viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,headerHeight:document.querySelector('.workspace>.top')?.getBoundingClientRect().height})")
               print("MOBILE_OVERFLOW=" + repr(mobile_overflow))
@@ -900,7 +900,7 @@ jobs:
               tablet.locator('input[name="username"]').fill("admin")
               tablet.locator('input[name="password"]').fill("admin")
               tablet.locator("form button").last.click()
-              tablet.wait_for_url(lambda url: "/login" not in url, timeout=15000)
+              tablet.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
               tablet.wait_for_function("""() => {
                 const e=document.getElementById('dashboardComponentStatus');
                 return e && e.querySelectorAll('.dashboard-component').length===4;
