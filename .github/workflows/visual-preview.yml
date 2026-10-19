@@ -513,7 +513,7 @@ jobs:
                 if(!response.ok)return false;
                 const data=await response.json();
                 const label=canvas.getAttribute('aria-label')||'';
-                const count=Number(label.match(/;\\s*(\\d+)$/)?.[1]||0);
+                const count=Number(label.match(/;\s*(\d+)$/)?.[1]||0);
                 return Array.isArray(data.traffic_history)&&data.traffic_history.length>=2
                   &&label.includes('(24h);')&&count===data.traffic_history.length;
               }""", timeout=15000)
@@ -560,12 +560,16 @@ jobs:
               mobile_clients = mobile.evaluate("""() => {
                 const box=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
                 const table=box('#clients'),details=box('#clientDetailsPanel');
+                const firstRow=document.querySelector('#clients .clients-table tbody tr');
                 return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,table,details,
+                  rowDisplay:firstRow?getComputedStyle(firstRow).display:null,
+                  rowWidth:firstRow?firstRow.getBoundingClientRect().width:0,
+                  tableScrollWidth:document.querySelector('#clients .clients-table-scroll')?.scrollWidth||0,
                   noOverlap:!!table&&!!details&&(table.bottom<=details.y+1||details.bottom<=table.y+1)};
               }""")
               print("MOBILE_CLIENTS_LAYOUT=" + repr(mobile_clients))
-              if max(mobile_clients["documentWidth"],mobile_clients["bodyWidth"])>mobile_clients["viewport"]+1 or not mobile_clients["noOverlap"]:
-                  raise SystemExit("Mobile user-management layout overflows or overlaps: " + repr(mobile_clients))
+              if max(mobile_clients["documentWidth"],mobile_clients["bodyWidth"])>mobile_clients["viewport"]+1 or not mobile_clients["noOverlap"] or mobile_clients["rowDisplay"]!="grid" or mobile_clients["tableScrollWidth"]>mobile_clients["viewport"]+1:
+                  raise SystemExit("Mobile user-management layout overflows, clips a table, or overlaps: " + repr(mobile_clients))
               capture_screenshot(mobile, out / "13-users-mobile.png", full_page=True)
               # Navigation to another section closes the mobile drawer; reopen it before selecting the next page.
               mobile.evaluate("""() => {
