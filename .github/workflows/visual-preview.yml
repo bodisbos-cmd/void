@@ -212,6 +212,22 @@ jobs:
               print("VOIDLING_EARLY_TABLET_CSS=" + repr(early_voidling_css))
               page.set_viewport_size({"width":1440,"height":1000})
               page.wait_for_timeout(120)
+              # Preserve Voidling evidence even if a separate dashboard-section assertion fails.
+              # This is intentionally captured before the layout/navigation regression checks.
+              early_widget = page.locator("#voidling-widget")
+              if early_widget.count():
+                  early_widget.evaluate("(e) => { e.style.width='180px'; e.style.height='200px'; e.style.right='24px'; e.style.bottom='24px'; }")
+                  early_states = []
+                  for state_name in ("online", "checking", "error", "sleep", "reacting"):
+                      early_widget.evaluate("(e, state) => { e.dataset.state=state; e.classList.toggle('is-reacting', state==='reacting'); }", state_name)
+                      page.wait_for_timeout(140)
+                      shot = out / ("voidling-state-" + state_name + ".png")
+                      early_widget.screenshot(path=str(shot), animations="disabled")
+                      early_states.append({"state":state_name,"bytes":shot.stat().st_size if shot.exists() else 0})
+                  print("VOIDLING_EARLY_STATE_SCREENSHOTS=" + repr(early_states))
+                  early_widget.evaluate("(e) => { e.style.width=''; e.style.height=''; e.style.right=''; e.style.bottom=''; e.classList.remove('is-reacting'); e.dataset.state='online'; }")
+              else:
+                  print("VOIDLING_EARLY_STATE_SCREENSHOTS=widget-missing")
               assert_active_section("dashboard")
               dashboard_layout = page.evaluate("""() => {
                 const rect = id => { const e = document.getElementById(id); const r = e.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; };
