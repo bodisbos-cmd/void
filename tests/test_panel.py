@@ -200,6 +200,9 @@ def test_voidling_procedural_webgl_model_and_state_contract(client):
     for marker in (
         "createVoidlingRenderer", "getContext('webgl'", "vertexSource",
         "fragmentSource", "sphereData", "tubeData", "procedural-webgl",
+        "aTexCoord", "TEXCOORD_0", "UNSIGNED_INT", "splitIndexedMesh",
+        "createEmbeddedTexture", "uBaseColorTexture", "uMetallicRoughnessTexture",
+        "uNormalTexture", "pbrMetallicRoughness", "texturesReady",
         "voidling-rotation", "voidling-position", "voidling-sound",
         "voidling-rotation-toggle", "function updateVisualState", "data:image/webp;base64,",
         "data-rotation-mode", "background-size:500% 100%", "mix-blend-mode:screen", "برای چرخش مدل",
