@@ -532,6 +532,7 @@ jobs:
               if drawer_layers["links"] and drawer_layers["caption"]["bottom"] > drawer_layers["links"]["top"] + 1:
                   raise SystemExit("Mobile drawer utility links overlap creator label: " + repr(drawer_layers))
               mobile.screenshot(path=str(out / "10-mobile-menu.png"), full_page=False, animations="disabled")
+              mobile.locator('[data-nav="clients"]').first.click()
               mobile.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
                 return visible.length>0&&visible.every(e=>e.dataset.sectionPage==='clients')
