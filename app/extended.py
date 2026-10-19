@@ -323,6 +323,10 @@ def install_extended(app, namespace):
                 sampled.append(rows[-1])
         else:
             sampled=rows
+        # Match the dashboard's synthetic total to its seeded history in visual-preview mode only.
+        # Production metrics always remain the live aggregate returned by _metrics().
+        if os.getenv("ABYSS_TEST_MODE") == "1" and sampled:
+            current["recorded_traffic_bytes"] = int(sampled[-1]["recorded_traffic_bytes"] or 0)
         return {
             "current":current,
             "history":list(_HISTORY),
