@@ -512,7 +512,9 @@ jobs:
                     }};
                     if(style&&style.sheet)walk(style.sheet.cssRules);
                   }catch(error){rules.push({error:String(error)})}
-                  voidlingStyle={inlineStyle:widgetElement.getAttribute('style'),width:computed.width,height:computed.height,position:computed.position,mediaMatches:matchMedia('(min-width:601px) and (max-width:1100px)').matches,stylePresent:!!document.getElementById('voidling-interactive-space'),rules};
+                  const styleNodes=[...document.querySelectorAll('[id="voidling-interactive-space"]')].map(e=>({tag:e.tagName,hasSheet:!!e.sheet,textLength:e.textContent?.length||0,hasTabletRule:(e.textContent||'').includes('@media(min-width:601px) and (max-width:1100px)'),start:(e.textContent||'').slice(0,90),end:(e.textContent||'').slice(-180)}));
+                  const sheets=[...document.styleSheets].map(s=>({id:s.ownerNode?.id||'',tag:s.ownerNode?.tagName||'',disabled:s.disabled,href:s.href||'',rules:s.cssRules?.length??-1})).filter(s=>s.id.includes('voidling')||s.rules===0);
+                  voidlingStyle={inlineStyle:widgetElement.getAttribute('style'),width:computed.width,height:computed.height,position:computed.position,mediaMatches:matchMedia('(min-width:601px) and (max-width:1100px)').matches,stylePresent:!!document.getElementById('voidling-interactive-space'),styleNodes,sheets,rules};
                 }
                 const tools=document.querySelector('.workspace>.top>.tools');
                 return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,stats,chart,health,quick,voidling,voidlingStyle,
