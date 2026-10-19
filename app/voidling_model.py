@@ -133,8 +133,7 @@ add('liquid-chrome',blade(((.47,.18,-.34),(.84,.40,-.38),(.69,.77,-.30),(.32,.90
 
 # One low curved band wraps the torso, then four broad ribbons form an orderly tail silhouette.
 add('liquid-chrome',blade(((-.18,-.35,.22),(-.55,-.25,.23),(-.62,-.49,.12),(-.31,-.64,.09)),.082,10,30,.06,.028))
-# A slender shoulder-level sweep passes behind the torso and emerges on both sides like the reference's liquid orbit.
-add('liquid-chrome',blade(((-.62,-.22,.07),(-1.02,-.02,.10),(.91,-.17,-.12),(.69,-.43,-.06)),.040,10,44,.025,.018))
+# Keep the torso silhouette open; the reference uses trailing ribbons, not an orbital ring.
 
 # Four distinct, wider S-curved ribbons that taper into flowing tips instead of thin straight tendrils.
 tails=[
