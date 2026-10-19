@@ -2895,7 +2895,7 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 #voidling-widget:hover{transform:translateY(-4px) scale(1.035);filter:drop-shadow(0 0 15px rgba(220,228,255,.24))}
 #voidling-widget:focus-visible{outline:2px solid #dce4ff!important;outline-offset:5px;border-radius:18px}
 #voidling-widget[data-rotation-mode="on"]{cursor:crosshair}
-.voidling-renderer{position:absolute;left:-4%;top:-4%;width:108%;height:108%;z-index:1;display:block;pointer-events:none;background:transparent;opacity:.82;transition:opacity .18s ease}
+.voidling-renderer{position:absolute;left:-4%;top:-4%;width:108%;height:108%;z-index:3;display:block;pointer-events:none;background:transparent;opacity:.58;transition:opacity .18s ease}
 #voidling-widget[data-rotation-mode="on"] .voidling-renderer{opacity:1}
 .voidling-art{position:absolute;inset:-2%;z-index:1;display:block;background-position:0% 50%;background-repeat:no-repeat;background-size:500% 100%;mix-blend-mode:screen;pointer-events:none;transform-origin:50% 52%;-webkit-mask-image:radial-gradient(ellipse 64% 73% at 50% 48%,#000 56%,rgba(0,0,0,.96) 74%,rgba(0,0,0,.44) 90%,transparent 100%);mask-image:radial-gradient(ellipse 64% 73% at 50% 48%,#000 56%,rgba(0,0,0,.96) 74%,rgba(0,0,0,.44) 90%,transparent 100%);filter:contrast(1.12) drop-shadow(0 5px 10px rgba(0,0,0,.58));animation:voidling-float 3.6s ease-in-out infinite}
 #voidling-widget[data-renderer="webgl"] .voidling-art{opacity:.78;visibility:visible;z-index:4}
