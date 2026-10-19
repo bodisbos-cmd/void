@@ -2903,6 +2903,27 @@ html body .login-visual .visual-orbit{
 #abyssParticleCanvas{position:fixed!important;inset:0!important;z-index:0!important;width:100%!important;height:100%!important;pointer-events:none!important}
 #abyssMenuShade{will-change:opacity}
 .sidebar{will-change:transform}
+/* Keep the frosted-glass finish on repeated surfaces without paying for 20px blur per card. */
+html body main.app-shell .workspace .profile,
+html body main.app-shell .workspace .profile-setting,
+html body main.app-shell .workspace .metric-pill,
+html body main.app-shell .workspace .extra-box,
+html body main.app-shell .workspace .client,
+html body main.app-shell .workspace .client-card{
+ backdrop-filter:blur(8px) saturate(110%)!important;
+ -webkit-backdrop-filter:blur(8px) saturate(110%)!important;
+}
+@media(pointer:coarse),(max-width:850px){
+ html body main.app-shell .workspace .profile,
+ html body main.app-shell .workspace .profile-setting,
+ html body main.app-shell .workspace .metric-pill,
+ html body main.app-shell .workspace .extra-box,
+ html body main.app-shell .workspace .client,
+ html body main.app-shell .workspace .client-card{
+  backdrop-filter:blur(6px) saturate(108%)!important;
+  -webkit-backdrop-filter:blur(6px) saturate(108%)!important;
+ }
+}
 @media(prefers-reduced-motion:reduce){
  html body:before{animation:none!important;transform:none!important}
  #abyssParticleCanvas{display:none!important}
