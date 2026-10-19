@@ -93,12 +93,26 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(json_type, 0x4E4F534A)
         doc = json.loads(data[20:20 + json_length].decode("utf-8"))
         self.assertEqual(doc["asset"]["version"], "2.0")
-        self.assertEqual(len(doc["meshes"][0]["primitives"]), 7)
-        self.assertEqual(
-            {item["name"] for item in doc["materials"]},
-            {"void-shell", "liquid-chrome", "eye-open", "eye-glint",
-             "eye-closed", "eye-happy", "eye-angry"},
-        )
+        if mod.VOIDLING_SOURCE_PATH.is_file():
+            # When the authentic source is packaged, the endpoint must serve the
+            # original one-mesh textured model instead of rebuilding a substitute.
+            self.assertEqual(len(doc["meshes"][0]["primitives"]), 1)
+            primitive = doc["meshes"][0]["primitives"][0]
+            self.assertTrue({"POSITION", "NORMAL", "TEXCOORD_0"}.issubset(primitive["attributes"]))
+            self.assertEqual(doc["accessors"][primitive["indices"]]["componentType"], 5125)
+            self.assertGreaterEqual(len(doc.get("images", [])), 3)
+            material = doc["materials"][primitive["material"]]
+            self.assertIn("baseColorTexture", material["pbrMetallicRoughness"])
+            self.assertIn("metallicRoughnessTexture", material["pbrMetallicRoughness"])
+            self.assertIn("normalTexture", material)
+        else:
+            # Keep the source-missing development fallback explicit and covered.
+            self.assertEqual(len(doc["meshes"][0]["primitives"]), 7)
+            self.assertEqual(
+                {item["name"] for item in doc["materials"]},
+                {"void-shell", "liquid-chrome", "eye-open", "eye-glint",
+                 "eye-closed", "eye-happy", "eye-angry"},
+            )
         response = asyncio.run(mod.voidling_model_asset())
         self.assertEqual(response.media_type, "model/gltf-binary")
         self.assertEqual(response.body, data)
