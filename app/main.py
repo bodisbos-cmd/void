@@ -3091,7 +3091,7 @@ function createVoidlingRenderer(host,rotation){
   }
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();disposed=true;if(rafId)cancelAnimationFrame(rafId);host.dataset.renderer='fallback';},{passive:false});
   addEventListener('resize',resize,{passive:true});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){if(rafId)cancelAnimationFrame(rafId);rafId=0}else{dirty=true;schedule()}});
-  host.dataset.renderer='webgl';host.dataset.model='procedural-fallback';host.dataset.meshCount=String(1+tubes.length+closedEyes.length+shellRibbons.length);loadVoidlingAsset();resize();dirty=true;schedule();
+  host.dataset.renderer='webgl';host.dataset.model='procedural-webgl';host.dataset.meshCount=String(1+tubes.length+closedEyes.length+shellRibbons.length);loadVoidlingAsset();resize();dirty=true;schedule();
   return{burst,refresh(){dirty=true;schedule()},destroy(){disposed=true;if(rafId)cancelAnimationFrame(rafId)}}
  }catch(error){host.dataset.renderer='fallback';canvas.dataset.error=String(error&&error.message||error).slice(0,120);return null}
 }
