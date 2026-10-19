@@ -369,6 +369,7 @@ jobs:
               page.wait_for_selector("#voidling-rotation-toggle", state="visible", timeout=3000)
               rotation_toggle = page.locator("#voidling-rotation-toggle")
               rotation_toggle.click()
+              page.evaluate("document.getElementById('voidling-status-popover')?.remove()")
               def rotate_view(dx):
                   box = state_preview.bounding_box()
                   sx, sy = box["x"] + box["width"]/2, box["y"] + box["height"]/2
@@ -390,6 +391,8 @@ jobs:
               front_pose = rotate_view(-100)
               if abs(front_pose["yaw"]) > .03:
                   raise SystemExit("Voidling view capture did not return to the front: " + repr(front_pose))
+              page.locator("#voidling-widget").click()
+              rotation_toggle = page.locator("#voidling-rotation-toggle")
               rotation_toggle.click()
               page.evaluate("document.getElementById('voidling-status-popover')?.remove()")
               print("VOIDLING_3D_VIEW_SCREENSHOTS=" + repr({"front":"voidling-view-front.png","threequarter":"voidling-view-threequarter.png","side":"voidling-view-side.png","quarterPose":quarter_pose,"sidePose":side_pose,"restoredPose":front_pose}))
