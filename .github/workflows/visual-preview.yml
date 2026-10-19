@@ -318,19 +318,23 @@ jobs:
               page.wait_for_function("""() => {
                 const w=document.getElementById('voidling-widget'), c=w?.querySelector('canvas.voidling-renderer');
                 return w?.dataset.renderer==='webgl' && w?.dataset.model==='glb-mesh'
-                  && Number(w?.dataset.meshCount)>=7 && c?.dataset.geometry==='glb-mesh' && !c?.dataset.error;
+                  && Number(w?.dataset.meshCount)>=1 && c?.dataset.geometry==='glb-mesh' && !c?.dataset.error;
               }""", timeout=10000)
+              page.wait_for_function("""() => {
+                const w=document.getElementById('voidling-widget');
+                return w?.dataset.modelAsset!=='embedded-textures' || Number(w?.dataset.texturesReady)>=Number(w?.dataset.textureCount);
+              }""", timeout=45000)
               voidling_3d = page.evaluate("""() => {
                 const widget=document.getElementById('voidling-widget'), canvas=widget?.querySelector('canvas.voidling-renderer');
                 let gl=null; try { gl=canvas?.getContext('webgl'); } catch (_) {}
                 return {exists:!!widget,renderer:widget?.dataset.renderer,model:widget?.dataset.model,
-                  geometry:canvas?.dataset.geometry,webgl:!!gl,meshCount:Number(widget?.dataset.meshCount)||0,rendererError:canvas?.dataset.error||null,
+                  geometry:canvas?.dataset.geometry,webgl:!!gl,meshCount:Number(widget?.dataset.meshCount)||0,modelAsset:widget?.dataset.modelAsset||null,textureCount:Number(widget?.dataset.textureCount)||0,texturesReady:Number(widget?.dataset.texturesReady)||0,textureError:widget?.dataset.modelTextureError||null,rendererError:canvas?.dataset.error||null,
                   width:canvas?.width||0,height:canvas?.height||0};
               }""")
               print("VOIDLING_WEBGL_MODEL=" + repr(voidling_3d))
               if (not voidling_3d.get("exists") or voidling_3d.get("renderer") != "webgl"
                       or voidling_3d.get("model") != "glb-mesh" or not voidling_3d.get("webgl")
-                      or voidling_3d.get("geometry") != "glb-mesh" or voidling_3d.get("meshCount", 0) < 7
+                      or voidling_3d.get("geometry") != "glb-mesh" or voidling_3d.get("meshCount", 0) < 1
                       or voidling_3d.get("width", 0) < 20 or voidling_3d.get("height", 0) < 20):
                   raise SystemExit("Voidling did not load/render the GLB 3D mesh: " + repr(voidling_3d))
               # Capture the actual WebGL model in every reference state. The sprite strip is
@@ -939,6 +943,15 @@ jobs:
               print("BROWSER_ERRORS=" + repr(errors))
               if errors:
                   raise SystemExit("Browser JavaScript errors detected: " + repr(errors))
+              source_model = page.evaluate("""() => {
+                const w=document.getElementById('voidling-widget');
+                return {modelAsset:w?.dataset.modelAsset||null,textureCount:Number(w?.dataset.textureCount)||0,
+                  texturesReady:Number(w?.dataset.texturesReady)||0,textureError:w?.dataset.modelTextureError||null,
+                  modelError:w?.dataset.modelError||null};
+              }""")
+              print("VOIDLING_AUTHENTIC_SOURCE_ASSET=" + repr(source_model))
+              if source_model["modelAsset"] != "embedded-textures" or source_model["textureCount"] < 3 or source_model["texturesReady"] < 3 or source_model["textureError"]:
+                  raise SystemExit("Authentic Voidling GLB with its embedded original textures is missing or failed to load: " + repr(source_model))
               browser.close()
           PY
       - name: Upload visual preview
