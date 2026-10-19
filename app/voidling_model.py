@@ -61,7 +61,7 @@ def almond(center,rx,ry,depth,tilt=0.,rings=7,sides=24):
         for ir in range(rings+1):
             r=ir/rings
             for j in range(sides):
-                t=2*math.pi*j/sides;sy=math.sin(t);x=rx*r*math.cos(t);y=ry*r*sy*(abs(sy)**.18)
+                t=2*math.pi*j/sides;cx=math.cos(t);sy=math.sin(t);x=rx*r*cx*(abs(cx)**.35);y=ry*r*sy*(abs(sy)**.08)
                 z=(-.20 if back else 1.)*depth*math.sqrt(max(0.,1-r*r))
                 xx=x*math.cos(tilt)-y*math.sin(tilt);yy=x*math.sin(tilt)+y*math.cos(tilt)
                 p.append((center[0]+xx,center[1]+yy,center[2]+z))
@@ -113,31 +113,33 @@ add('liquid-chrome',tube(((.22,-.38,-.08),(.51,-.47,-.23),(.44,-.69,-.30),(.28,-
 
 # Crown and cheek fins: swept leaf-shaped surfaces that emerge from the shell,
 # with distinct front/back depth instead of round loops sitting on top of the head.
-add('liquid-chrome',blade(((-.54,.25,.57),(-.98,.34,.54),(-.91,.78,.33),(-.43,1.04,.12)),.185,10,32,.035,.028))
-add('liquid-chrome',blade(((-.43,.55,.61),(-.30,1.04,.56),(.15,1.17,.13),(.40,.86,.20)),.145,10,32,.035,.024))
-add('liquid-chrome',blade(((.51,.27,.57),(.99,.45,.48),(.88,.84,.25),(.56,1.00,.10)),.155,9,30,.035,.025))
-add('liquid-chrome',blade(((-.66,.05,.49),(-.91,.31,.48),(-.82,.57,.35),(-.58,.73,.30)),.105,8,26,.05,.022))
+add('liquid-chrome',blade(((-.54,.25,.53),(-.98,.34,.54),(-.91,.78,.33),(-.43,1.04,.12)),.125,10,32,.035,.024))
+add('liquid-chrome',blade(((-.43,.55,.57),(-.30,1.04,.56),(.15,1.17,.13),(.40,.86,.20)),.095,10,32,.035,.020))
+add('liquid-chrome',blade(((.51,.27,.53),(.99,.45,.48),(.88,.84,.25),(.56,1.00,.10)),.105,9,30,.035,.021))
+add('liquid-chrome',blade(((-.66,.05,.46),(-.91,.31,.48),(-.82,.57,.35),(-.58,.73,.30)),.075,8,26,.05,.019))
 # Rear-side fins remain visible when rotated to profile or back view.
-add('liquid-chrome',blade(((-.48,.22,-.36),(-.79,.48,-.43),(-.70,.79,-.38),(-.36,.91,-.20)),.13,8,28,.04,.022))
-add('liquid-chrome',blade(((.48,.22,-.36),(.78,.48,-.43),(.69,.78,-.38),(.36,.91,-.20)),.12,8,28,.04,.022))
+add('liquid-chrome',blade(((-.48,.22,-.36),(-.79,.48,-.43),(-.70,.79,-.38),(-.36,.91,-.20)),.085,8,28,.04,.019))
+add('liquid-chrome',blade(((.48,.22,-.36),(.78,.48,-.43),(.69,.78,-.38),(.36,.91,-.20)),.08,8,28,.04,.019))
 
+# A single low, asymmetric ribbon curls around the torso like the reference's liquid-metal sweep.
+add('liquid-chrome',blade(((-.18,-.34,.28),(-.61,-.20,.29),(-.73,-.51,.15),(-.39,-.66,.12)),.055,8,26,.06,.018))
 # Four broad liquid-metal tail ribbons form a clean layered silhouette beneath the torso.
 tails=[
- ((-.18,-.53,.26),(-.57,-.72,.43),(-.38,-1.06,.27),(-.78,-1.36,.015)),
- ((-.09,-.59,.32),(-.31,-.82,.45),(-.08,-1.12,.22),(-.22,-1.43,.035)),
- ((.10,-.58,.31),(.42,-.78,.44),(.20,-1.10,.20),(.55,-1.38,.02)),
- ((.25,-.52,.22),(.65,-.72,.34),(.52,-1.00,.12),(.80,-1.32,-.02)),
+ ((-.18,-.53,.28),(-.62,-.74,.43),(-.25,-1.08,.27),(-.84,-1.36,-.025)),
+ ((-.09,-.59,.35),(-.40,-.82,.47),(.06,-1.12,.23),(-.18,-1.43,.015)),
+ ((.10,-.58,.34),(.47,-.79,.45),(.05,-1.10,.21),(.65,-1.38,-.035)),
+ ((.25,-.52,.24),(.72,-.72,.35),(.40,-1.00,.11),(.88,-1.32,-.065)),
 ]
-for q,width in zip(tails,(.145,.125,.137,.132)):
+for q,width in zip(tails,(.105,.086,.105,.092)):
     add('liquid-chrome',blade(q,width,9,30,.025,.026))
 # One fine edge filament trails behind the right fin, keeping the reference's delicate tendril detail.
-add('liquid-chrome',tube(((.23,-.62,-.17),(.49,-.88,-.31),(.12,-1.18,-.25),(.25,-1.45,-.08)),.027,7,26,.06))
+add('liquid-chrome',tube(((.23,-.62,-.17),(.49,-.88,-.31),(.12,-1.18,-.25),(.25,-1.45,-.08)),.023,7,26,.06))
 
 # Large, angled almond lenses sit in front of the shell. Alternate eyelid meshes
 # are separate real geometry used by the online/checking/error/sleep/response states.
 for s in (-1,1):
-    tilt=s*.49
-    add('eye-open',almond((s*.315,.17,.755),.192,.245,.078,tilt))
+    tilt=s*.62
+    add('eye-open',almond((s*.315,.17,.755),.194,.232,.078,tilt))
     add('eye-glint',ellipsoid((s*.315-s*.045,.238,.833),(.021,.034,.012),8,12))
     add('eye-closed',tube(((s*.48,.17,.78),(s*.42,.115,.80),(s*.32,.115,.81),(s*.25,.17,.78)),.024,8,22,.82,(.65,1.,1.)))
     add('eye-happy',tube(((s*.49,.10,.78),(s*.43,.30,.81),(s*.32,.30,.82),(s*.245,.10,.78)),.028,8,22,.88,(.65,1.,1.)))

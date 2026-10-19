@@ -3054,14 +3054,14 @@ function createVoidlingRenderer(host,rotation){
    const faultMotion=state==='error'&&!reduceMotion?Math.sin(t*18)*.035:0;const root=mul(trans(state==='error'&&!reduceMotion?Math.sin(t*15)*.025:0,bob,0),mul(ry(pose.yaw+(reduceMotion?0:Math.sin(t*.68)*.045)+faultMotion),mul(rx(pose.pitch+(reduceMotion?0:Math.sin(t*.54)*.022)+(state==='error'&&!reduceMotion?-.07:state==='checking'&&!reduceMotion?Math.sin(t*2.4)*.045:0)),scaleM(.92,.92,.92))));
    let rim=[.43,.46,.54],glow=[.002,.003,.006],eye=[.92,.94,1],eyeGlow=[.60,.64,.78];
    if(state==='checking'){rim=[.52,.48,.70];glow=[.010,.006,.023];eye=[.91,.91,1];eyeGlow=[.58,.54,.82]}
-   if(state==='error'){rim=[.70,.18,.22];glow=[.006,.001,.0015];eye=[1,.24,.28];eyeGlow=[1,.055,.075]}
+   if(state==='error'){rim=[.24,.065,.078];glow=[.001,.0002,.0003];eye=[1,.18,.22];eyeGlow=[1,.035,.05]}
    if(state==='sleep'){rim=[.22,.24,.29];glow=[.001,.0015,.003];eye=[.40,.43,.51];eyeGlow=[.16,.18,.24]}
    if(state==='reacting'){rim=[.55,.61,.78];glow=[.008,.012,.026];eye=[.94,.96,1];eyeGlow=[.70,.76,.90]}
    if(assetParts){
     assetParts.forEach(part=>{
      const n=part.name;
-     if(n==='eye-open'&&state!=='online')return;
-     if(n==='eye-glint'&&state!=='online')return;
+     if(n==='eye-open'&&state!=='online'&&state!=='error')return;
+     if(n==='eye-glint'&&state!=='online'&&state!=='error')return;
      if(n==='eye-closed'&&state!=='sleep')return;
      if(n==='eye-happy'&&state!=='checking'&&state!=='reacting')return;
      if(n==='eye-angry'&&state!=='error')return;
@@ -3069,8 +3069,11 @@ function createVoidlingRenderer(host,rotation){
      if(n==='void-shell'){c=state==='sleep'?[.018,.020,.026]:[.006,.008,.012];hr=rim;em=glow;shine=1.85}
      else if(n==='liquid-chrome'){c=[.050,.058,.073];hr=[.75,.78,.87];em=state==='error'?[.012,.001,.002]:glow;shine=2.25}
      else if(n==='eye-open'||n==='eye-happy'||n==='eye-closed'||n==='eye-angry'){
-      c=eye;hr=rim;em=eyeGlow;shine=.88;alpha=1;
-     }else if(n==='eye-glint'){c=[1,1,1];hr=[1,1,1];em=[.9,.94,1];shine=.25;alpha=.98}
+      c=state==='error'&&n==='eye-open'?[1,.17,.23]:n==='eye-closed'?[.72,.78,.91]:n==='eye-happy'?[.94,.96,1]:eye;
+      hr=state==='error'&&n==='eye-open'?[1,.12,.16]:rim;
+      em=state==='error'&&n==='eye-open'?[1,.025,.04]:n==='eye-closed'?[.52,.60,.76]:eyeGlow;
+      shine=.88;alpha=1;
+     }else if(n==='eye-glint'){c=state==='error'?[1,.60,.62]:[1,1,1];hr=[1,1,1];em=state==='error'?[1,.07,.08]:[.9,.94,1];shine=.25;alpha=.98}
      draw(part.g,root,vp,[0,0,0],[1,1,1],c,hr,em,shine,alpha);
     });
    }else{
