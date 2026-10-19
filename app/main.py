@@ -2915,7 +2915,8 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 #voidling-widget:hover #voidling-label,#voidling-widget:focus-visible #voidling-label,#voidling-widget.show-label #voidling-label{opacity:1;transform:translateY(0)}
 .voidling-sleep-mark{display:none;position:absolute;z-index:3;right:4px;top:-4px;font:700 11px/1 Vazirmatn,Tahoma,sans-serif;letter-spacing:2px;color:#dce4f7;text-shadow:0 0 9px #dce4f780;pointer-events:none}
 #voidling-widget[data-state="sleep"] .voidling-sleep-mark{display:block}
-@keyframes voidling-float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}\n@keyframes voidling-breath{0%,100%{filter:contrast(1.12) drop-shadow(0 5px 10px rgba(0,0,0,.58)) drop-shadow(0 0 2px rgba(190,205,255,.06))}50%{filter:contrast(1.16) drop-shadow(0 5px 10px rgba(0,0,0,.58)) drop-shadow(0 0 8px rgba(190,205,255,.17)}}
+@keyframes voidling-float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+@keyframes voidling-breath{0%,100%{filter:contrast(1.12) drop-shadow(0 5px 10px rgba(0,0,0,.58)) drop-shadow(0 0 2px rgba(190,205,255,.06))}50%{filter:contrast(1.16) drop-shadow(0 5px 10px rgba(0,0,0,.58)) drop-shadow(0 0 8px rgba(190,205,255,.17)}}
 @keyframes voidling-orbit{to{transform:rotate(335deg)}}
 @keyframes voidling-react{0%{transform:scale(1)}35%{transform:scale(1.12) rotate(5deg)}100%{transform:scale(1)}}
 @keyframes voidling-nav-orbit{0%{transform:rotate(-25deg) scale(1)}45%{transform:rotate(155deg) scale(1.16)}100%{transform:rotate(335deg) scale(1)}}
