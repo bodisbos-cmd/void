@@ -2903,6 +2903,33 @@ html body .login-visual .visual-orbit{
 #abyssParticleCanvas{position:fixed!important;inset:0!important;z-index:0!important;width:100%!important;height:100%!important;pointer-events:none!important}
 #abyssMenuShade{will-change:opacity}
 .sidebar{will-change:transform}
+/* Re-enable restrained glass on the main surface with a small, bounded blur budget. */
+html body main.app-shell .workspace .card,
+html body main.app-shell .workspace .panel,
+html body main.app-shell .workspace .box{
+ backdrop-filter:blur(8px) saturate(110%)!important;
+ -webkit-backdrop-filter:blur(8px) saturate(110%)!important;
+}
+html body main.app-shell .workspace button,
+html body main.app-shell .workspace .button-link,
+html body main.app-shell .workspace .nav-item{
+ backdrop-filter:blur(4px) saturate(108%)!important;
+ -webkit-backdrop-filter:blur(4px) saturate(108%)!important;
+}
+@media(pointer:coarse),(max-width:850px){
+ html body main.app-shell .workspace .card,
+ html body main.app-shell .workspace .panel,
+ html body main.app-shell .workspace .box{
+  backdrop-filter:blur(6px) saturate(108%)!important;
+  -webkit-backdrop-filter:blur(6px) saturate(108%)!important;
+ }
+ html body main.app-shell .workspace button,
+ html body main.app-shell .workspace .button-link,
+ html body main.app-shell .workspace .nav-item{
+  backdrop-filter:blur(3px) saturate(106%)!important;
+  -webkit-backdrop-filter:blur(3px) saturate(106%)!important;
+ }
+}
 /* Keep the frosted-glass finish on repeated surfaces without paying for 20px blur per card. */
 html body main.app-shell .workspace .profile,
 html body main.app-shell .workspace .profile-setting,
