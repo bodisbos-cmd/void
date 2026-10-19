@@ -2898,7 +2898,7 @@ body:has(#voidling-widget)>.app-shell,body:has(#voidling-widget)>.wrap{position:
 .voidling-renderer{position:absolute;left:-4%;top:-4%;width:108%;height:108%;z-index:3;display:block;pointer-events:none;background:transparent;opacity:.58;transition:opacity .18s ease}
 #voidling-widget[data-rotation-mode="on"] .voidling-renderer{opacity:1}
 .voidling-art{position:absolute;inset:-2%;z-index:1;display:block;background-position:0% 50%;background-repeat:no-repeat;background-size:500% 100%;mix-blend-mode:screen;pointer-events:none;transform-origin:50% 52%;-webkit-mask-image:radial-gradient(ellipse 64% 73% at 50% 48%,#000 56%,rgba(0,0,0,.96) 74%,rgba(0,0,0,.44) 90%,transparent 100%);mask-image:radial-gradient(ellipse 64% 73% at 50% 48%,#000 56%,rgba(0,0,0,.96) 74%,rgba(0,0,0,.44) 90%,transparent 100%);filter:contrast(1.12) drop-shadow(0 5px 10px rgba(0,0,0,.58));animation:voidling-float 3.6s ease-in-out infinite}
-#voidling-widget[data-renderer="webgl"] .voidling-art{opacity:.78;visibility:visible;z-index:4}
+#voidling-widget[data-renderer="webgl"] .voidling-art{opacity:.92;visibility:visible;z-index:1}
 #voidling-widget[data-rotation-mode="on"] .voidling-art{opacity:0;visibility:hidden}
 .voidling-orbit{position:absolute;pointer-events:none;z-index:2;left:-8%;top:28%;width:116%;height:40%;border:1px solid rgba(205,215,255,.19);border-radius:50%;transform:rotate(-25deg);opacity:0;animation:voidling-orbit 9s linear infinite}
 .voidling-orbit:after{content:"";position:absolute;inset:16% -7%;border:1px solid rgba(218,224,244,.075);border-radius:50%;transform:rotate(42deg);box-shadow:0 0 8px rgba(210,220,245,.025)}
