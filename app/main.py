@@ -6,7 +6,7 @@ from html import escape as html_escape
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlsplit
-
+import qrcode
 from qrcode.image.svg import SvgPathImage
 from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
