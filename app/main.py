@@ -2973,36 +2973,111 @@ function createVoidlingRenderer(host,rotation){
   gl=canvas.getContext('webgl',{alpha:true,antialias:true,depth:true,stencil:false,preserveDrawingBuffer:false,powerPreference:'low-power'});
   if(!gl)return null;
   const vertexSource=[
-   'attribute vec3 aPosition;','attribute vec3 aNormal;','uniform mat4 uMVP;','uniform mat4 uModel;','varying vec3 vNormal;','varying vec3 vWorld;',
-   'void main(){vec4 world=uModel*vec4(aPosition,1.0);vWorld=world.xyz;vNormal=normalize(mat3(uModel)*aNormal);gl_Position=uMVP*vec4(aPosition,1.0);}'
+   'attribute vec3 aPosition;','attribute vec3 aNormal;','attribute vec2 aTexCoord;','uniform mat4 uMVP;','uniform mat4 uModel;','varying vec3 vNormal;','varying vec3 vWorld;','varying vec2 vTexCoord;',
+   'void main(){vec4 world=uModel*vec4(aPosition,1.0);vWorld=world.xyz;vNormal=normalize(mat3(uModel)*aNormal);vTexCoord=aTexCoord;gl_Position=uMVP*vec4(aPosition,1.0);}'
   ].join('\n');
+  const normalMappingEnabled=!!gl.getExtension('OES_standard_derivatives');
+  const normalExtensionLine=normalMappingEnabled?'#extension GL_OES_standard_derivatives : enable':'';
+  const normalMapCode=normalMappingEnabled
+   ? 'vec3 n=normalize(vNormal);if(uHasNormalTexture>0.5){vec3 mapN=texture2D(uNormalTexture,vTexCoord).xyz*2.0-1.0;vec3 q0=dFdx(vWorld),q1=dFdy(vWorld);vec2 st0=dFdx(vTexCoord),st1=dFdy(vTexCoord);vec3 T=normalize(q0*st1.t-q1*st0.t);vec3 B=normalize(-q0*st1.s+q1*st0.s);n=normalize(mat3(T,B,n)*mapN);}'
+   : 'vec3 n=normalize(vNormal);';
   const fragmentSource=[
-   'precision mediump float;','uniform vec3 uColor;','uniform vec3 uRim;','uniform vec3 uEmissive;','uniform float uAlpha;','uniform float uShine;','varying vec3 vNormal;','varying vec3 vWorld;',
-   'void main(){vec3 n=normalize(vNormal);vec3 l=normalize(vec3(-0.42,0.62,1.0));vec3 l2=normalize(vec3(0.72,0.18,0.55));vec3 l3=normalize(vec3(-0.82,-0.16,0.72));vec3 l4=normalize(vec3(0.14,0.94,0.28));vec3 v=normalize(vec3(0.0,0.0,4.65)-vWorld);float d=max(dot(n,l),0.0);float d2=max(dot(n,l2),0.0);float s=pow(max(dot(reflect(-l,n),v),0.0),78.0)*uShine;float s2=pow(max(dot(reflect(-l2,n),v),0.0),31.0)*uShine*0.34;float s3=pow(max(dot(reflect(-l3,n),v),0.0),112.0)*uShine*0.58;float s4=pow(max(dot(reflect(-l4,n),v),0.0),46.0)*uShine*0.48;float soft=pow(max(dot(reflect(-l,n),v),0.0),7.0)*uShine*0.23;float rim=pow(1.0-max(dot(n,v),0.0),1.65);vec3 c=uColor*(0.045+0.20*d+0.075*d2)+vec3(0.87,0.90,0.98)*(s*0.85+s2*0.40+s3*0.70+s4)+vec3(0.36,0.38,0.44)*soft+uRim*rim*0.86+uEmissive;gl_FragColor=vec4(c,uAlpha);}'
-  ].join('\n');
+   normalExtensionLine,'precision mediump float;',
+   'uniform vec3 uColor;','uniform vec3 uRim;','uniform vec3 uEmissive;','uniform float uAlpha;','uniform float uShine;',
+   'uniform vec4 uBaseColorFactor;','uniform float uMetallicFactor;','uniform float uRoughnessFactor;',
+   'uniform sampler2D uBaseColorTexture;','uniform sampler2D uMetallicRoughnessTexture;','uniform sampler2D uNormalTexture;',
+   'uniform float uHasBaseColorTexture;','uniform float uHasMetallicRoughnessTexture;','uniform float uHasNormalTexture;',
+   'varying vec3 vNormal;','varying vec3 vWorld;','varying vec2 vTexCoord;',
+   'void main(){vec4 texel=uHasBaseColorTexture>0.5?texture2D(uBaseColorTexture,vTexCoord):vec4(1.0);vec4 base=texel*uBaseColorFactor*vec4(uColor,1.0);vec4 mr=uHasMetallicRoughnessTexture>0.5?texture2D(uMetallicRoughnessTexture,vTexCoord):vec4(1.0);float roughness=clamp(uRoughnessFactor*mr.g,0.045,1.0);float metallic=clamp(uMetallicFactor*mr.b,0.0,1.0);',
+   normalMapCode,
+   'vec3 l=normalize(vec3(-0.42,0.62,1.0));vec3 l2=normalize(vec3(0.72,0.18,0.55));vec3 l3=normalize(vec3(-0.82,-0.16,0.72));vec3 l4=normalize(vec3(0.14,0.94,0.28));vec3 v=normalize(vec3(0.0,0.0,4.65)-vWorld);float d=max(dot(n,l),0.0);float d2=max(dot(n,l2),0.0);vec3 f0=mix(vec3(0.04),base.rgb,metallic);float exponent=mix(100.0,6.0,roughness);float s=pow(max(dot(reflect(-l,n),v),0.0),exponent)*uShine;float s2=pow(max(dot(reflect(-l2,n),v),0.0),max(5.0,exponent*0.52))*uShine*0.36;float s3=pow(max(dot(reflect(-l3,n),v),0.0),max(5.0,exponent*1.2))*uShine*0.55;float s4=pow(max(dot(reflect(-l4,n),v),0.0),max(5.0,exponent*0.72))*uShine*0.45;float rim=pow(1.0-max(dot(n,v),0.0),1.65);vec3 diffuse=base.rgb*(1.0-metallic)*(0.055+0.28*d+0.085*d2);vec3 specular=f0*(s*0.88+s2*0.42+s3*0.52+s4);vec3 c=diffuse+specular+uRim*rim*0.9+uEmissive;gl_FragColor=vec4(c,base.a*uAlpha);}'
+  ].join('\\n');
   function compile(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const error=gl.getShaderInfoLog(s)||'shader compile failed';gl.deleteShader(s);throw new Error(error)}return s}
   const vs=compile(gl.VERTEX_SHADER,vertexSource),fs=compile(gl.FRAGMENT_SHADER,fragmentSource);program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program)||'program link failed');
-  const loc={p:gl.getAttribLocation(program,'aPosition'),n:gl.getAttribLocation(program,'aNormal'),mvp:gl.getUniformLocation(program,'uMVP'),model:gl.getUniformLocation(program,'uModel'),color:gl.getUniformLocation(program,'uColor'),rim:gl.getUniformLocation(program,'uRim'),emissive:gl.getUniformLocation(program,'uEmissive'),alpha:gl.getUniformLocation(program,'uAlpha'),shine:gl.getUniformLocation(program,'uShine')};
-  function meshData(pos,normals,idx){const p=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,p);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);const n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,n);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(normals),gl.STATIC_DRAW);const i=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,i);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx),gl.STATIC_DRAW);return{p,n,i,count:idx.length}}
-  let assetParts=null;
+  const loc={p:gl.getAttribLocation(program,'aPosition'),n:gl.getAttribLocation(program,'aNormal'),uv:gl.getAttribLocation(program,'aTexCoord'),mvp:gl.getUniformLocation(program,'uMVP'),model:gl.getUniformLocation(program,'uModel'),color:gl.getUniformLocation(program,'uColor'),rim:gl.getUniformLocation(program,'uRim'),emissive:gl.getUniformLocation(program,'uEmissive'),alpha:gl.getUniformLocation(program,'uAlpha'),shine:gl.getUniformLocation(program,'uShine'),baseFactor:gl.getUniformLocation(program,'uBaseColorFactor'),metallicFactor:gl.getUniformLocation(program,'uMetallicFactor'),roughnessFactor:gl.getUniformLocation(program,'uRoughnessFactor'),baseTexture:gl.getUniformLocation(program,'uBaseColorTexture'),mrTexture:gl.getUniformLocation(program,'uMetallicRoughnessTexture'),normalTexture:gl.getUniformLocation(program,'uNormalTexture'),hasBaseTexture:gl.getUniformLocation(program,'uHasBaseColorTexture'),hasMRTexture:gl.getUniformLocation(program,'uHasMetallicRoughnessTexture'),hasNormalTexture:gl.getUniformLocation(program,'uHasNormalTexture')};
+  const supportsUint32=!!gl.getExtension('OES_element_index_uint');
+  const whiteTexture=gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D,whiteTexture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([255,255,255,255]));
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  function meshData(pos,normals,idx,uvs=null){
+   const p=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,p);gl.bufferData(gl.ARRAY_BUFFER,pos instanceof Float32Array?pos:new Float32Array(pos),gl.STATIC_DRAW);
+   const n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,n);gl.bufferData(gl.ARRAY_BUFFER,normals instanceof Float32Array?normals:new Float32Array(normals),gl.STATIC_DRAW);
+   const uv=uvs?gl.createBuffer():null;if(uv){gl.bindBuffer(gl.ARRAY_BUFFER,uv);gl.bufferData(gl.ARRAY_BUFFER,uvs instanceof Float32Array?uvs:new Float32Array(uvs),gl.STATIC_DRAW)}
+   const indexData=idx instanceof Uint32Array&&supportsUint32?idx:(idx instanceof Uint16Array?idx:new Uint16Array(idx));
+   const i=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,i);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indexData,gl.STATIC_DRAW);
+   return{p,n,uv,i,count:indexData.length,indexType:indexData instanceof Uint32Array?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT};
+  }
+  function splitIndexedMesh(pos,normals,uvs,indices){
+   if(!(indices instanceof Uint32Array)||supportsUint32)return[meshData(pos,normals,indices,uvs)];
+   const result=[];let remap=new Map(),p=[],n=[],uv=[],ix=[];
+   function flush(){if(ix.length){result.push(meshData(new Float32Array(p),new Float32Array(n),new Uint16Array(ix),uvs?new Float32Array(uv):null))}remap=new Map();p=[];n=[];uv=[];ix=[]}
+   for(let t=0;t<indices.length;t+=3){
+    const tri=[indices[t],indices[t+1],indices[t+2]],needed=new Set(tri.filter(v=>!remap.has(v)));
+    if(remap.size+needed.size>65530&&ix.length)flush();
+    for(const sourceIndex of tri){
+     let mapped=remap.get(sourceIndex);
+     if(mapped===undefined){mapped=remap.size;remap.set(sourceIndex,mapped);for(let k=0;k<3;k++){p.push(pos[sourceIndex*3+k]);n.push(normals[sourceIndex*3+k])}if(uvs){uv.push(uvs[sourceIndex*2],uvs[sourceIndex*2+1])}}
+     ix.push(mapped);
+    }
+   }
+   flush();return result;
+  }
+  let assetParts=null,embeddedTexturesReady=0;
+  function readGltfAccessor(gltf,bin,index){
+   const a=gltf.accessors[index],v=gltf.bufferViews[a.bufferView],start=(v.byteOffset||0)+(a.byteOffset||0),mult=a.type==='VEC3'?3:a.type==='VEC2'?2:1,count=a.count*mult;
+   if(a.componentType===5126)return new Float32Array(bin,start,count);
+   if(a.componentType===5123)return new Uint16Array(bin,start,count);
+   if(a.componentType===5125)return new Uint32Array(bin,start,count);
+   throw new Error('Unsupported GLB accessor component '+a.componentType);
+  }
+  function createEmbeddedTexture(gltf,bin,index,cache){
+   if(cache.has(index))return cache.get(index);
+   const textureDef=(gltf.textures||[])[index];if(!textureDef)throw new Error('Missing glTF texture '+index);
+   const imageDef=(gltf.images||[])[textureDef.source];if(!imageDef||imageDef.bufferView===undefined)throw new Error('Voidling texture is not embedded in GLB');
+   const view=gltf.bufferViews[imageDef.bufferView],start=view.byteOffset||0,end=start+view.byteLength;
+   if(start<0||end>bin.byteLength)throw new Error('Voidling embedded texture is out of range');
+   const texture=gl.createTexture();cache.set(index,texture);gl.bindTexture(gl.TEXTURE_2D,texture);
+   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([255,255,255,255]));
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+   const url=URL.createObjectURL(new Blob([bin.slice(start,end)],{type:imageDef.mimeType||'image/png'})),image=new Image();
+   image.onload=()=>{
+    try{
+     let upload=image;
+     if(image.width>2048||image.height>2048){const canvas2=document.createElement('canvas'),ratio=Math.min(2048/image.width,2048/image.height);canvas2.width=Math.max(1,Math.round(image.width*ratio));canvas2.height=Math.max(1,Math.round(image.height*ratio));const context=canvas2.getContext('2d');context.drawImage(image,0,0,canvas2.width,canvas2.height);upload=canvas2}
+     gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,upload);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+     embeddedTexturesReady++;host.dataset.texturesReady=String(embeddedTexturesReady);dirty=true;schedule();
+    }catch(error){host.dataset.modelTextureError=String(error&&error.message||error).slice(0,120)}
+    URL.revokeObjectURL(url);
+   };
+   image.onerror=()=>{host.dataset.modelTextureError='Could not decode embedded texture '+index;URL.revokeObjectURL(url)};
+   image.src=url;return texture;
+  }
   function loadVoidlingAsset(){
    fetch('/voidling.glb',{cache:'force-cache'}).then(response=>{if(!response.ok)throw new Error('GLB request failed: '+response.status);return response.arrayBuffer()}).then(buffer=>{
     const dv=new DataView(buffer);if(dv.getUint32(0,true)!==0x46546c67)throw new Error('Invalid GLB magic');
-    let offset=12,doc=null,bin=null;
-    while(offset+8<=buffer.byteLength){const size=dv.getUint32(offset,true),type=dv.getUint32(offset+4,true),start=offset+8;
-     if(type===0x4e4f534a)doc=JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,start,size)).trim());
-     else if(type===0x004e4942)bin=buffer.slice(start,start+size);
-     offset=start+size;
+    let offset=12,gltf=null,bin=null;
+    while(offset+8<=buffer.byteLength){const size=dv.getUint32(offset,true),type=dv.getUint32(offset+4,true),start=offset+8;if(start+size>buffer.byteLength)throw new Error('Truncated GLB chunk');if(type===0x4e4f534a)gltf=JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,start,size)).trim());else if(type===0x004e4942)bin=buffer.slice(start,start+size);offset=start+size}
+    if(!gltf||!bin||!gltf.meshes||!gltf.meshes[0])throw new Error('GLB mesh chunks missing');
+    const primitives=gltf.meshes[0].primitives||[];if(!primitives.length)throw new Error('Empty Voidling GLB');
+    const decoded=primitives.map(primitive=>({primitive,pos:readGltfAccessor(gltf,bin,primitive.attributes.POSITION),normals:readGltfAccessor(gltf,bin,primitive.attributes.NORMAL),uvs:primitive.attributes.TEXCOORD_0!==undefined?readGltfAccessor(gltf,bin,primitive.attributes.TEXCOORD_0):null,indices:readGltfAccessor(gltf,bin,primitive.indices)}));
+    const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+    decoded.forEach(item=>{const a=gltf.accessors[item.primitive.attributes.POSITION];for(let k=0;k<3;k++){if(a.min&&Number.isFinite(a.min[k]))min[k]=Math.min(min[k],a.min[k]);if(a.max&&Number.isFinite(a.max[k]))max[k]=Math.max(max[k],a.max[k])}if(!a.min||!a.max)for(let i=0;i<item.pos.length;i+=3)for(let k=0;k<3;k++){min[k]=Math.min(min[k],item.pos[i+k]);max[k]=Math.max(max[k],item.pos[i+k])}});
+    if(min.some(v=>!Number.isFinite(v))||max.some(v=>!Number.isFinite(v)))throw new Error('Voidling GLB bounds missing');
+    const center=min.map((v,k)=>(v+max[k])*.5),extent=Math.max(...max.map((v,k)=>v-min[k]),.001),fitScale=3.2/extent;
+    const textureCache=new Map();
+    function materialFor(index){
+     const mat=(gltf.materials||[])[index]||{},pbr=mat.pbrMetallicRoughness||{};
+     return{baseFactor:new Float32Array(pbr.baseColorFactor||[1,1,1,1]),metallicFactor:Number.isFinite(pbr.metallicFactor)?pbr.metallicFactor:1,roughnessFactor:Number.isFinite(pbr.roughnessFactor)?pbr.roughnessFactor:1,baseTexture:pbr.baseColorTexture?createEmbeddedTexture(gltf,bin,pbr.baseColorTexture.index,textureCache):null,mrTexture:pbr.metallicRoughnessTexture?createEmbeddedTexture(gltf,bin,pbr.metallicRoughnessTexture.index,textureCache):null,normalTexture:mat.normalTexture?createEmbeddedTexture(gltf,bin,mat.normalTexture.index,textureCache):null};
     }
-    if(!doc||!bin||!doc.meshes||!doc.meshes[0])throw new Error('GLB mesh chunks missing');
-    function accessor(index){const a=doc.accessors[index],v=doc.bufferViews[a.bufferView],start=(v.byteOffset||0)+(a.byteOffset||0),mult=a.type==='VEC3'?3:a.type==='VEC2'?2:1;
-     if(a.componentType===5126)return Array.from(new Float32Array(bin,start,a.count*mult));
-     if(a.componentType===5123)return Array.from(new Uint16Array(bin,start,a.count*mult));
-     if(a.componentType===5125)return Array.from(new Uint32Array(bin,start,a.count*mult));
-     throw new Error('Unsupported GLB accessor component '+a.componentType);
-    }
-    assetParts=doc.meshes[0].primitives.map(primitive=>({g:meshData(accessor(primitive.attributes.POSITION),accessor(primitive.attributes.NORMAL),accessor(primitive.indices)),name:(doc.materials[primitive.material]||{}).name||(primitive.extras||{}).materialName||''}));
+    assetParts=[];
+    decoded.forEach(item=>{
+     const positions=new Float32Array(item.pos.length);for(let i=0;i<item.pos.length;i+=3){positions[i]=(item.pos[i]-center[0])*fitScale;positions[i+1]=(item.pos[i+1]-center[1])*fitScale;positions[i+2]=(item.pos[i+2]-center[2])*fitScale}
+     const material=materialFor(item.primitive.material),geometries=splitIndexedMesh(positions,item.normals,item.uvs,item.indices);
+     geometries.forEach(g=>assetParts.push({g,name:(gltf.materials?.[item.primitive.material]||{}).name||(item.primitive.extras||{}).materialName||'',material}));
+    });
     if(!assetParts.length)throw new Error('Empty Voidling GLB');
+    host.dataset.textureCount=String(textureCache.size);host.dataset.texturesReady='0';host.dataset.modelAsset=(gltf.images||[]).length?'embedded-textures':'gltf-materials';
     canvas.dataset.geometry='glb-mesh';host.dataset.model='glb-mesh';host.dataset.meshCount=String(assetParts.length);dirty=true;schedule();
    }).catch(error=>{host.dataset.model='procedural-fallback';host.dataset.modelError=String(error&&error.message||error).slice(0,100);dirty=true;schedule()});
   }
@@ -3045,7 +3120,7 @@ function createVoidlingRenderer(host,rotation){
   function rz(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1])}
   function projection(aspect){const f=1/Math.tan(40*Math.PI/360),near=.1,far=60,o=new Float32Array(16);o[0]=f/aspect;o[5]=f;o[10]=(far+near)/(near-far);o[11]=-1;o[14]=(2*far*near)/(near-far);return o}
   function transform(pos,rot,scl){let m=trans(...pos);m=mul(m,ry(rot[1]));m=mul(m,rx(rot[0]));m=mul(m,rz(rot[2]));return mul(m,scaleM(...scl))}
-  function draw(g,root,vp,pos,scl,color,rim,emission,shine=.35,alpha=1,rot=[0,0,0]){const model=mul(root,transform(pos,rot,scl)),mvp=mul(vp,model);gl.uniformMatrix4fv(loc.model,false,model);gl.uniformMatrix4fv(loc.mvp,false,mvp);gl.uniform3fv(loc.color,color);gl.uniform3fv(loc.rim,rim);gl.uniform3fv(loc.emissive,emission);gl.uniform1f(loc.shine,shine);gl.uniform1f(loc.alpha,alpha);gl.bindBuffer(gl.ARRAY_BUFFER,g.p);gl.enableVertexAttribArray(loc.p);gl.vertexAttribPointer(loc.p,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,g.n);gl.enableVertexAttribArray(loc.n);gl.vertexAttribPointer(loc.n,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,g.i);gl.drawElements(gl.TRIANGLES,g.count,gl.UNSIGNED_SHORT,0)}
+  function draw(g,root,vp,pos,scl,color,rim,emission,shine=.35,alpha=1,rot=[0,0,0],material=null){const model=mul(root,transform(pos,rot,scl)),mvp=mul(vp,model);gl.uniformMatrix4fv(loc.model,false,model);gl.uniformMatrix4fv(loc.mvp,false,mvp);gl.uniform3fv(loc.color,color);gl.uniform3fv(loc.rim,rim);gl.uniform3fv(loc.emissive,emission);gl.uniform1f(loc.shine,shine);gl.uniform1f(loc.alpha,alpha);gl.uniform4fv(loc.baseFactor,material?material.baseFactor:new Float32Array([1,1,1,1]));gl.uniform1f(loc.metallicFactor,material?material.metallicFactor:0);gl.uniform1f(loc.roughnessFactor,material?material.roughnessFactor:.55);const bindings=[[0,loc.baseTexture,loc.hasBaseTexture,material&&material.baseTexture],[1,loc.mrTexture,loc.hasMRTexture,material&&material.mrTexture],[2,loc.normalTexture,loc.hasNormalTexture,material&&material.normalTexture]];bindings.forEach(([unit,sampler,flag,texture])=>{gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,texture||whiteTexture);gl.uniform1i(sampler,unit);gl.uniform1f(flag,texture?1:0)});gl.bindBuffer(gl.ARRAY_BUFFER,g.p);gl.enableVertexAttribArray(loc.p);gl.vertexAttribPointer(loc.p,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,g.n);gl.enableVertexAttribArray(loc.n);gl.vertexAttribPointer(loc.n,3,gl.FLOAT,false,0,0);if(g.uv){gl.bindBuffer(gl.ARRAY_BUFFER,g.uv);gl.enableVertexAttribArray(loc.uv);gl.vertexAttribPointer(loc.uv,2,gl.FLOAT,false,0,0)}else{gl.disableVertexAttribArray(loc.uv);gl.vertexAttrib2f(loc.uv,0,0)}gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,g.i);gl.drawElements(gl.TRIANGLES,g.count,g.indexType||gl.UNSIGNED_SHORT,0)}
   function resize(){const r=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,1.25),w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);dirty=true}schedule()}
   function schedule(){if(!disposed&&!rafId&&document.visibilityState!=='hidden')rafId=requestAnimationFrame(frame)}
   function burst(){const now=performance.now();particles=[];for(let i=0;i<16;i++)particles.push({a:i/16*Math.PI*2+(Math.random()-.5)*.28,b:(Math.random()-.5)*1.35,start:now,life:reduceMotion?120:760});dirty=true;schedule()}
@@ -3059,22 +3134,27 @@ function createVoidlingRenderer(host,rotation){
    if(state==='reacting'){rim=[.55,.61,.78];glow=[.008,.012,.026];eye=[.94,.96,1];eyeGlow=[.70,.76,.90]}
    if(assetParts){
     assetParts.forEach(part=>{
-     const n=part.name;
+     const n=part.name,material=part.material;
      if(n==='eye-open'&&state!=='online'&&state!=='error')return;
      if(n==='eye-glint'&&state!=='online'&&state!=='error')return;
      if(n==='eye-closed'&&state!=='sleep')return;
      if(n==='eye-happy'&&state!=='checking'&&state!=='reacting')return;
      if(n==='eye-angry'&&state!=='error')return;
-     let c=[.055,.065,.09],hr=[.48,.53,.63],em=glow,shine=1.1,alpha=.98;
+     const textured=Boolean(material&&(material.baseTexture||material.mrTexture||material.normalTexture));
+     let c=textured?[1,1,1]:[.055,.065,.09],hr=rim,em=glow,shine=textured?1.15:1.1,alpha=.98;
      if(n==='void-shell'){c=state==='sleep'?[.018,.020,.026]:[.006,.008,.012];hr=rim;em=glow;shine=1.85}
      else if(n==='liquid-chrome'){c=[.14,.16,.19];hr=[.82,.86,.96];em=state==='error'?[.012,.001,.002]:glow;shine=1.92}
      else if(n==='eye-open'||n==='eye-happy'||n==='eye-closed'||n==='eye-angry'){
       c=state==='error'&&n==='eye-open'?[1,.17,.23]:n==='eye-closed'?[.72,.78,.91]:n==='eye-happy'?[.94,.96,1]:eye;
-      hr=state==='error'&&n==='eye-open'?[1,.12,.16]:rim;
-      em=state==='error'&&n==='eye-open'?[1,.025,.04]:n==='eye-closed'?[.52,.60,.76]:eyeGlow;
-      shine=.88;alpha=1;
+      hr=state==='error'&&n==='eye-open'?[1,.12,.16]:rim;em=state==='error'&&n==='eye-open'?[1,.025,.04]:n==='eye-closed'?[.52,.60,.76]:eyeGlow;shine=.88;alpha=1;
      }else if(n==='eye-glint'){c=state==='error'?[1,.60,.62]:[1,1,1];hr=[1,1,1];em=state==='error'?[1,.07,.08]:[.9,.94,1];shine=.25;alpha=.98}
-     draw(part.g,root,vp,[0,0,0],[1,1,1],c,hr,em,shine,alpha);
+     else if(textured){
+      if(state==='checking')c=[.82,.83,1];
+      else if(state==='error'){c=[1,.22,.26];hr=[1,.08,.10];em=[.30,.008,.012];shine=1.65}
+      else if(state==='sleep'){c=[.42,.44,.50];hr=[.20,.22,.28];em=[.001,.0015,.003];shine=.62;alpha=.94}
+      else if(state==='reacting'){c=[.88,.92,1];hr=[.67,.72,.92];em=[.018,.022,.045];shine=1.48}
+     }
+     draw(part.g,root,vp,[0,0,0],[1,1,1],c,hr,em,shine,alpha,[0,0,0],material);
     });
    }else{
    const body=[.095,.108,.135],highlight=[.48,.53,.63];
@@ -3094,7 +3174,7 @@ function createVoidlingRenderer(host,rotation){
   }
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();disposed=true;if(rafId)cancelAnimationFrame(rafId);host.dataset.renderer='fallback';},{passive:false});
   addEventListener('resize',resize,{passive:true});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){if(rafId)cancelAnimationFrame(rafId);rafId=0}else{dirty=true;schedule()}});
-  host.dataset.renderer='webgl';host.dataset.model='procedural-webgl';host.dataset.meshCount=String(1+tubes.length+closedEyes.length+shellRibbons.length);loadVoidlingAsset();resize();dirty=true;schedule();
+  host.dataset.renderer='webgl';host.dataset.model='procedural-webgl';host.dataset.meshCount=String(1+tubes.length+closedEyes.length+shellRibbons.length);host.dataset.textureCount='0';host.dataset.texturesReady='0';loadVoidlingAsset();resize();dirty=true;schedule();
   return{burst,refresh(){dirty=true;schedule()},destroy(){disposed=true;if(rafId)cancelAnimationFrame(rafId)}}
  }catch(error){host.dataset.renderer='fallback';canvas.dataset.error=String(error&&error.message||error).slice(0,120);return null}
 }
