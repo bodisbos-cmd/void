@@ -6,6 +6,7 @@ from html import escape as html_escape
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlsplit
+from app.voidling_model import get_voidling_glb
 import qrcode
 from qrcode.image.svg import SvgPathImage
 from fastapi import FastAPI, Form, HTTPException, Request
@@ -352,6 +353,16 @@ async def lifespan(app):
     task=asyncio.create_task(monitor()); yield; task.cancel()
     if xray_proc and xray_proc.poll() is None: xray_proc.terminate()
 app=FastAPI(title=APP_NAME,docs_url=None,redoc_url=None,openapi_url=None,lifespan=lifespan)
+
+@app.get("/voidling.glb", include_in_schema=False)
+async def voidling_model_asset():
+    try:
+        model_data = get_voidling_glb()
+    except Exception as exc:
+        LOG.exception("Voidling GLB generation failed")
+        raise HTTPException(status_code=500, detail="Voidling model unavailable") from exc
+    return Response(content=model_data, media_type="model/gltf-binary",
+        headers={"Cache-Control":"public, max-age=86400","X-Content-Type-Options":"nosniff"})
 
 @app.get("/brand-logo", include_in_schema=False)
 async def brand_logo():
@@ -2962,6 +2973,28 @@ function createVoidlingRenderer(host,rotation){
   const vs=compile(gl.VERTEX_SHADER,vertexSource),fs=compile(gl.FRAGMENT_SHADER,fragmentSource);program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program)||'program link failed');
   const loc={p:gl.getAttribLocation(program,'aPosition'),n:gl.getAttribLocation(program,'aNormal'),mvp:gl.getUniformLocation(program,'uMVP'),model:gl.getUniformLocation(program,'uModel'),color:gl.getUniformLocation(program,'uColor'),rim:gl.getUniformLocation(program,'uRim'),emissive:gl.getUniformLocation(program,'uEmissive'),alpha:gl.getUniformLocation(program,'uAlpha'),shine:gl.getUniformLocation(program,'uShine')};
   function meshData(pos,normals,idx){const p=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,p);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);const n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,n);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(normals),gl.STATIC_DRAW);const i=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,i);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx),gl.STATIC_DRAW);return{p,n,i,count:idx.length}}
+  let assetParts=null;
+  function loadVoidlingAsset(){
+   fetch('/voidling.glb',{cache:'force-cache'}).then(response=>{if(!response.ok)throw new Error('GLB request failed: '+response.status);return response.arrayBuffer()}).then(buffer=>{
+    const dv=new DataView(buffer);if(dv.getUint32(0,true)!==0x46546c67)throw new Error('Invalid GLB magic');
+    let offset=12,doc=null,bin=null;
+    while(offset+8<=buffer.byteLength){const size=dv.getUint32(offset,true),type=dv.getUint32(offset+4,true),start=offset+8;
+     if(type===0x4e4f534a)doc=JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,start,size)).trim());
+     else if(type===0x004e4942)bin=buffer.slice(start,start+size);
+     offset=start+size;
+    }
+    if(!doc||!bin||!doc.meshes||!doc.meshes[0])throw new Error('GLB mesh chunks missing');
+    function accessor(index){const a=doc.accessors[index],v=doc.bufferViews[a.bufferView],start=(v.byteOffset||0)+(a.byteOffset||0),mult=a.type==='VEC3'?3:a.type==='VEC2'?2:1;
+     if(a.componentType===5126)return Array.from(new Float32Array(bin,start,a.count*mult));
+     if(a.componentType===5123)return Array.from(new Uint16Array(bin,start,a.count*mult));
+     if(a.componentType===5125)return Array.from(new Uint32Array(bin,start,a.count*mult));
+     throw new Error('Unsupported GLB accessor component '+a.componentType);
+    }
+    assetParts=doc.meshes[0].primitives.map(primitive=>({g:meshData(accessor(primitive.attributes.POSITION),accessor(primitive.attributes.NORMAL),accessor(primitive.indices)),name:(doc.materials[primitive.material]||{}).name||(primitive.extras||{}).materialName||''}));
+    if(!assetParts.length)throw new Error('Empty Voidling GLB');
+    host.dataset.model='glb-mesh';host.dataset.meshCount=String(assetParts.length);dirty=true;schedule();
+   }).catch(error=>{host.dataset.model='procedural-fallback';host.dataset.modelError=String(error&&error.message||error).slice(0,100);dirty=true;schedule()});
+  }
   function sphereData(rows=30,cols=42){const p=[],n=[],idx=[];for(let y=0;y<=rows;y++){const t=y*Math.PI/rows;for(let x=0;x<=cols;x++){const a=x*Math.PI*2/cols,nx=Math.sin(t)*Math.cos(a),ny=Math.cos(t),nz=Math.sin(t)*Math.sin(a);p.push(nx,ny,nz);n.push(nx,ny,nz)}}for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const a=y*(cols+1)+x,b=a+cols+1;idx.push(a,a+1,b,b,a+1,b+1)}return meshData(p,n,idx)}
   function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
   function norm(v){const d=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/d,v[1]/d,v[2]/d]}
@@ -3013,6 +3046,23 @@ function createVoidlingRenderer(host,rotation){
    if(state==='error'){rim=[.72,.10,.14];glow=[.075,.004,.012];eye=[1,.24,.28];eyeGlow=[1,.055,.075]}
    if(state==='sleep'){rim=[.13,.16,.25];glow=[.012,.018,.04];eye=[.38,.44,.60];eyeGlow=[.16,.20,.34]}
    if(state==='reacting'){rim=[.48,.58,.98];glow=[.05,.09,.20];eye=[.9,.94,1];eyeGlow=[.70,.78,1]}
+   if(assetParts){
+    assetParts.forEach(part=>{
+     const n=part.name;
+     if(n==='eye-open'&&state!=='online')return;
+     if(n==='eye-glint'&&state!=='online')return;
+     if(n==='eye-closed'&&state!=='sleep')return;
+     if(n==='eye-happy'&&state!=='checking'&&state!=='reacting')return;
+     if(n==='eye-angry'&&state!=='error')return;
+     let c=[.055,.065,.09],hr=[.48,.53,.63],em=glow,shine=1.1,alpha=.98;
+     if(n==='void-shell'){c=state==='sleep'?[.055,.060,.075]:[.035,.043,.060];hr=rim;em=glow;shine=1.25}
+     else if(n==='liquid-chrome'){c=[.075,.085,.115];hr=[.58,.64,.76];em=state==='error'?[.025,.002,.005]:glow;shine=1.45}
+     else if(n==='eye-open'||n==='eye-happy'||n==='eye-closed'||n==='eye-angry'){
+      c=eye;hr=rim;em=eyeGlow;shine=.88;alpha=1;
+     }else if(n==='eye-glint'){c=[1,1,1];hr=[1,1,1];em=[.9,.94,1];shine=.25;alpha=.98}
+     draw(part.g,root,vp,[0,0,0],[1,1,1],c,hr,em,shine,alpha);
+    });
+   }else{
    const body=[.095,.108,.135],highlight=[.48,.53,.63];
    draw(sphere,root,vp,[0,-.50,.01],[.35,.43,.30],body,rim,glow,.82,1);
    draw(sphere,root,vp,[0,.24,0],[.79,.73,.67*(1+(reduceMotion?0:Math.sin(t*1.9)*.012))],body,rim,glow,1.12,1);
@@ -3024,12 +3074,13 @@ function createVoidlingRenderer(host,rotation){
    else if(state==='error'){angryEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.82,1))}
    else if(state==='checking'||state==='reacting'){happyEyes.forEach(g=>draw(g,root,vp,[0,0,0],[1,1,1],eye,rim,eyeGlow,.64,.98))}
    else{[-1,1].forEach(side=>{const x=side*.305,rot=[0,0,side*.10];draw(sphere,root,vp,[x,.22,.64],[.225,.30,.075],eyeGlow,rim,eyeGlow,.28,.32,rot);draw(sphere,root,vp,[x,.22,.685],[.155,.22,.078],eye,rim,eyeGlow,1.02,1,rot);draw(sphere,root,vp,[x-side*.038,.28,.746],[.028,.055,.018],[1,1,1],[1,1,1],[.88,.91,1],.22,.94,rot)})}
+   }
    const alive=[];particles.forEach(p=>{const age=(now-p.start)/p.life;if(age>=1)return;alive.push(p);const r=.52+age*.72,x=Math.cos(p.a)*r,y=Math.sin(p.a)*r*.75+p.b*.24,z=.2+Math.sin(p.a*1.7)*.26+age*.18,fade=1-age,size=.024*fade+.004;draw(sphere,root,vp,[x,y,z],[size,size,size],[.70,.78,1],[.72,.82,1],[.58,.68,1],.2,fade*.95)});particles=alive;
    if(!reduceMotion||particles.length)schedule()
   }
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();disposed=true;if(rafId)cancelAnimationFrame(rafId);host.dataset.renderer='fallback';},{passive:false});
   addEventListener('resize',resize,{passive:true});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){if(rafId)cancelAnimationFrame(rafId);rafId=0}else{dirty=true;schedule()}});
-  host.dataset.renderer='webgl';host.dataset.model='procedural-webgl';host.dataset.meshCount=String(1+tubes.length+closedEyes.length+shellRibbons.length);resize();dirty=true;schedule();
+  host.dataset.renderer='webgl';host.dataset.model='procedural-fallback';host.dataset.meshCount=String(1+tubes.length+closedEyes.length+shellRibbons.length);loadVoidlingAsset();resize();dirty=true;schedule();
   return{burst,refresh(){dirty=true;schedule()},destroy(){disposed=true;if(rafId)cancelAnimationFrame(rafId)}}
  }catch(error){host.dataset.renderer='fallback';canvas.dataset.error=String(error&&error.message||error).slice(0,120);return null}
 }
