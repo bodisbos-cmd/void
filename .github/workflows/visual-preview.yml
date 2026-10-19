@@ -102,11 +102,12 @@ jobs:
           base = "http://127.0.0.1:18080"
           out = Path("visual-preview")
           import time
-          def capture_screenshot(target, name, full_page=False):
+          def capture_screenshot(target, destination, full_page=False):
               started = time.monotonic()
-              print("SCREENSHOT_START=" + str(name), flush=True)
-              target.screenshot(path=str(out / name), full_page=full_page, animations="disabled", timeout=45000)
-              print("SCREENSHOT_DONE=" + str(name) + " duration_s=" + str(round(time.monotonic() - started, 2)), flush=True)
+              name = Path(destination).name
+              print("SCREENSHOT_START=" + name, flush=True)
+              target.screenshot(path=str(destination), full_page=full_page, animations="disabled", timeout=45000)
+              print("SCREENSHOT_DONE=" + name + " duration_s=" + str(round(time.monotonic() - started, 2)), flush=True)
           with sync_playwright() as p:
               browser = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist", "--enable-unsafe-swiftshader"])
               page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
@@ -137,7 +138,7 @@ jobs:
               if (not login_geometry["logoReady"] or login_geometry["logoCardOverlap"]
                       or not login_geometry["logoSeparatedFromCard"] or not login_geometry["referenceScale"]):
                   raise SystemExit("Approved logo asset or login composition is incorrect: " + repr(login_geometry))
-              capture_screenshot(page, "01-login-desktop.png", full_page=False)
+              capture_screenshot(page, out / "01-login-desktop.png", full_page=False)
               page.locator('input[name="username"]').fill("admin")
               page.locator('input[name="password"]').fill("admin")
               page.locator("form button").last.click()
@@ -276,7 +277,7 @@ jobs:
                       or sidebar_logo["http"] != 200 or sidebar_logo["bytes"] < 1000
                       or "/brand/abyss-tunnel-logo.jpg" not in sidebar_logo["backgroundImage"]):
                   raise SystemExit("Sidebar is missing the supplied reference orbital logo: " + repr(sidebar_logo))
-              capture_screenshot(page, "02-dashboard-desktop.png", full_page=False)
+              capture_screenshot(page, out / "02-dashboard-desktop.png", full_page=False)
               for nav, filename in [("clients","03-users-desktop.png"),("create","04-create-desktop.png"),("servers","05-servers-desktop.png"),("protocols","06-protocols-desktop.png"),("reports","07-reports-desktop.png"),("settings","08-settings-desktop.png")]:
                   locator = page.locator('[data-nav="' + nav + '"]').first
                   if not locator.count():
@@ -376,7 +377,7 @@ jobs:
                       print("PROTOCOL_TABLE_VIEW=" + repr(protocol_view))
                       if protocol_view["rows"]<1 or protocol_view["toggles"] != protocol_view["rows"]:
                           raise SystemExit("Protocol table/toggles are incomplete: " + repr(protocol_view))
-                  capture_screenshot(page, filename, full_page=False)
+                  capture_screenshot(page, out / filename, full_page=False)
               page.locator('[data-nav="dashboard"]').first.click()
               assert_active_section("dashboard")
               page.set_viewport_size({"width":1024,"height":768})
@@ -402,7 +403,7 @@ jobs:
                   raise SystemExit("Tablet dashboard does not follow the intended chart/status/details order: " + repr(tablet_layout))
               if tablet_layout["toolbar"] and tablet_layout["toolbar"]["scrollWidth"] > tablet_layout["toolbar"]["clientWidth"] + 1:
                   raise SystemExit("Tablet toolbar clips or horizontally overflows its controls: " + repr(tablet_layout))
-              capture_screenshot(page, "13-dashboard-tablet.png", full_page=False)
+              capture_screenshot(page, out / "13-dashboard-tablet.png", full_page=False)
               subscription = browser.new_page(viewport={"width":1440,"height":1000}, device_scale_factor=1)
               subscription.on("pageerror", lambda e: errors.append("subscription: " + str(e) + " | " + str(getattr(e, "stack", ""))))
               response = subscription.goto(base + "/sub/preview-visual-token-0001", wait_until="domcontentloaded")
@@ -466,7 +467,7 @@ jobs:
                     "bodyPrefix": qr_response.body()[:180]
                   }))
                   raise SystemExit("Subscription QR failed to render: " + repr(qr_result))
-              capture_screenshot(subscription, "11-subscription-desktop.png", full_page=True)
+              capture_screenshot(subscription, out / "11-subscription-desktop.png", full_page=True)
               subscription_mobile = browser.new_page(viewport={"width":390,"height":844}, device_scale_factor=1, is_mobile=True, has_touch=True)
               subscription_mobile.on("pageerror", lambda e: errors.append("subscription mobile: " + str(e) + " | " + str(getattr(e, "stack", ""))))
               sub_response = subscription_mobile.goto(base + "/sub/preview-visual-token-0001", wait_until="domcontentloaded")
@@ -497,7 +498,7 @@ jobs:
               print("SUBSCRIPTION_MOBILE_LAYOUT=" + repr(sub_mobile_layout))
               if not sub_mobile_layout["mobileMetricsVisible"] or not sub_mobile_layout["referenceOrder"] or not sub_mobile_layout["noCardOverlap"] or not sub_mobile_layout["legacyHeroHidden"] or not sub_mobile_layout["legacyStatsHidden"]:
                   raise SystemExit("Subscription mobile layout diverged from the reference order: " + repr(sub_mobile_layout))
-              capture_screenshot(subscription_mobile, "12-subscription-mobile.png", full_page=True)
+              capture_screenshot(subscription_mobile, out / "12-subscription-mobile.png", full_page=True)
               mobile = browser.new_page(viewport={"width":390,"height":844}, device_scale_factor=1, is_mobile=True, has_touch=True)
               mobile.on("pageerror", lambda e: errors.append("mobile: " + str(e) + " | " + str(getattr(e, "stack", ""))))
               mobile.goto(base + "/login", wait_until="domcontentloaded")
@@ -512,7 +513,7 @@ jobs:
                   raise SystemExit("Mobile layout has horizontal overflow: " + repr(mobile_overflow))
               if mobile_overflow["headerHeight"] is None or mobile_overflow["headerHeight"] > 430:
                   raise SystemExit("Mobile toolbar is excessively tall instead of using compact controls: " + repr(mobile_overflow))
-              capture_screenshot(mobile, "09-dashboard-mobile.png", full_page=False)
+              capture_screenshot(mobile, out / "09-dashboard-mobile.png", full_page=False)
               toggle = mobile.locator("#menuToggle")
               if not toggle.count():
                   raise SystemExit("Mobile drawer toggle is missing")
@@ -537,7 +538,7 @@ jobs:
                   raise SystemExit("Mobile drawer creator label overlaps account identity: " + repr(drawer_layers))
               if drawer_layers["links"] and drawer_layers["caption"]["bottom"] > drawer_layers["links"]["top"] + 1:
                   raise SystemExit("Mobile drawer utility links overlap creator label: " + repr(drawer_layers))
-              capture_screenshot(mobile, "10-mobile-menu.png", full_page=False)
+              capture_screenshot(mobile, out / "10-mobile-menu.png", full_page=False)
               mobile.locator('[data-nav="clients"]').first.click()
               mobile.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
@@ -554,7 +555,7 @@ jobs:
               print("MOBILE_CLIENTS_LAYOUT=" + repr(mobile_clients))
               if max(mobile_clients["documentWidth"],mobile_clients["bodyWidth"])>mobile_clients["viewport"]+1 or not mobile_clients["noOverlap"]:
                   raise SystemExit("Mobile user-management layout overflows or overlaps: " + repr(mobile_clients))
-              capture_screenshot(mobile, "13-users-mobile.png", full_page=True)
+              capture_screenshot(mobile, out / "13-users-mobile.png", full_page=True)
               # Navigation to another section closes the mobile drawer; reopen it before selecting the next page.
               mobile.evaluate("""() => {
                 if (!document.body.classList.contains('abyss-menu-open')) {
@@ -576,7 +577,7 @@ jobs:
               print("MOBILE_CREATE_LAYOUT=" + repr(mobile_create))
               if max(mobile_create["documentWidth"],mobile_create["bodyWidth"])>mobile_create["viewport"]+1 or mobile_create["profileChoices"]<1 or mobile_create["visiblePanel"]!=1:
                   raise SystemExit("Mobile service-creation layout overflows or hides its active panel: " + repr(mobile_create))
-              capture_screenshot(mobile, "14-create-mobile.png", full_page=True)
+              capture_screenshot(mobile, out / "14-create-mobile.png", full_page=True)
               # A fresh non-mobile context checks the tablet breakpoint for the same sections.
               tablet = browser.new_page(viewport={"width":1024,"height":768}, device_scale_factor=1)
               tablet.on("pageerror", lambda e: errors.append("tablet: " + str(e) + " | " + str(getattr(e, "stack", ""))))
@@ -605,7 +606,7 @@ jobs:
               print("TABLET_CLIENTS_LAYOUT=" + repr(tablet_clients))
               if max(tablet_clients["documentWidth"],tablet_clients["bodyWidth"])>tablet_clients["viewport"]+1 or not tablet_clients["noOverlap"]:
                   raise SystemExit("Tablet user-management layout overflows or overlaps: " + repr(tablet_clients))
-              capture_screenshot(tablet, "15-users-tablet.png", full_page=True)
+              capture_screenshot(tablet, out / "15-users-tablet.png", full_page=True)
               tablet.locator('[data-nav="create"]').first.click()
               tablet.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
@@ -618,7 +619,7 @@ jobs:
               print("TABLET_CREATE_LAYOUT=" + repr(tablet_create))
               if max(tablet_create["documentWidth"],tablet_create["bodyWidth"])>tablet_create["viewport"]+1 or tablet_create["profileChoices"]<1 or tablet_create["visiblePanel"]!=1:
                   raise SystemExit("Tablet service-creation layout overflows or hides its active panel: " + repr(tablet_create))
-              capture_screenshot(tablet, "16-create-tablet.png", full_page=True)
+              capture_screenshot(tablet, out / "16-create-tablet.png", full_page=True)
               tablet.close()
               print("BROWSER_ERRORS=" + repr(errors))
               if errors:
