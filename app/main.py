@@ -2888,7 +2888,7 @@ html body .login-visual .visual-orbit{
  }
 }
 /* Smoothness budget: keep compositor-driven motion and avoid costly backdrop filters on touch devices. */
-#abyssParticleCanvas{position:fixed!important;inset:0!important;z-index:0!important;width:100%!important;height:100%!important;pointer-events:none!important;contain:strict!important}
+#abyssParticleCanvas{position:fixed!important;inset:0!important;z-index:0!important;width:100%!important;height:100%!important;pointer-events:none!important}
 #abyssMenuShade{will-change:opacity;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .sidebar{will-change:transform}
 @media(pointer:coarse), (max-width:850px){
