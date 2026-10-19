@@ -351,7 +351,39 @@ jobs:
                       raise SystemExit("Voidling state screenshot is missing/empty: " + state_name)
                   state_screenshots.append({"state":state_name,"screenshot":screenshot_path.name,"bytes":screenshot_path.stat().st_size})
               print("VOIDLING_3D_STATE_SCREENSHOTS=" + repr(state_screenshots))
-              state_preview.evaluate("(e) => { e.style.width=''; e.style.height=''; e.style.right=''; e.style.bottom=''; e.classList.remove('is-reacting'); }")
+              # Capture actual model geometry from three angles, not merely one front-facing sprite.
+              state_preview.evaluate("(e) => { e.dataset.state='online'; e.classList.remove('is-reacting'); }")
+              page.wait_for_timeout(160)
+              state_preview.screenshot(path=str(out / "voidling-view-front.png"), animations="disabled")
+              page.locator("#voidling-widget").click()
+              page.wait_for_selector("#voidling-rotation-toggle", state="visible", timeout=3000)
+              rotation_toggle = page.locator("#voidling-rotation-toggle")
+              rotation_toggle.click()
+              def rotate_view(dx):
+                  box = state_preview.bounding_box()
+                  sx, sy = box["x"] + box["width"]/2, box["y"] + box["height"]/2
+                  page.mouse.move(sx, sy)
+                  page.mouse.down()
+                  page.mouse.move(sx + dx, sy + 8, steps=6)
+                  page.mouse.up()
+                  page.wait_for_timeout(160)
+                  pose = page.evaluate("() => { try { return JSON.parse(localStorage.getItem('voidling-rotation') || 'null'); } catch (_) { return null; } }")
+                  if not pose or not isinstance(pose.get("yaw"), (int,float)) or not isinstance(pose.get("pitch"), (int,float)):
+                      raise SystemExit("Voidling angle control did not persist a 3D pose: " + repr(pose))
+                  return pose
+              quarter_pose = rotate_view(30)
+              state_preview.screenshot(path=str(out / "voidling-view-threequarter.png"), animations="disabled")
+              side_pose = rotate_view(70)
+              if abs(side_pose["yaw"] - quarter_pose["yaw"]) < .75:
+                  raise SystemExit("Voidling three-quarter and side captures did not change viewing angle: " + repr({"quarter":quarter_pose,"side":side_pose}))
+              state_preview.screenshot(path=str(out / "voidling-view-side.png"), animations="disabled")
+              front_pose = rotate_view(-100)
+              if abs(front_pose["yaw"]) > .03:
+                  raise SystemExit("Voidling view capture did not return to the front: " + repr(front_pose))
+              rotation_toggle.click()
+              page.evaluate("document.getElementById('voidling-status-popover')?.remove()")
+              print("VOIDLING_3D_VIEW_SCREENSHOTS=" + repr({"front":"voidling-view-front.png","threequarter":"voidling-view-threequarter.png","side":"voidling-view-side.png","quarterPose":quarter_pose,"sidePose":side_pose,"restoredPose":front_pose}))
+              state_preview.evaluate("(e) => { e.dataset.state='online'; e.style.width=''; e.style.height=''; e.style.right=''; e.style.bottom=''; e.classList.remove('is-reacting'); }")
               # Exercise real panel-state mutation: error outranks loading and interaction,
               # then a healthy recovery returns the model to idle.
               status_cards = page.locator("#dashboardComponentStatus .dashboard-component")
