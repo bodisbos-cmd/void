@@ -117,25 +117,28 @@ add('liquid-chrome',tube(((.15,-.37,-.08),(.29,-.49,-.16),(.30,-.61,-.19),(.20,-
 
 # Broad cowl/crown blade. It rises from behind the hood and curls back toward
 # the face; the large ribbon silhouette is intentional, not a horn made from a tube.
-add('liquid-chrome',blade(((-.36,.52,.39),(-.49,1.10,.30),(.10,1.61,.065),(.44,1.16,.18)),.205,14,44,.055,.050))
+# Wider swept crown ribbon: attached at the upper-left shell, arcing over the head, and curling down the far side.
+add('liquid-chrome',blade(((-.54,.43,.54),(-.80,1.16,.30),(.12,1.72,.00),(.64,.88,.14)),.230,16,48,.035,.052))
 # Outer cheek fins flare from the hood and taper into soft tips.
-add('liquid-chrome',blade(((-.59,.22,.47),(-1.10,.47,.38),(-1.08,.91,.16),(-.63,1.02,.16)),.178,12,38,.045,.043))
-add('liquid-chrome',blade(((.55,.25,.45),(.99,.49,.35),(.98,.84,.16),(.64,.99,.16)),.158,12,36,.045,.040))
-# A shorter inner curl gives the front silhouette a layered, liquid-metal edge.
-add('liquid-chrome',blade(((-.61,.015,.48),(-.91,.20,.44),(-.86,.48,.35),(-.54,.65,.31)),.118,10,32,.055,.032))
-# Rear planes are offset in depth so the model reads as a creature from side/back views.
-add('liquid-chrome',blade(((-.47,.18,-.34),(-.83,.44,-.38),(-.72,.82,-.30),(-.35,.92,-.18)),.142,10,34,.045,.033))
-add('liquid-chrome',blade(((.47,.18,-.34),(.81,.43,-.38),(.72,.79,-.30),(.35,.90,-.18)),.132,10,34,.045,.032))
+# Shell-hugging cheek fins: keep them below the crown so they read as swept chrome edges, not round ears.
+add('liquid-chrome',blade(((-.61,.15,.49),(-1.03,.34,.42),(-1.05,.70,.20),(-.75,.78,.20)),.112,12,38,.035,.035))
+add('liquid-chrome',blade(((.57,.15,.46),(.95,.36,.38),(.91,.63,.20),(.70,.72,.16)),.095,12,36,.035,.032))
+# Smaller inner curls create a layered, hooked silhouette close to the shell.
+add('liquid-chrome',blade(((-.59,.00,.50),(-.91,.24,.44),(-.78,.50,.34),(-.50,.48,.42)),.078,10,32,.035,.029))
+# Rear planes remain offset in depth so the model still reads cleanly from side and back views.
+add('liquid-chrome',blade(((-.47,.18,-.34),(-.87,.42,-.38),(-.73,.82,-.30),(-.32,.93,-.18)),.155,10,34,.035,.036))
+add('liquid-chrome',blade(((.47,.18,-.34),(.84,.40,-.38),(.69,.77,-.30),(.32,.90,-.18)),.142,10,34,.035,.034))
 
 # One low curved band wraps the torso, then four broad ribbons form an orderly tail silhouette.
 add('liquid-chrome',blade(((-.18,-.35,.22),(-.55,-.25,.23),(-.62,-.49,.12),(-.31,-.64,.09)),.082,10,30,.06,.028))
+# Four distinct, wider S-curved ribbons that taper into flowing tips instead of thin straight tendrils.
 tails=[
- ((-.15,-.57,.20),(-.56,-.79,.35),(-.26,-1.10,.22),(-.82,-1.39,-.015)),
- ((-.06,-.62,.24),(-.34,-.87,.38),(-.04,-1.16,.24),(-.19,-1.49,.02)),
- ((.09,-.61,.22),(.46,-.83,.34),(.08,-1.14,.19),(.62,-1.39,-.03)),
- ((.23,-.55,.14),(.70,-.72,.23),(.40,-1.03,.09),(.88,-1.32,-.06)),
+ ((-.15,-.56,.20),(-.58,-.79,.34),(-.18,-1.11,.23),(-.78,-1.43,-.015)),
+ ((-.04,-.62,.25),(-.34,-.89,.39),(.02,-1.14,.21),(-.25,-1.52,.015)),
+ ((.10,-.61,.22),(.46,-.82,.34),(.08,-1.12,.18),(.56,-1.40,-.02)),
+ ((.23,-.55,.14),(.72,-.69,.24),(.34,-1.00,.08),(.95,-1.34,-.06)),
 ]
-for q,width in zip(tails,(.142,.128,.148,.116)):
+for q,width in zip(tails,(.170,.152,.171,.142)):
     add('liquid-chrome',blade(q,width,12,36,.035,.038))
 
 # Eyes are recessed, tapered luminous lenses aligned to the hood's front surface.
