@@ -108,8 +108,8 @@ def blade(q, width, sides=8, steps=28, tip=.035, thickness=.024, axis=(0.,0.,1.)
 # Reference-led silhouette: a large smooth hood, tucked torso, a single high crown
 # sweep, broad cheek flares, and a few layered liquid-metal tails.
 add('void-shell',ellipsoid((-.015,.25,0),(.86,.755,.655),40,64,True))
-add('void-shell',ellipsoid((0,-.535,.012),(.235,.292,.218),24,36,True))
-add('void-shell',ellipsoid((0,-.355,.045),(.145,.165,.145),20,28))
+# Fuller, softly tapered torso: the reference reads as one small pear-like body, not two stacked beads.
+add('void-shell',ellipsoid((0,-.49,.012),(.275,.305,.222),28,40,True))
 
 # A tucked, low-gloss connection rather than a bundle of thin wires.
 add('liquid-chrome',tube(((-.15,-.37,-.08),(-.29,-.49,-.16),(-.30,-.61,-.19),(-.20,-.70,-.12)),.024,8,22,.12))
@@ -125,6 +125,8 @@ add('liquid-chrome',blade(((-.61,.15,.49),(-1.03,.34,.42),(-1.05,.70,.20),(-.75,
 add('liquid-chrome',blade(((.57,.15,.46),(.95,.36,.38),(.91,.63,.20),(.70,.72,.16)),.095,12,36,.035,.032))
 # Smaller inner curls create a layered, hooked silhouette close to the shell.
 add('liquid-chrome',blade(((-.59,.00,.50),(-.91,.24,.44),(-.78,.50,.34),(-.50,.48,.42)),.078,10,32,.035,.029))
+# The signature cheek cowl sweeps across the near side of the face and hugs the shell instead of forming a separate ear.
+add('liquid-chrome',blade(((-.78,.20,.32),(-1.00,.32,.40),(-.79,-.08,.56),(-.48,-.02,.61)),.145,14,42,.025,.038))
 # Rear planes remain offset in depth so the model still reads cleanly from side and back views.
 add('liquid-chrome',blade(((-.47,.18,-.34),(-.87,.42,-.38),(-.73,.82,-.30),(-.32,.93,-.18)),.155,10,34,.035,.036))
 add('liquid-chrome',blade(((.47,.18,-.34),(.84,.40,-.38),(.69,.77,-.30),(.32,.90,-.18)),.142,10,34,.035,.034))
