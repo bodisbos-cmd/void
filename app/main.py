@@ -2978,7 +2978,7 @@ function createVoidlingRenderer(host,rotation){
   ].join('\n');
   const fragmentSource=[
    'precision mediump float;','uniform vec3 uColor;','uniform vec3 uRim;','uniform vec3 uEmissive;','uniform float uAlpha;','uniform float uShine;','varying vec3 vNormal;','varying vec3 vWorld;',
-   'void main(){vec3 n=normalize(vNormal);vec3 l=normalize(vec3(-0.42,0.62,1.0));vec3 l2=normalize(vec3(0.72,0.18,0.55));vec3 v=normalize(vec3(0.0,0.0,5.25)-vWorld);float d=max(dot(n,l),0.0);float d2=max(dot(n,l2),0.0);float s=pow(max(dot(reflect(-l,n),v),0.0),52.0)*uShine;float s2=pow(max(dot(reflect(-l2,n),v),0.0),38.0)*uShine*0.32;float rim=pow(1.0-max(dot(n,v),0.0),1.75);vec3 c=uColor*(0.12+0.31*d+0.12*d2)+vec3(0.72,0.79,0.96)*(s*0.88+s2*0.5)+uRim*rim*0.82+uEmissive;gl_FragColor=vec4(c,uAlpha);}'
+   'void main(){vec3 n=normalize(vNormal);vec3 l=normalize(vec3(-0.42,0.62,1.0));vec3 l2=normalize(vec3(0.72,0.18,0.55));vec3 l3=normalize(vec3(-0.82,-0.16,0.72));vec3 v=normalize(vec3(0.0,0.0,4.65)-vWorld);float d=max(dot(n,l),0.0);float d2=max(dot(n,l2),0.0);float s=pow(max(dot(reflect(-l,n),v),0.0),78.0)*uShine;float s2=pow(max(dot(reflect(-l2,n),v),0.0),31.0)*uShine*0.34;float s3=pow(max(dot(reflect(-l3,n),v),0.0),112.0)*uShine*0.58;float soft=pow(max(dot(reflect(-l,n),v),0.0),7.0)*uShine*0.075;float rim=pow(1.0-max(dot(n,v),0.0),1.65);vec3 c=uColor*(0.075+0.25*d+0.095*d2)+vec3(0.83,0.88,1.0)*(s*0.85+s2*0.40+s3*0.70)+vec3(0.27,0.32,0.44)*soft+uRim*rim*0.88+uEmissive;gl_FragColor=vec4(c,uAlpha);}'
   ].join('\n');
   function compile(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const error=gl.getShaderInfoLog(s)||'shader compile failed';gl.deleteShader(s);throw new Error(error)}return s}
   const vs=compile(gl.VERTEX_SHADER,vertexSource),fs=compile(gl.FRAGMENT_SHADER,fragmentSource);program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program)||'program link failed');
@@ -3050,8 +3050,8 @@ function createVoidlingRenderer(host,rotation){
   function schedule(){if(!disposed&&!rafId&&document.visibilityState!=='hidden')rafId=requestAnimationFrame(frame)}
   function burst(){const now=performance.now();particles=[];for(let i=0;i<16;i++)particles.push({a:i/16*Math.PI*2+(Math.random()-.5)*.28,b:(Math.random()-.5)*1.35,start:now,life:reduceMotion?120:760});dirty=true;schedule()}
   function frame(now){rafId=0;if(disposed||document.visibilityState==='hidden')return;if(reduceMotion&&!dirty&&!particles.length)return;if(!reduceMotion&&now-lastFrame<33){schedule();return}lastFrame=now;dirty=false;gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(program);
-   const w=canvas.width||1,h=canvas.height||1,proj=projection(w/h),view=trans(0,0,-5.25),vp=mul(proj,view),state=host.dataset.state||'online',t=reduceMotion?0:now*.001,pose=rotation(),bob=reduceMotion?0:Math.sin(t*1.9)*.035;
-   const faultMotion=state==='error'&&!reduceMotion?Math.sin(t*18)*.035:0;const root=mul(trans(state==='error'&&!reduceMotion?Math.sin(t*15)*.025:0,bob,0),mul(ry(pose.yaw+(reduceMotion?0:Math.sin(t*.68)*.045)+faultMotion),mul(rx(pose.pitch+(reduceMotion?0:Math.sin(t*.54)*.022)+(state==='error'&&!reduceMotion?-.07:state==='checking'&&!reduceMotion?Math.sin(t*2.4)*.045:0)),scaleM(.86,.86,.86))));
+   const w=canvas.width||1,h=canvas.height||1,proj=projection(w/h),view=trans(0,0,-4.65),vp=mul(proj,view),state=host.dataset.state||'online',t=reduceMotion?0:now*.001,pose=rotation(),bob=reduceMotion?0:Math.sin(t*1.9)*.035;
+   const faultMotion=state==='error'&&!reduceMotion?Math.sin(t*18)*.035:0;const root=mul(trans(state==='error'&&!reduceMotion?Math.sin(t*15)*.025:0,bob,0),mul(ry(pose.yaw+(reduceMotion?0:Math.sin(t*.68)*.045)+faultMotion),mul(rx(pose.pitch+(reduceMotion?0:Math.sin(t*.54)*.022)+(state==='error'&&!reduceMotion?-.07:state==='checking'&&!reduceMotion?Math.sin(t*2.4)*.045:0)),scaleM(.92,.92,.92))));
    let rim=[.24,.31,.52],glow=[.025,.04,.085],eye=[.78,.84,1],eyeGlow=[.42,.52,.9];
    if(state==='checking'){rim=[.40,.28,.92];glow=[.11,.045,.30];eye=[.83,.80,1];eyeGlow=[.48,.37,1]}
    if(state==='error'){rim=[.72,.10,.14];glow=[.075,.004,.012];eye=[1,.24,.28];eyeGlow=[1,.055,.075]}
@@ -3066,8 +3066,8 @@ function createVoidlingRenderer(host,rotation){
      if(n==='eye-happy'&&state!=='checking'&&state!=='reacting')return;
      if(n==='eye-angry'&&state!=='error')return;
      let c=[.055,.065,.09],hr=[.48,.53,.63],em=glow,shine=1.1,alpha=.98;
-     if(n==='void-shell'){c=state==='sleep'?[.055,.060,.075]:[.035,.043,.060];hr=rim;em=glow;shine=1.25}
-     else if(n==='liquid-chrome'){c=[.075,.085,.115];hr=[.58,.64,.76];em=state==='error'?[.025,.002,.005]:glow;shine=1.45}
+     if(n==='void-shell'){c=state==='sleep'?[.030,.034,.046]:[.014,.019,.030];hr=rim;em=glow;shine=1.55}
+     else if(n==='liquid-chrome'){c=[.040,.050,.077];hr=[.68,.74,.88];em=state==='error'?[.025,.002,.005]:glow;shine=1.85}
      else if(n==='eye-open'||n==='eye-happy'||n==='eye-closed'||n==='eye-angry'){
       c=eye;hr=rim;em=eyeGlow;shine=.88;alpha=1;
      }else if(n==='eye-glint'){c=[1,1,1];hr=[1,1,1];em=[.9,.94,1];shine=.25;alpha=.98}

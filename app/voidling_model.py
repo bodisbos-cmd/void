@@ -77,14 +77,45 @@ def almond(center,rx,ry,depth,tilt=0.,rings=7,sides=24):
         f.extend(((a,b,c),(b,d,c)))
     return p,n,f
 
+def blade(q, width, sides=8, steps=28, tip=.035, thickness=.024, axis=(0.,0.,1.)):
+    """Swept, double-sided leaf/ribbon mesh for the character's flowing chrome fins."""
+    p=[]; n=[]; f=[]
+    across=sides+1
+    for face in (1.,-1.):
+        offset=len(p)
+        for i in range(steps+1):
+            t=i/steps; u=1-t
+            c=tuple(u**3*q[0][k]+3*u*u*t*q[1][k]+3*u*t*t*q[2][k]+t**3*q[3][k] for k in range(3))
+            tangent=unit(tuple(3*u*u*(q[1][k]-q[0][k])+6*u*t*(q[2][k]-q[1][k])+3*t*t*(q[3][k]-q[2][k]) for k in range(3)))
+            ref=axis if abs(sum(tangent[k]*axis[k] for k in range(3)))<.90 else (0.,1.,0.)
+            lateral=unit(cross(tangent,ref)); normal=unit(cross(lateral,tangent))
+            profile=tip+(1.-tip)*(max(0.,math.sin(math.pi*t))**.58)
+            for j in range(across):
+                v=2*j/sides-1
+                breadth=width*profile*(1.-.18*v*v)
+                camber=thickness*profile*math.sqrt(max(0.,1-v*v))*.55
+                pos=addv(addv(c,mulv(lateral,v*breadth)),mulv(normal,face*camber))
+                p.append(pos); n.append(unit(addv(mulv(normal,face),mulv(lateral,-v*.13))))
+        for i in range(steps):
+            for j in range(sides):
+                a=offset+i*across+j; b=a+across; c=a+1; d=b+1
+                f.extend(((a,b,c),(c,b,d)))
+    return p,n,f
+
 # Main dark-chrome shell, smaller torso, and organic shoulder connector.
-add('void-shell',ellipsoid((0,.26,0),(.755,.77,.625),25,40,True))
+add('void-shell',ellipsoid((-.015,.27,0),(.82,.80,.655),28,44,True))
 add('void-shell',ellipsoid((0,-.57,.025),(.30,.39,.265),18,28,True))
 add('void-shell',ellipsoid((0,-.315,.015),(.205,.18,.19),16,24))
 for s in (-1,1):
     add('liquid-chrome',tube(((s*.48,.28,.12),(s*.88,.53,.19),(s*.63,.99,.12),(s*.18,1.15,.05)),.105,10,26,.10))
     add('liquid-chrome',tube(((s*.59,.03,.16),(s*.96,.32,.20),(s*.67,.69,.16),(s*.25,.67,.23)),.068,9,24,.12))
     add('liquid-chrome',tube(((s*.35,-.36,.05),(s*.73,-.60,.16),(s*.47,-.93,.20),(s*.18,-1.12,.10)),.067,9,24,.08))
+# Broad swept shell blades are actual curved surfaces, not thin tubes or painted effects.
+add('liquid-chrome',blade(((-.58,.29,.39),(-.98,.52,.32),(-.78,.94,.20),(-.39,1.13,.12)),.145,9,30,.045,.022))
+add('liquid-chrome',blade(((-.43,.55,.21),(-.55,1.09,.09),(-.06,1.36,.015),(.35,1.05,.12)),.105,9,30,.05,.020))
+add('liquid-chrome',blade(((.54,.27,.29),(.94,.51,.18),(.89,.94,.07),(.57,1.13,.045)),.105,8,28,.045,.020))
+add('liquid-chrome',blade(((-.69,.08,.40),(-.94,.28,.36),(-.86,.60,.28),(-.58,.79,.31)),.112,8,25,.06,.019))
+add('liquid-chrome',blade(((.58,.03,.38),(.82,.28,.32),(.78,.52,.25),(.57,.68,.27)),.085,8,24,.06,.017))
 tails=[
  ((-.19,-.69,.04),(-.52,-.91,.22),(-.27,-1.25,.16),(-.61,-1.47,.04)),
  ((-.055,-.72,.11),(-.19,-1.03,.24),(.14,-1.22,.14),(.08,-1.48,.07)),
@@ -94,6 +125,12 @@ tails=[
  ((.015,-.79,-.12),(.28,-1.01,-.25),(-.08,-1.25,-.14),(-.22,-1.45,-.055)),
 ]
 for i,q in enumerate(tails):add('liquid-chrome',tube(q,.079 if i in (1,5) else .067,8,24,.035))
+# Fine pointed blades underlay the rounded filaments to create the layered liquid-metal silhouette.
+for i,q in enumerate(tails):
+    if i in (0,1,2,3,4):
+        add('liquid-chrome',blade(q,.083 if i in (1,2,4) else .071,7,27,.025,.020))
+add('liquid-chrome',blade(((-.32,-.49,.15),(-.69,-.69,.27),(-.46,-.99,.19),(-.30,-1.28,.10)),.091,7,25,.035,.021))
+add('liquid-chrome',blade(((.29,-.48,.15),(.59,-.72,.23),(.52,-.99,.11),(.69,-1.23,.055)),.082,7,25,.035,.019))
 for s in (-1,1):
     add('liquid-chrome',tube(((s*.27,-.39,.10),(s*.56,-.34,.32),(s*.64,-.55,.29),(s*.42,-.73,.18)),.048,8,22,.1,(.50,1.,1.)))
 # State-specific eye meshes keep the five faces as actual geometry in the model.
@@ -107,8 +144,8 @@ for s in (-1,1):
     add('eye-angry',tube(q,.031,7,20,.90,(.65,1.,1.)))
 
 MAT={
- 'void-shell':{'base':[.018,.023,.034,1.],'metal':.96,'rough':.16,'emit':[.004,.006,.012]},
- 'liquid-chrome':{'base':[.075,.09,.13,1.],'metal':.92,'rough':.22,'emit':[.012,.017,.03]},
+ 'void-shell':{'base':[.009,.012,.020,1.],'metal':.98,'rough':.105,'emit':[.002,.003,.007]},
+ 'liquid-chrome':{'base':[.040,.050,.077,1.],'metal':.96,'rough':.155,'emit':[.006,.010,.020]},
  'eye-open':{'base':[.83,.88,1.,1.],'metal':.1,'rough':.12,'emit':[.52,.62,.92]},
  'eye-glint':{'base':[1.,1.,1.,1.],'metal':0.,'rough':.08,'emit':[.9,.95,1.]},
  'eye-closed':{'base':[.76,.82,1.,1.],'metal':.18,'rough':.15,'emit':[.25,.32,.56]},
