@@ -280,17 +280,34 @@ jobs:
               sidebar_logo = page.evaluate("""() => {
                 const brand=document.querySelector('#sidebar>.side-brand');
                 const caption=document.querySelector('#sidebar>.side-caption.side-caption-top');
+                const brandStyle=brand?getComputedStyle(brand):null;
+                const wordmark=brand?.querySelector('.brand-name');
+                const wordmarkStyle=wordmark?getComputedStyle(wordmark):null;
                 return {
-                  brandDisplay:brand?getComputedStyle(brand).display:null,
-                  brandVisible:!!brand && brand.getClientRects().length>0 && getComputedStyle(brand).visibility!=='hidden',
+                  brandDisplay:brandStyle?.display||null,
+                  brandVisible:!!brand && brand.getClientRects().length>0 && brandStyle.visibility!=='hidden',
                   brandText:brand?.innerText?.trim()||'',
+                  brandBackground:brandStyle?.backgroundColor||null,
+                  brandBackgroundImage:brandStyle?.backgroundImage||null,
+                  brandBorder:brandStyle?.borderStyle||null,
+                  brandBoxShadow:brandStyle?.boxShadow||null,
+                  wordmarkBackground:wordmarkStyle?.backgroundColor||null,
+                  wordmarkBackgroundImage:wordmarkStyle?.backgroundImage||null,
+                  wordmarkBorder:wordmarkStyle?.borderStyle||null,
+                  wordmarkBoxShadow:wordmarkStyle?.boxShadow||null,
                   captionDisplay:caption?getComputedStyle(caption).display:null,
                   repeatedSidebarMark:document.querySelectorAll('.sidebar .side-brand .abyss-logo-mark, .sidebar .side-brand .abyss-logo-image').length
                 };
               }""")
               print("SIDEBAR_REFERENCE_LOGO=" + repr(sidebar_logo))
-              if not sidebar_logo["brandVisible"] or "AbyssTunnel" not in sidebar_logo["brandText"] or sidebar_logo["captionDisplay"] != "none" or sidebar_logo["repeatedSidebarMark"] != 0:
-                  raise SystemExit("Desktop sidebar brand/header does not match the approved reference: " + repr(sidebar_logo))
+              const sidebarPlainBackground = value => value === 'rgba(0, 0, 0, 0)' || value === 'transparent';
+              if (!sidebar_logo["brandVisible"] || !sidebar_logo["brandText"].includes("AbyssTunnel") || sidebar_logo["captionDisplay"] !== "none" || sidebar_logo["repeatedSidebarMark"] !== 0
+                  || !sidebarPlainBackground(sidebar_logo["brandBackground"]) || sidebar_logo["brandBackgroundImage"] !== "none"
+                  || sidebar_logo["brandBorder"] !== "none" || sidebar_logo["brandBoxShadow"] !== "none"
+                  || !sidebarPlainBackground(sidebar_logo["wordmarkBackground"]) || sidebar_logo["wordmarkBackgroundImage"] !== "none"
+                  || sidebar_logo["wordmarkBorder"] !== "none" || sidebar_logo["wordmarkBoxShadow"] !== "none") {
+                  raise SystemExit("Desktop sidebar brand must be plain text without a logo, box, background, border or shadow: " + repr(sidebar_logo))
+              }
               capture_screenshot(page, out / "02-dashboard-desktop.png", full_page=False)
               for nav, filename in [("clients","03-users-desktop.png"),("create","04-create-desktop.png"),("servers","05-servers-desktop.png"),("protocols","06-protocols-desktop.png"),("reports","07-reports-desktop.png"),("settings","08-settings-desktop.png")]:
                   locator = page.locator('[data-nav="' + nav + '"]').first
