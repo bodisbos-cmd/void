@@ -190,8 +190,9 @@ def test_subscription_diagnostics_help_and_official_downloads(client):
 
 
 def test_profile_feedback_accepts_and_validates_measured_latency(client):
-    admin_login(client)
-    created = client.post("/api/clients", json={"name": "latency feedback user"})
+    csrf = admin_login(client)
+    created = client.post("/api/clients", json={"name": "latency feedback user"},
+                          headers={"X-CSRF-Token": csrf})
     assert created.status_code == 200, created.text
     info = client.get(f"/api/clients/{created.json()['id']}/subscription").json()
     token = info["page_url"].rsplit("/", 1)[1]
