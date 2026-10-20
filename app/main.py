@@ -3042,21 +3042,8 @@ html body main.app-shell .workspace .client-card{
 
  /* Mobile drawer fixes: one control at a time, no repeated brand image, and one scrollable drawer. */
  @media(max-width:850px){
-  html body main.app-shell>#menuToggle{
-   position:fixed!important;top:max(12px,env(safe-area-inset-top))!important;
-   left:auto!important;right:12px!important;z-index:10021!important;
-   display:flex!important;align-items:center!important;justify-content:center!important;
-   width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;
-   margin:0!important;padding:0!important;border-radius:12px!important;
-   font-family:system-ui,sans-serif!important;font-size:22px!important;line-height:1!important;
-   color:var(--ab-text)!important;background:rgba(15,15,16,.94)!important;
-   border:1px solid rgba(190,193,200,.25)!important;box-shadow:0 8px 24px rgba(0,0,0,.3)!important;
-   backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;
-   transition:opacity .16s ease,transform .16s ease!important
-  }
-  html body.abyss-menu-open main.app-shell>#menuToggle{
-   visibility:hidden!important;opacity:0!important;pointer-events:none!important;transform:scale(.9)!important
-  }
+  /* The duplicate floating menu button is removed; close the drawer using its own X control. */
+  html body main.app-shell>#menuToggle{display:none!important}
   html body main.app-shell>aside.sidebar{
    overflow-y:auto!important;overflow-x:hidden!important;
    -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important
@@ -3068,13 +3055,14 @@ html body main.app-shell .workspace .client-card{
    background:linear-gradient(180deg,rgba(7,7,8,.99),rgba(7,7,8,.96))!important;
    border-bottom:1px solid rgba(185,188,194,.14)!important
   }
+  /* The logo is only shown on the login panel. */
   html body main.app-shell>aside.sidebar>.side-brand .abyss-logo-mark,
-  html body main.app-shell>aside.sidebar>.side-brand .abyss-logo-image{display:none!important}
-  html body main.app-shell>aside.sidebar>.side-brand .brand-name{flex:1 1 auto!important;min-width:0!important}
-  html body main.app-shell>aside.sidebar>.side-nav{
-   flex:0 0 auto!important;min-height:auto!important;overflow:visible!important;
-   overscroll-behavior:visible!important;padding-bottom:8px!important
-  }
+  html body main.app-shell>aside.sidebar>.side-brand .abyss-logo-image,
+  html body main.app-shell>aside.sidebar>.side-brand .brand-name{display:none!important}
+  html body main.app-shell>aside.sidebar>.side-brand{justify-content:flex-end!important;min-height:50px!important}
+  html body main.app-shell>aside.sidebar>.side-nav{display:flex!important;flex-direction:column!important;flex:0 0 auto!important;min-height:max-content!important;height:auto!important;overflow:visible!important;overscroll-behavior:visible!important;padding-bottom:24px!important}
+  html body main.app-shell>aside.sidebar{display:flex!important;flex-direction:column!important;min-height:0!important}
+  html body main.app-shell>aside.sidebar>.side-caption,html body main.app-shell>aside.sidebar>.side-nav,html body main.app-shell>aside.sidebar>.sidebar-account-badge{flex-shrink:0!important}
   html body main.app-shell>aside.sidebar>.side-caption.side-caption-top{padding-top:8px!important}
   html body main.app-shell>aside.sidebar>.side-brand .sidebar-close{
    position:static!important;inset:auto!important;display:flex!important;
