@@ -184,6 +184,40 @@ def test_subscription_diagnostics_help_and_official_downloads(client):
     assert 'data-mark="ok"' in page.text and 'data-mark="fail"' in page.text
     assert "abyss-profile-results:" in page.text
     assert "به‌صورت آماری برای پیشنهادهای اپراتور ثبت می‌شود" in page.text
+    assert "data-latency-save" in page.text
+    assert "data-latency-input" in page.text
+    assert "پینگ پایین‌تر و موفقیت بیشتر" in page.text
+
+
+def test_profile_feedback_accepts_and_validates_measured_latency(client):
+    admin_login(client)
+    created = client.post("/api/clients", json={"name": "latency feedback user"})
+    assert created.status_code == 200, created.text
+    info = client.get(f"/api/clients/{created.json()['id']}/subscription").json()
+    token = info["page_url"].rsplit("/", 1)[1]
+
+    saved = client.post(f"/sub/{token}/feedback", json={
+        "carrier": "mci", "profile_key": "ws", "result": "ok", "latency_ms": 73,
+    })
+    assert saved.status_code == 200, saved.text
+    with panel.db() as conn:
+        row = conn.execute(
+            "SELECT latency_ms,result FROM profile_feedback WHERE client_id=? AND carrier=? AND profile_key=?",
+            (created.json()["id"], "mci", "ws"),
+        ).fetchone()
+    assert row["latency_ms"] == 73
+    assert row["result"] == "ok"
+
+    for invalid in (0, 60001, True, "73"):
+        response = client.post(f"/sub/{token}/feedback", json={
+            "carrier": "mci", "profile_key": "ws", "result": "ok", "latency_ms": invalid,
+        })
+        assert response.status_code == 422
+
+    mismatch = client.post(f"/sub/{token}/feedback", json={
+        "carrier": "mci", "profile_key": "ws", "result": "fail", "latency_ms": 73,
+    })
+    assert mismatch.status_code == 422
 
 
 def test_dashboard_injects_hamburger_api_backup_and_metrics(client):
