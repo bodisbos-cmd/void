@@ -3067,7 +3067,7 @@ html body main.app-shell .workspace .client-card{
    background:linear-gradient(180deg,rgba(7,7,8,.99),rgba(7,7,8,.96))!important;
    border-bottom:1px solid rgba(185,188,194,.14)!important
   }
-  /* Keep the brand signature in the drawer, without duplicating the login-page artwork. */
+  /* The logo is reserved for login; keep the drawer header minimal. */
   html body main.app-shell>aside.sidebar>.side-brand .abyss-logo-mark,
   html body main.app-shell>aside.sidebar>.side-brand .abyss-logo-image{display:none!important}
   html body main.app-shell>aside.sidebar>.side-brand .brand-name{display:flex!important;flex:1 1 auto!important;min-width:0!important}
@@ -3077,13 +3077,17 @@ html body main.app-shell .workspace .client-card{
   html body main.app-shell>aside.sidebar>.side-caption,html body main.app-shell>aside.sidebar>.side-nav,html body main.app-shell>aside.sidebar>.sidebar-account-badge{flex-shrink:0!important}
   html body main.app-shell>aside.sidebar>.side-caption.side-caption-top{padding-top:8px!important}
   html body main.app-shell>aside.sidebar>.side-brand .sidebar-close{
-   position:static!important;inset:auto!important;display:flex!important;
-   flex:0 0 38px!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
-   margin:0!important;padding:0!important;border-radius:12px!important;
-   align-items:center!important;justify-content:center!important;
-   background:rgba(255,255,255,.055)!important;border:1px solid rgba(190,192,198,.22)!important;
-   color:var(--ab-text)!important;font-size:25px!important;line-height:1!important;box-shadow:none!important;z-index:10015!important
+   position:absolute!important;top:8px!important;right:8px!important;inset-inline-start:auto!important;
+   display:flex!important;flex:0 0 24px!important;width:24px!important;height:28px!important;
+   min-width:24px!important;min-height:28px!important;margin:0!important;padding:0!important;
+   border-radius:0!important;align-items:center!important;justify-content:center!important;
+   background:transparent!important;border:0!important;outline:0!important;
+   color:var(--ab-text)!important;font-family:Arial,sans-serif!important;font-size:27px!important;
+   font-weight:300!important;line-height:1!important;box-shadow:none!important;backdrop-filter:none!important;
+   -webkit-backdrop-filter:none!important;z-index:10015!important
   }
+  html body main.app-shell>aside.sidebar>.side-brand{position:relative!important;padding-right:34px!important}
+  html body main.app-shell>aside.sidebar>.side-brand .brand-name{display:none!important}
  }
  @media(min-width:851px){html body main.app-shell .sidebar-close{display:none!important}}
 
