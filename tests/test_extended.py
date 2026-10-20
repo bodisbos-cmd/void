@@ -179,14 +179,13 @@ def test_subscription_diagnostics_help_and_official_downloads(client):
     assert "xhttp-auto" in page.text and "xhttp-packet-up" in page.text
     assert "xhttp-stream-up" not in page.text and "xhttp-stream-one" not in page.text
     assert "Trojan" in page.text and "VMess" in page.text and "Shadowsocks 2022" in page.text
-    assert 'id="carrierSelect"' in page.text
+    assert 'id="measureProfileLatency"' in page.text
     assert 'data-profile-choice="ws"' in page.text
-    assert 'data-mark="ok"' in page.text and 'data-mark="fail"' in page.text
-    assert "abyss-profile-results:" in page.text
-    assert "به‌صورت آماری برای پیشنهادهای همان اپراتور ثبت می‌شود" in page.text
-    assert "data-latency-save" in page.text
-    assert "data-latency-input" in page.text
-    assert "پینگ پایین‌تر و موفقیت بیشتر" in page.text
+    assert "سنجش تأخیر و مرتب‌سازی" in page.text
+    assert "زمان پاسخ مسیرها از سمت سرور" in page.text
+    assert "data-latency-save" not in page.text
+    assert "data-latency-input" not in page.text
+    assert 'data-mark="ok"' not in page.text and 'data-mark="fail"' not in page.text
 
 
 def test_profile_feedback_accepts_and_validates_measured_latency(client):
