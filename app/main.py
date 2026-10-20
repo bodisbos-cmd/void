@@ -3225,6 +3225,24 @@ html body main.app-shell>.workspace>.top>.abyss-brand-row .brand-name{
   margin:0!important;padding:0!important;background:transparent!important;
   border:0!important;box-shadow:none!important
 }
+/* Final safeguard: the menu wordmark is plain text, never a boxed logo or image. */
+html body main.app-shell>aside.sidebar>.side-brand,
+html body main.app-shell>aside.sidebar>.side-brand .brand-name,
+html body main.app-shell>aside.sidebar>.side-brand .brand-name small{
+  background:transparent!important;background-image:none!important;
+  border:0!important;border-radius:0!important;outline:0!important;
+  box-shadow:none!important;filter:none!important;
+}
+html body main.app-shell>aside.sidebar>.side-brand:before,
+html body main.app-shell>aside.sidebar>.side-brand:after,
+html body main.app-shell>aside.sidebar>.side-brand .brand-name:before,
+html body main.app-shell>aside.sidebar>.side-brand .brand-name:after{
+  content:none!important;display:none!important;
+}
+html body main.app-shell>aside.sidebar>.side-brand img,
+html body main.app-shell>aside.sidebar>.side-brand svg{
+  display:none!important;
+}
 </style>"""
 
 
