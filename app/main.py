@@ -35,6 +35,30 @@ DATA_DIR=Path(os.getenv("DATA_DIR","/data")); DATA_DIR.mkdir(parents=True,exist_
 DB_PATH=DATA_DIR/"panel.sqlite3"; XRAY_CONFIG=DATA_DIR/"xray.json"
 XRAY_BIN=os.getenv("XRAY_BIN","/usr/local/bin/xray"); PUBLIC_DOMAIN=os.getenv("RAILWAY_PUBLIC_DOMAIN","").strip()
 BASE_URL=os.getenv("BASE_URL","").strip().rstrip("/")
+
+def configured_support_url():
+    """Return a validated optional support URL from the environment."""
+    value=os.getenv("SUPPORT_URL","").strip()
+    if not value or any(ord(char) <= 32 for char in value):
+        return ""
+    try:
+        parsed=urlsplit(value)
+        _=parsed.port
+    except ValueError:
+        return ""
+    if parsed.scheme.lower() not in ("http","https") or not parsed.hostname or parsed.username is not None or parsed.password is not None:
+        return ""
+    return value
+
+
+def inject_support_links(page):
+    """Wire support anchors only when a valid administrator-provided URL exists."""
+    url=configured_support_url()
+    if not url or not isinstance(page,str):
+        return page
+    safe=html_escape(url,quote=True)
+    return page.replace('href="#support-link-not-configured"',f'href="{safe}" target="_blank" rel="noopener noreferrer"')
+
 LOG=logging.getLogger("void"); logging.basicConfig(level=os.getenv("LOG_LEVEL","INFO").upper())
 xray_proc=None; xray_lock=asyncio.Lock(); restore_lock=asyncio.Lock()
 
@@ -3227,12 +3251,12 @@ async def abyss_brand_logo():
 @app.get("/",response_class=HTMLResponse)
 async def home(r:Request):
     if r.session.get("admin") is True or r.session.get("reseller_id"):
-        return HTMLResponse(DASH,headers={"Cache-Control":"no-store, max-age=0","Pragma":"no-cache","Vary":"Cookie"})
+        return HTMLResponse(inject_support_links(DASH),headers={"Cache-Control":"no-store, max-age=0","Pragma":"no-cache","Vary":"Cookie"})
     return RedirectResponse("/login",303)
 @app.get("/login",response_class=HTMLResponse)
 async def login_page(r:Request):
     t=secrets.token_urlsafe(24); r.session["login_csrf"]=t
-    return HTMLResponse(LOGIN.replace("{{ERROR}}","").replace("{{CSRF}}",t))
+    return HTMLResponse(inject_support_links(LOGIN.replace("{{ERROR}}","").replace("{{CSRF}}",t)))
 @app.post("/login")
 async def login(r:Request,username:str=Form(...),password:str=Form(...)):
     f=await r.form(); a=str(f.get("csrf_token","")); b=str(r.session.get("login_csrf",""))
@@ -3681,7 +3705,7 @@ const clientUsageHistory=__USAGE_HISTORY__;
  draw();
 })();
 </script><script id="abyss-profile-results">(()=>{const select=document.getElementById('carrierSelect'),list=document.getElementById('profileChoices');if(!select||!list)return;const prefix='abyss-profile-results:';const storageKey=()=>prefix+select.value;const read=()=>{try{return JSON.parse(localStorage.getItem(storageKey())||'{}')}catch(e){return {}}};function paint(){const data=read();list.querySelectorAll('[data-profile-choice]').forEach(card=>{const key=card.dataset.profileChoice,value=data[key]||'';card.querySelectorAll('[data-mark]').forEach(b=>b.dataset.selected=String(b.dataset.mark===value));const out=card.querySelector('[data-result]');if(out)out.textContent=value==='ok'?'برای این شبکه موفق بود':value==='fail'?'برای این شبکه ناموفق بود':''});const cards=[...list.querySelectorAll('[data-profile-choice]')];cards.sort((a,b)=>{const rank=x=>({ok:0,'':1,fail:2})[data[x.dataset.profileChoice]||''];return rank(a)-rank(b)});cards.forEach(x=>list.appendChild(x))}select.value=localStorage.getItem(prefix+'carrier')||'auto';select.addEventListener('change',()=>{localStorage.setItem(prefix+'carrier',select.value);paint()});list.querySelectorAll('[data-mark]').forEach(b=>b.addEventListener('click',async()=>{const d=read();d[b.dataset.profile]=b.dataset.mark;localStorage.setItem(storageKey(),JSON.stringify(d));paint();try{await fetch(location.pathname+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({carrier:select.value,profile_key:b.dataset.profile,result:b.dataset.mark})})}catch(e){}}));paint()})();</script></body></html>"""
-    return (template.replace("__SUB_URL__",html_escape(sub_url,quote=True))
+    return inject_support_links((template.replace("__SUB_URL__",html_escape(sub_url,quote=True))
         .replace("__CLIENT_NAME__",html_escape(client["name"]))
         .replace("__PROFILE_SUMMARY__",html_escape(profile_summary))
         .replace("__CREATED__",html_escape(created_display))
@@ -3694,7 +3718,7 @@ const clientUsageHistory=__USAGE_HISTORY__;
         .replace("__COUNT__",str(len(links)))
         .replace("__QR_URL__",html_escape(qr_url,quote=True))
         .replace("__USAGE_HISTORY__",json.dumps(usage_history,separators=(",",":")))
-        .replace("__SUB_JSON__",json.dumps(sub_url))).replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>",ABYSS_THEME_CSS+ABYSS_THEME_POLISH_CSS+"<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>",ABYSS_THEME_JS+"</body>")
+        .replace("__SUB_JSON__",json.dumps(sub_url))).replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>",ABYSS_THEME_CSS+ABYSS_THEME_POLISH_CSS+"<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>",ABYSS_THEME_JS+"</body>"))
 
 @app.get("/api/clients/{cid}/subscription")
 async def subscription_link(cid:str,r:Request):
