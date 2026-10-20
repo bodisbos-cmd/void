@@ -568,7 +568,7 @@ jobs:
                   raise SystemExit("Mobile drawer account overlaps navigation: " + repr(drawer_layers))
               if drawer_layers["account"]["top"] < drawer_layers["caption"]["bottom"] - 1:
                   raise SystemExit("Mobile drawer creator label overlaps account identity: " + repr(drawer_layers))
-              if drawer_layers["links"] and drawer_layers["caption"]["bottom"] > drawer_layers["links"]["top"] + 1:
+              if drawer_layers["links"] and drawer_layers["links"]["bottom"] > drawer_layers["caption"]["top"] + 1:
                   raise SystemExit("Mobile drawer utility links overlap creator label: " + repr(drawer_layers))
               if drawer_layers["menuOpen"] is not True or drawer_layers["menuVisibility"] != "hidden" or drawer_layers["menuLabel"] != "☰":
                   raise SystemExit("The floating menu trigger must be icon-only and hidden while the drawer is open: " + repr(drawer_layers))
