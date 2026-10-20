@@ -615,7 +615,7 @@ jobs:
                 return {scrollTop:sidebar.scrollTop,scrollHeight:sidebar.scrollHeight,clientHeight:sidebar.clientHeight,
                   reachedEnd:sidebar.scrollTop+sidebar.clientHeight>=sidebar.scrollHeight-2,
                   actionsVisible:inside(actions),closeVisible:inside(close),
-                  stickyHeaderOpaque:!!headerStyle&&headerStyle.position==='sticky'&&headerStyle.backgroundImage.includes('linear-gradient')};
+                  stickyHeaderOpaque:!!headerStyle&&headerStyle.position==='sticky'&&(()=>{const color=headerStyle.backgroundColor;const match=color.match(/rgba?\\([^)]*(?:,\\s*([0-9.]+))?\\)/);return headerStyle.backgroundImage==='none'&&!!match&&(match[1]===undefined||Number(match[1])>=0.99)})()};
               }""")
               print("MOBILE_DRAWER_BOTTOM=" + repr(drawer_bottom))
               if drawer_bottom["scrollHeight"] > drawer_bottom["clientHeight"] + 1:
