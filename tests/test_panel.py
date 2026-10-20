@@ -1079,5 +1079,6 @@ def test_global_search_targets_panel_actions_and_keeps_client_filter_separate(cl
     assert 'id="search" placeholder="جست‌وجوی نام یا شناسه…"' in page
     assert 'https://github.com/bodisbos-cmd/Void/stargazers' in page
     assert '◇ حمایت از پروژه' in page
-    assert "aside.sidebar>.side-brand{display:none!important}" in page
+    assert "aside.sidebar>.side-brand{display:flex!important;visibility:visible!important;opacity:1!important}" in page
+    assert "aside.sidebar>.side-caption.side-caption-top{display:none!important}" in page
     assert "aside.sidebar>.abyss-utility-links" in page
