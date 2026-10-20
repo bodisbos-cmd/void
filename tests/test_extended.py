@@ -179,11 +179,45 @@ def test_subscription_diagnostics_help_and_official_downloads(client):
     assert "xhttp-auto" in page.text and "xhttp-packet-up" in page.text
     assert "xhttp-stream-up" not in page.text and "xhttp-stream-one" not in page.text
     assert "Trojan" in page.text and "VMess" in page.text and "Shadowsocks 2022" in page.text
-    assert 'id="carrierSelect"' in page.text
+    assert 'id="measureProfileLatency"' in page.text
     assert 'data-profile-choice="ws"' in page.text
-    assert 'data-mark="ok"' in page.text and 'data-mark="fail"' in page.text
-    assert "abyss-profile-results:" in page.text
-    assert "به‌صورت آماری برای پیشنهادهای اپراتور ثبت می‌شود" in page.text
+    assert "سنجش تأخیر و مرتب‌سازی" in page.text
+    assert "زمان پاسخ مسیرها از سمت سرور" in page.text
+    assert "data-latency-save" not in page.text
+    assert "data-latency-input" not in page.text
+    assert 'data-mark="ok"' not in page.text and 'data-mark="fail"' not in page.text
+
+
+def test_profile_feedback_accepts_and_validates_measured_latency(client):
+    csrf = admin_login(client)
+    created = client.post("/api/clients", json={"name": "latency feedback user"},
+                          headers={"X-CSRF-Token": csrf})
+    assert created.status_code == 200, created.text
+    info = client.get(f"/api/clients/{created.json()['id']}/subscription").json()
+    token = info["page_url"].rsplit("/", 1)[1]
+
+    saved = client.post(f"/sub/{token}/feedback", json={
+        "carrier": "mci", "profile_key": "ws", "result": "ok", "latency_ms": 73,
+    })
+    assert saved.status_code == 200, saved.text
+    with panel.db() as conn:
+        row = conn.execute(
+            "SELECT latency_ms,result FROM profile_feedback WHERE client_id=? AND carrier=? AND profile_key=?",
+            (created.json()["id"], "mci", "ws"),
+        ).fetchone()
+    assert row["latency_ms"] == 73
+    assert row["result"] == "ok"
+
+    for invalid in (0, 60001, True, "73"):
+        response = client.post(f"/sub/{token}/feedback", json={
+            "carrier": "mci", "profile_key": "ws", "result": "ok", "latency_ms": invalid,
+        })
+        assert response.status_code == 422
+
+    mismatch = client.post(f"/sub/{token}/feedback", json={
+        "carrier": "mci", "profile_key": "ws", "result": "fail", "latency_ms": 73,
+    })
+    assert mismatch.status_code == 422
 
 
 def test_dashboard_injects_hamburger_api_backup_and_metrics(client):
@@ -280,7 +314,8 @@ def test_profile_route_diagnostics_is_not_misrepresented_as_vpn_ping(client, mon
     assert response.status_code == 200, response.text
     data = response.json()
     assert len(data["checks"]) == 13
-    assert all(item["route_ok"] for item in data["checks"] if item["enabled"])
+    assert all(item["route_ok"] for item in data["checks"] if item["enabled"] and item["network"] == "xhttp")
+    assert all(not item["route_ok"] for item in data["checks"] if item["enabled"] and item["network"] in {"ws", "httpupgrade"})
     assert all(item["status"] == "disabled" for item in data["checks"] if not item["enabled"])
     assert "پینگ یا تونل واقعی" in data["note"]
 

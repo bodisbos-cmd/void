@@ -116,45 +116,74 @@ def _probe_profile(profile):
     result={"key":profile["key"],"label":profile["label"],"path":profile["path"],
       "port":profile["port"],"network":profile["network"],"mode":profile.get("mode"),
       "protocol":profile.get("protocol","vless"),"enabled":profile.get("enabled",True),"experimental":bool(profile.get("experimental",False)),
-      "latency_ms":None,"http_status":None,"route_ok":False,"listener_ok":False,
+      "latency_ms":None,"listener_latency_ms":None,"route_latency_ms":None,"probe_duration_ms":None,
+      "http_status":None,"route_ok":False,"listener_ok":False,"handshake_ok":None,
       "tunnel_tested":False,"error":None}
     if not result["enabled"]:
         result["status"]="disabled"
         result["hint"]="این پروفایل در تنظیمات داشبورد غیرفعال است."
-        result["latency_ms"]=round((time.monotonic()-started)*1000,1)
+        result["probe_duration_ms"]=round((time.monotonic()-started)*1000,1)
+        result["latency_ms"]=result["probe_duration_ms"]
         return result
+
+    listener_started=time.monotonic()
     try:
         with socket.create_connection(("127.0.0.1",int(profile["port"])),timeout=0.5):
             result["listener_ok"]=True
     except (TimeoutError,OSError) as exc:
         result["listener_error"]=str(exc)[:100]
+    finally:
+        result["listener_latency_ms"]=round((time.monotonic()-listener_started)*1000,1)
+
     connection=None
+    route_started=time.monotonic()
     try:
         connection=http.client.HTTPConnection("127.0.0.1",8080,timeout=1.0)
         request_headers={"Host":"localhost","Connection":"close"}
-        # WebSocket and HTTPUpgrade inbounds require an Upgrade request to make
-        # a valid route probe. A plain GET can make Xray close early, causing
-        # Nginx to report a false 502 even when the listener and proxy route work.
+        # Exercise a real HTTP/1.1 upgrade handshake. Merely sending Upgrade
+        # without the required WebSocket key/version can produce an error that
+        # the old probe incorrectly counted as a healthy route.
         if profile["network"] in {"ws","httpupgrade"}:
-            request_headers.update({"Connection":"Upgrade","Upgrade":"websocket"})
+            request_headers.update({
+                "Connection":"Upgrade",
+                "Upgrade":"websocket",
+                "Sec-WebSocket-Key":"dGhlIHNhbXBsZSBub25jZQ==",
+                "Sec-WebSocket-Version":"13",
+            })
         connection.request("GET",profile["path"],headers=request_headers)
         response=connection.getresponse()
         result["http_status"]=response.status
-        # After 101 the socket has become an upgraded stream; do not block
-        # while waiting for a body that a healthy tunnel endpoint will not send.
-        if response.status != 101:
-            response.read(1)
-        result["route_ok"]=response.status not in {502,503,504}
+        result["route_latency_ms"]=round((time.monotonic()-route_started)*1000,1)
+
+        if profile["network"] in {"ws","httpupgrade"}:
+            result["handshake_ok"]=response.status==101
+            result["route_ok"]=result["handshake_ok"]
+        else:
+            # XHTTP needs a protocol-aware client/body to prove a tunnel. Here
+            # only reject server/gateway errors; any success remains explicitly
+            # a local route check, never a real tunnel or carrier ping.
+            result["route_ok"]=200 <= response.status < 500
     except (http.client.HTTPException,TimeoutError,OSError) as exc:
         result["error"]="Gateway/route did not respond: "+str(exc)[:120]
     finally:
-        if connection: connection.close()
+        if result["route_latency_ms"] is None:
+            result["route_latency_ms"]=round((time.monotonic()-route_started)*1000,1)
+        if connection:
+            connection.close()
+
+    status=result["http_status"]
     if not result["listener_ok"]:
         result["status"]="listener_missing"
         result["hint"]="پورت داخلی Xray پاسخ نمی‌دهد؛ وضعیت اجرای Xray و تنظیمات این پروفایل را بررسی کن."
+    elif status is None or status>=500:
+        result["status"]="gateway_error"
+        result["hint"]="مسیر Nginx یا listener پاسخ سالم نداد؛ خطای مسیر و لاگ Xray را بررسی کن."
+    elif profile["network"] in {"ws","httpupgrade"} and not result["handshake_ok"]:
+        result["status"]="upgrade_handshake_failed"
+        result["hint"]=f"مسیر پاسخ HTTP {status} داد، اما handshake موردنیاز {profile['network']} با پاسخ 101 کامل نشد؛ مسیر Nginx، path و transport را بررسی کن."
     elif not result["route_ok"]:
         result["status"]="gateway_error"
-        result["hint"]="مسیر Nginx به این پروفایل خطا می‌دهد؛ مسیر و proxy_pass را بررسی کن."
+        result["hint"]="مسیر Nginx به این پروفایل پاسخ معتبر نداد؛ مسیر و proxy_pass را بررسی کن."
     else:
         result["status"]="route_reachable_tunnel_unverified"
         if result["network"]=="xhttp" and result["mode"] in {"stream-one","stream-up"}:
@@ -163,7 +192,11 @@ def _probe_profile(profile):
             result["hint"]="باز بودن مسیر، سازگاری Shadowsocks 2022 و پلاگین WebSocket را اثبات نمی‌کند؛ با کلاینتی که v2ray-plugin و روش رمزنگاری را پشتیبانی کند تست کن."
         else:
             result["hint"]="مسیر وب و پورت داخلی پاسخ می‌دهند؛ تونل واقعی هنوز از اینجا تأیید نشده است."
-    result["latency_ms"]=round((time.monotonic()-started)*1000,1)
+
+    result["probe_duration_ms"]=round((time.monotonic()-started)*1000,1)
+    # Keep the existing field for API consumers, but define it as HTTP route
+    # response time rather than the combined listener + route probe duration.
+    result["latency_ms"]=result["route_latency_ms"]
     return result
 
 def _xray_config_test(panel):
@@ -361,24 +394,35 @@ def install_extended(app, namespace):
         nginx_error=nginx_probe["error"]
         with p.db() as c:
             rows=c.execute(
-                "SELECT profile_key,COUNT(*) AS reports,SUM(CASE WHEN result='ok' THEN 1 ELSE 0 END) AS successes "
+                "SELECT profile_key,COUNT(*) AS reports,SUM(CASE WHEN result='ok' THEN 1 ELSE 0 END) AS successes,"
+                "AVG(CASE WHEN result='ok' THEN latency_ms END) AS avg_latency_ms,"
+                "COUNT(latency_ms) AS latency_reports "
                 "FROM profile_feedback WHERE carrier=? AND created_at>=? GROUP BY profile_key",
                 (carrier,(datetime.now(timezone.utc)-timedelta(days=30)).isoformat(timespec="seconds"))
             ).fetchall()
-        feedback={row["profile_key"]:{"reports":int(row["reports"]),"successes":int(row["successes"] or 0)} for row in rows}
+        feedback={row["profile_key"]:{
+            "reports":int(row["reports"]),
+            "successes":int(row["successes"] or 0),
+            "avg_latency_ms":round(float(row["avg_latency_ms"])) if row["avg_latency_ms"] is not None else None,
+            "latency_reports":int(row["latency_reports"] or 0)
+        } for row in rows}
         preferred={"ws","httpupgrade","xhttp_auto"}
         for item in checks:
-            stats=feedback.get(item["key"],{"reports":0,"successes":0})
+            stats=feedback.get(item["key"],{"reports":0,"successes":0,"avg_latency_ms":None,"latency_reports":0})
             rate=round(100*stats["successes"]/stats["reports"]) if stats["reports"] else None
             item["feedback_reports"]=stats["reports"]
             item["feedback_success_rate"]=rate
+            item["average_latency_ms"]=stats["avg_latency_ms"]
+            item["latency_reports"]=stats["latency_reports"]
             item["status_text"]=item.get("hint") or item.get("status","unknown")
             if not item["enabled"]:
                 item["recommendation"]="این پروفایل غیرفعال است؛ برای تست ابتدا آن را در تنظیمات فعال کن."
             elif not item["route_ok"] or not item["listener_ok"]:
                 item["recommendation"]="فعلاً انتخابش نکن؛ ابتدا خطای مسیر یا listener داخل داشبورد را برطرف کن."
             elif stats["reports"]>=3 and rate is not None and rate>=65:
-                item["recommendation"]=f"پیشنهادشده برای { {'auto':'شبکهٔ نامشخص','mci':'همراه اول','irancell':'ایرانسل','rightel':'رایتل','wifi':'وای‌فای'}[carrier] }؛ {rate}% موفقیت از {stats['reports']} گزارش ۳۰ روز اخیر."
+                network_label={'auto':'شبکهٔ نامشخص','mci':'همراه اول','irancell':'ایرانسل','rightel':'رایتل','wifi':'وای‌فای'}[carrier]
+                latency_note=f" میانگین پینگ گزارش‌شده: {stats['avg_latency_ms']} ms از {stats['latency_reports']} اندازه‌گیری." if stats["latency_reports"]>=3 and stats["avg_latency_ms"] is not None else ""
+                item["recommendation"]=f"پیشنهادشده برای {network_label}؛ {rate}% موفقیت از {stats['reports']} گزارش ۳۰ روز اخیر.{latency_note}"
             elif stats["reports"]>=3 and rate is not None and rate<=35:
                 item["recommendation"]=f"اولویت پایین برای { {'auto':'شبکهٔ نامشخص','mci':'همراه اول','irancell':'ایرانسل','rightel':'رایتل','wifi':'وای‌فای'}[carrier] }؛ {rate}% موفقیت از {stats['reports']} گزارش ۳۰ روز اخیر."
             elif item.get("experimental"):
@@ -390,6 +434,7 @@ def install_extended(app, namespace):
         checks.sort(key=lambda x:(
             not (x["enabled"] and x["listener_ok"] and x["route_ok"]),
             -(x["feedback_success_rate"] if x["feedback_success_rate"] is not None and x["feedback_reports"]>=3 else -1),
+            x["average_latency_ms"] if x["latency_reports"]>=3 and x["average_latency_ms"] is not None else float("inf"),
             x["key"]
         ))
         issues=[]
