@@ -296,8 +296,13 @@ jobs:
                   locator = page.locator('[data-nav="' + nav + '"]').first
                   if not locator.count():
                       raise SystemExit("Missing navigation item: " + nav)
+                  nav_started = time.monotonic()
                   locator.click()
                   assert_active_section(nav)
+                  nav_elapsed_ms = round((time.monotonic() - nav_started) * 1000, 1)
+                  print("NAVIGATION_FEEDBACK_MS=" + repr({"section": nav, "ms": nav_elapsed_ms}), flush=True)
+                  if nav_elapsed_ms > 1500:
+                      raise SystemExit("Section navigation exceeded the 1500 ms feedback budget: " + nav + " " + str(nav_elapsed_ms))
                   if nav == "create":
                       tabs = page.locator('#createServiceCard .creation-tab[role="tab"]')
                       if tabs.count() != 3:
@@ -542,8 +547,13 @@ jobs:
               toggle = mobile.locator("#menuToggle")
               if not toggle.count():
                   raise SystemExit("Mobile drawer toggle is missing")
+              drawer_open_started = time.monotonic()
               toggle.click()
               mobile.wait_for_function("document.body.classList.contains('abyss-menu-open') && document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
+              drawer_open_ms = round((time.monotonic() - drawer_open_started) * 1000, 1)
+              print("MOBILE_DRAWER_FEEDBACK_MS=" + str(drawer_open_ms), flush=True)
+              if drawer_open_ms > 1500:
+                  raise SystemExit("Mobile drawer exceeded the 1500 ms feedback budget: " + str(drawer_open_ms))
               mobile.wait_for_timeout(350)
               drawer_layers = mobile.evaluate("""() => {
                 const sidebar=document.getElementById('sidebar'), shade=document.getElementById('abyssMenuShade');
