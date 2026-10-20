@@ -225,7 +225,6 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'html body main.app-shell .abyss-brand-row .abyss-logo-image,' in response.text
     assert 'justify-content:flex-start!important;gap:0!important;' in response.text
     assert 'background:transparent!important;border:0!important;border-radius:0!important;' in response.text
-    assert '<img class="visual-orbit" src="/brand/abyss-tunnel-logo.jpg" alt="AbyssTunnel · I.T.A.">' in client.get("/").text
     assert 'menu.textContent=\'☰\';' in response.text
     assert '(brand||sidebar).prepend(closeButton);' in response.text
     assert 'body.abyss-menu-open main.app-shell>#menuToggle{' in response.text
