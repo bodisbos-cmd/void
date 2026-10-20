@@ -3153,10 +3153,10 @@ html body main.app-shell>aside.sidebar>.side-brand:before{
 }
 
 
-/* Desktop/tablet reference cleanup: no second brand block above the navigation. */
+/* Desktop/tablet reference: preserve the compact AbyssTunnel brand above navigation. */
 @media(min-width:701px){
- html body main.app-shell>aside.sidebar>.side-brand{display:none!important}
- html body main.app-shell>aside.sidebar>.side-caption.side-caption-top{padding-top:8px!important}
+ html body main.app-shell>aside.sidebar>.side-brand{display:flex!important;visibility:visible!important;opacity:1!important}
+ html body main.app-shell>aside.sidebar>.side-caption.side-caption-top{display:none!important}
 }
 /* Keep project links attached to the end of the scrollable navigation on every viewport. */
 html body main.app-shell>aside.sidebar>.side-nav>.abyss-utility-links{
