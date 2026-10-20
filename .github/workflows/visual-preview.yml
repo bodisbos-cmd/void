@@ -277,20 +277,12 @@ jobs:
               page.locator("#langBtn").click()
               page.wait_for_function("""() => document.querySelector('#dashboardQuickCard .section-title')?.textContent?.trim()==='جزئیات سریع'
                 && document.querySelector('#dashboardQuickDetails .quick-detail-copy .small')?.textContent?.trim()==='آخرین سرویس ساخته‌شده'""", timeout=5000)
-              sidebar_logo = page.evaluate("""async () => {
-                const mark=document.querySelector('.sidebar .side-brand .abyss-logo-mark');
-                if (!mark) return {present:false};
-                const r=mark.getBoundingClientRect(), style=getComputedStyle(mark);
-                const response=await fetch('/brand/abyss-tunnel-logo.jpg',{cache:'no-store'});
-                const blob=await response.blob();
-                return {present:true,width:r.width,height:r.height,backgroundImage:style.backgroundImage,
-                  http:response.status,bytes:blob.size};
-              }""")
+              sidebar_logo = page.evaluate("""() => ({
+                repeatedSidebarMark: document.querySelectorAll('.sidebar .side-brand .abyss-logo-mark, .sidebar .side-brand .abyss-logo-image').length
+              })""")
               print("SIDEBAR_REFERENCE_LOGO=" + repr(sidebar_logo))
-              if (not sidebar_logo.get("present") or sidebar_logo["width"] < 24 or sidebar_logo["height"] < 24
-                      or sidebar_logo["http"] != 200 or sidebar_logo["bytes"] < 1000
-                      or "/brand/abyss-tunnel-logo.jpg" not in sidebar_logo["backgroundImage"]):
-                  raise SystemExit("Sidebar is missing the supplied reference orbital logo: " + repr(sidebar_logo))
+              if sidebar_logo["repeatedSidebarMark"] != 0:
+                  raise SystemExit("The login-only logo is incorrectly repeated in the sidebar: " + repr(sidebar_logo))
               capture_screenshot(page, out / "02-dashboard-desktop.png", full_page=False)
               for nav, filename in [("clients","03-users-desktop.png"),("create","04-create-desktop.png"),("servers","05-servers-desktop.png"),("protocols","06-protocols-desktop.png"),("reports","07-reports-desktop.png"),("settings","08-settings-desktop.png")]:
                   locator = page.locator('[data-nav="' + nav + '"]').first
@@ -556,12 +548,17 @@ jobs:
                   raise SystemExit("Mobile drawer exceeded the 1500 ms feedback budget: " + str(drawer_open_ms))
               mobile.wait_for_timeout(350)
               drawer_layers = mobile.evaluate("""() => {
-                const sidebar=document.getElementById('sidebar'), shade=document.getElementById('abyssMenuShade');
+                const sidebar=document.getElementById('sidebar'), shade=document.getElementById('abyssMenuShade'), menu=document.getElementById('menuToggle');
                 const captions=[...sidebar.querySelectorAll(':scope>.side-caption')], nav=sidebar.querySelector(':scope>.side-nav'), account=sidebar.querySelector(':scope>.sidebar-account-badge'), links=sidebar.querySelector(':scope>.abyss-utility-links');
+                const close=sidebar.querySelector(':scope>.side-brand .sidebar-close'), mark=sidebar.querySelector(':scope>.side-brand .abyss-logo-mark');
                 const box=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height}};
                 return {shadeParent:shade?.parentElement?.className, shadeZ:shade?Number(getComputedStyle(shade).zIndex):null,
                   sidebarZ:Number(getComputedStyle(sidebar).zIndex), sidebarFilter:getComputedStyle(sidebar).filter,
-                  nav:box(nav),account:box(account),caption:box(captions[captions.length-1]),links:box(links),
+                  nav:box(nav),account:box(account),caption:box(captions[captions.length-1]),links:box(links),close:box(close),
+                  closeDisplay:close?getComputedStyle(close).display:null,closeInHeader:!!close&&close.parentElement.classList.contains('side-brand'),
+                  menuVisibility:getComputedStyle(menu).visibility,menuLabel:menu.textContent.trim(),sidebarLogoCount:sidebar.querySelectorAll('.abyss-logo-mark,.abyss-logo-image').length,
+                  sidebarOverflowY:getComputedStyle(sidebar).overflowY,sidebarScrollHeight:sidebar.scrollHeight,sidebarClientHeight:sidebar.clientHeight,
+                  navOverflowY:getComputedStyle(nav).overflowY,navScrollHeight:nav.scrollHeight,navClientHeight:nav.clientHeight,
                   menuOpen:document.body.classList.contains('abyss-menu-open')};
               }""")
               print("MOBILE_DRAWER_LAYERS=" + repr(drawer_layers))
@@ -573,7 +570,35 @@ jobs:
                   raise SystemExit("Mobile drawer creator label overlaps account identity: " + repr(drawer_layers))
               if drawer_layers["links"] and drawer_layers["caption"]["bottom"] > drawer_layers["links"]["top"] + 1:
                   raise SystemExit("Mobile drawer utility links overlap creator label: " + repr(drawer_layers))
+              if drawer_layers["menuOpen"] is not True or drawer_layers["menuVisibility"] != "hidden" or drawer_layers["menuLabel"] != "☰":
+                  raise SystemExit("The floating menu trigger must be icon-only and hidden while the drawer is open: " + repr(drawer_layers))
+              if drawer_layers["closeDisplay"] == "none" or not drawer_layers["closeInHeader"]:
+                  raise SystemExit("The close button must appear once inside the drawer header: " + repr(drawer_layers))
+              if drawer_layers["sidebarLogoCount"] != 0:
+                  raise SystemExit("The sidebar repeats the login logo: " + repr(drawer_layers))
+              if drawer_layers["sidebarOverflowY"] not in ("auto","scroll") or drawer_layers["navOverflowY"] in ("auto","scroll"):
+                  raise SystemExit("Mobile drawer content must use one scroll container and not clip its lower menu items: " + repr(drawer_layers))
+              drawer_bottom = mobile.evaluate("""() => {
+                const sidebar=document.getElementById('sidebar'), actions=sidebar.querySelector('.sidebar-quick-actions'), close=sidebar.querySelector('.side-brand .sidebar-close');
+                sidebar.scrollTop=sidebar.scrollHeight;
+                const inside=e=>{if(!e)return false;const r=e.getBoundingClientRect(),s=sidebar.getBoundingClientRect();return r.top>=s.top-1&&r.bottom<=s.bottom+1};
+                return {scrollTop:sidebar.scrollTop,scrollHeight:sidebar.scrollHeight,clientHeight:sidebar.clientHeight,
+                  reachedEnd:sidebar.scrollTop+sidebar.clientHeight>=sidebar.scrollHeight-2,
+                  actionsVisible:inside(actions),closeVisible:inside(close)};
+              }""")
+              print("MOBILE_DRAWER_BOTTOM=" + repr(drawer_bottom))
+              if drawer_bottom["scrollHeight"] > drawer_bottom["clientHeight"] + 1:
+                  if not drawer_bottom["reachedEnd"] or not drawer_bottom["actionsVisible"] or not drawer_bottom["closeVisible"]:
+                      raise SystemExit("Mobile drawer lower controls are clipped or unreachable: " + repr(drawer_bottom))
+                  capture_screenshot(mobile, out / "10-mobile-menu-bottom.png", full_page=False)
+              mobile.evaluate("document.getElementById('sidebar').scrollTop=0")
               capture_screenshot(mobile, out / "10-mobile-menu.png", full_page=False)
+              mobile.locator('#sidebar .side-brand .sidebar-close').click()
+              mobile.wait_for_function("!document.body.classList.contains('abyss-menu-open') && !document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
+              mobile.wait_for_function("getComputedStyle(document.querySelector('#menuToggle')).visibility!=='hidden'", timeout=3000)
+              mobile.locator("#menuToggle").click()
+              mobile.wait_for_function("document.body.classList.contains('abyss-menu-open') && document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
+              mobile.evaluate("document.getElementById('sidebar').scrollTop=0")
               mobile.locator('[data-nav="clients"]').first.click()
               mobile.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
