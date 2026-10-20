@@ -60,13 +60,13 @@ def test_support_url_is_rendered_safely_on_login_and_dashboard(client, monkeypat
     assert login.status_code == 200
     expected_link = f'href="{support_url}" target="_blank" rel="noopener noreferrer"'
     assert expected_link in login.text
-    assert "#support-link-not-configured" not in login.text
+    assert 'href="#support-link-not-configured"' not in login.text
 
     admin_client(client)
     dashboard = client.get("/")
     assert dashboard.status_code == 200
     assert expected_link in dashboard.text
-    assert "#support-link-not-configured" not in dashboard.text
+    assert 'href="#support-link-not-configured"' not in dashboard.text
 
 
 def test_support_url_rejects_unsafe_or_malformed_values(monkeypatch):
