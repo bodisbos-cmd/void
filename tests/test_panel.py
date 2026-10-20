@@ -323,7 +323,13 @@ def test_create_pause_subscription_and_revoke(client):
     assert len(httpupgrade_configs) == 2
     assert any("path=%2Fhttpupgrade%3Fed%3D2560" in line for line in httpupgrade_configs)
     assert any("path=%2Fupgrade%3Fed%3D2560" in line for line in httpupgrade_configs)
-    assert not any("ed%3D2560" in line for line in configs if "type=ws" in line or "type=xhttp" in line)
+    websocket_configs = [line for line in configs if "type=ws" in line]
+    assert len(websocket_configs) == 3
+    assert any("path=%2Fws%3Fed%3D2560" in line for line in websocket_configs)
+    assert any("path=%2Fconnect%3Fed%3D2560" in line for line in websocket_configs)
+    assert any("path=%2Ftrojan-ws%3Fed%3D2560" in line for line in websocket_configs)
+    assert all("ed%3D2560" in line for line in websocket_configs)
+    assert not any("ed%3D2560" in line for line in configs if "type=xhttp" in line)
     assert sum("type=xhttp" in line for line in configs) == 2
     assert any("mode=auto" in line for line in configs)
     assert any("mode=packet-up" in line for line in configs)
