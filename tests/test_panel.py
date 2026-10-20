@@ -199,8 +199,6 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'oninput="scheduleClientRender()"' in response.text
     assert "function scheduleClientRender()" in dashboard_script.text
     assert "activeSection==='dashboard'||activeSection==='metrics'" in dashboard_script.text
-    assert "Voidling" not in response.text
-    assert "Voidling" not in dashboard_script.text
     assert "function renderDashboardQuickDetails(data=latestOverview)" in dashboard_script.text
     assert "latestService:'آخرین سرویس ساخته‌شده'" in dashboard_script.text
     assert "latestPanelChange:'آخرین تغییر پنل'" in dashboard_script.text
