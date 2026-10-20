@@ -3225,6 +3225,26 @@ html body main.app-shell>.workspace>.top>.abyss-brand-row .brand-name{
   margin:0!important;padding:0!important;background:transparent!important;
   border:0!important;box-shadow:none!important
 }
+
+/* Final user-detail overflow guard: long usage values must never collide with icons or labels. */
+html body main.app-shell .client-details-panel,
+html body main.app-shell .client-details-panel *{min-width:0;box-sizing:border-box}
+html body main.app-shell .client-detail-list>div{gap:12px;align-items:flex-start}
+html body main.app-shell .client-detail-list>div>b{
+ display:block;flex:1 1 auto;width:auto;max-width:68%;min-width:0;
+ text-align:left;overflow-wrap:anywhere;word-break:normal;
+}
+html body main.app-shell .client-detail-list>div>b bdi{
+ display:inline-block;max-width:100%;white-space:normal;unicode-bidi:isolate;
+ font-variant-numeric:tabular-nums;overflow-wrap:anywhere;
+}
+html body main.app-shell .client-detail-list>div:nth-child(2)>b{
+ font-size:clamp(10px,1vw,12px);letter-spacing:0;
+}
+@media(max-width:1150px){
+ html body main.app-shell .client-details-panel{grid-row:2!important;position:relative!important;top:auto!important;align-self:start!important}
+}
+
 /* Final safeguard: the menu wordmark is plain text, never a boxed logo or image. */
 html body main.app-shell>aside.sidebar>.side-brand,
 html body main.app-shell>aside.sidebar>.side-brand .brand-name,
