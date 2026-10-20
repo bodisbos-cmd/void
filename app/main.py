@@ -3012,6 +3012,10 @@ html body main.app-shell .workspace .client-card{
  html body .workspace #clients .clients-table .actions{display:flex!important;flex-wrap:wrap!important;gap:5px!important}
  html body .workspace #clients .client-pagination{display:flex!important;flex-wrap:wrap!important;gap:8px!important;justify-content:space-between!important}
 }
+/* Align the touch drawer trigger with its right-hand entrance in the RTL mobile layout. */
+@media(max-width:850px){
+ html body main.app-shell>#menuToggle{left:auto!important;right:14px!important}
+}
 /* Mobile fit pass: preserve the centered brand and every control while reducing excess toolbar height. */
 @media(max-width:700px){
  html body main.app-shell>.workspace>.top{gap:5px!important;padding-bottom:4px!important}
