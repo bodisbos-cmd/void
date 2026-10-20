@@ -116,18 +116,9 @@ def init_db():
         if "latency_ms" not in feedback_columns:
             c.execute("ALTER TABLE profile_feedback ADD COLUMN latency_ms INTEGER")
         if not c.execute("SELECT id FROM admins WHERE id=1").fetchone():
-            # Preserve admin/admin for local development, but fail closed on production installs.
-            # A public deployment must provide its own non-default bootstrap secret.
-            env_names=("APP_ENV","ENVIRONMENT","RAILWAY_ENVIRONMENT_NAME")
-            production_mode=(
-                any(os.getenv(k,"").strip().lower() in ("production","prod") for k in env_names)
-                or bool(os.getenv("RAILWAY_PROJECT_ID") and os.getenv("RAILWAY_SERVICE_ID"))
-            )
-            pw=os.getenv("ABYSS_INITIAL_ADMIN_PASSWORD","").strip()
-            if production_mode and (len(pw) < 16 or pw.lower() in ("admin","password","12345678","changeme")):
-                raise RuntimeError("Set a strong, unique ABYSS_INITIAL_ADMIN_PASSWORD before starting a production installation.")
-            if not pw:
-                pw="admin"
+            # First-run bootstrap credentials requested for the self-hosted project.
+            # Existing databases are never reset here; this only applies when no admin exists.
+            pw="admin"
             changed=utc_now()
             c.execute("INSERT INTO admins VALUES(1,?,?)",(password_hash(pw),changed))
             p=DATA_DIR/"INITIAL_ADMIN_PASSWORD.txt"; p.write_text(f"Username: admin\nPassword: {pw}\n",encoding="utf-8")
