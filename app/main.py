@@ -540,7 +540,7 @@ input,select,textarea{max-width:100%;min-width:0}table{display:block;max-width:1
 <button class="nav-item" data-nav="events" onclick="showSection('events')"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V9M10 18V5M16 18v-7M22 18V3" transform="translate(-1 1)"/></svg></span>رویدادهای اخیر</button>
 <a class="nav-item" href="/api-docs" target="_blank" rel="noopener"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></svg></span>مستندات API</a>
 </nav><div class="side-caption" style="margin-top:18px">سازنده · Abyss Tunnel · دسترسی سریع</div><div class="abyss-utility-links" aria-label="پیوندهای پروژه"><a href="https://github.com/bodisbos-cmd/Void" target="_blank" rel="noopener">⌘ GitHub</a><a href="https://github.com/bodisbos-cmd/Void/stargazers" target="_blank" rel="noopener">☆ ستاره دادن</a><a href="#support-link-not-configured" onclick="if(this.getAttribute('href')==='#support-link-not-configured'){alert('لینک حمایت مالی هنوز تنظیم نشده است؛ متغیر SUPPORT_URL را در Railway تنظیم کن.');return false}">◇ حمایت از پروژه</a></div><div class="sidebar-account-badge" aria-label="حساب فعلی"><span class="sidebar-account-avatar" aria-hidden="true">◉</span><span><b id="sidebarAccountUsername">admin</b><small id="sidebarAccountRole">مدیر کل</small></span></div><div class="sidebar-quick-actions" aria-label="اقدامات حساب"><button type="button" onclick="changePassword()" data-i18n="changePassword">تغییر رمز عبور</button><button type="button" onclick="load()" data-i18n="refresh">به‌روزرسانی</button><button type="button" class="sidebar-logout" onclick="location.href='/logout'" data-i18n="logout">خروج</button></div></aside>
-<div class="workspace"><header class="top"><div class="abyss-brand-row"><span class="brand-name"><b>AbyssTunnel</b><small>• I T A • · داشبورد مدیریت</small></span></div><div class="mint" data-i18n="tagline">داشبورد مدیریتی خصوصی</div><div id="sectionTitle" class="section-heading">نمای کلی</div><div class="tools"><input class="top-tools-search" id="globalSearch" type="search" placeholder="جست‌وجوی کاربر…" data-i18n-placeholder="search" aria-label="جست‌وجوی کاربر" onkeydown="if(event.key==='Enter'){event.preventDefault();runGlobalSearch()}"><button type="button" class="toolbar-icon" onclick="showSection('events')" title="رویدادهای اخیر" aria-label="رویدادهای اخیر"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button> <button id="langBtn" onclick="toggleLanguage()">English</button><button type="button" class="toolbar-icon" onclick="showPanelHelp()" title="راهنمای پنل" aria-label="راهنمای پنل">?</button><span class="account-badge"><span class="account-avatar" aria-hidden="true">◉</span><span class="account-copy"><b id="accountUsername">مدیر پنل</b><small id="accountRole">حساب مدیریت</small></span></span></div></header>
+<div class="workspace"><header class="top"><div class="abyss-brand-row"><span class="brand-name"><b>AbyssTunnel</b><small>• I T A • · داشبورد مدیریت</small></span></div><div class="mint" data-i18n="tagline">داشبورد مدیریتی خصوصی</div><div id="sectionTitle" class="section-heading">نمای کلی</div><div class="tools"><input class="top-tools-search" id="globalSearch" type="search" placeholder="جست‌وجوی بخش‌ها و ابزارها…" aria-label="جست‌وجوی بخش‌ها و ابزارهای پنل" autocomplete="off" oninput="renderGlobalSearchResults()" onfocus="renderGlobalSearchResults()" onkeydown="if(event.key==='Enter'){event.preventDefault();runGlobalSearch()}else if(event.key==='Escape'){hideGlobalSearchResults()}"><div id="globalSearchResults" class="global-search-results" role="listbox" aria-label="نتایج جست‌وجوی پنل" hidden></div><button type="button" class="toolbar-icon" onclick="showSection('events')" title="رویدادهای اخیر" aria-label="رویدادهای اخیر"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button> <button id="langBtn" onclick="toggleLanguage()">English</button><button type="button" class="toolbar-icon" onclick="showPanelHelp()" title="راهنمای پنل" aria-label="راهنمای پنل">?</button><span class="account-badge"><span class="account-avatar" aria-hidden="true">◉</span><span class="account-copy"><b id="accountUsername">مدیر پنل</b><small id="accountRole">حساب مدیریت</small></span></span></div></header>
 <section id="overviewStats" class="stats" data-section-page="dashboard"><div class="card"><span data-i18n="total">کل کاربران</span><div class="num" id="total">—</div></div><div class="card"><span data-i18n="active">کاربران فعال</span><div class="num" id="active">—</div></div><div class="card"><span>مصرف ثبت‌شده</span><div class="num" id="dashboardTraffic">—</div><div class="small">ترافیک ثبت‌شدهٔ داشبورد</div></div><div class="card"><span data-i18n="xray">وضعیت Xray</span><div class="num" id="xray">—</div></div></section>
 <section id="dashboardUsageCard" class="card" data-section-page="dashboard"><div class="usage-chart-head"><div><div class="section-title">نمودار مصرف پهنای باند</div><div class="small">تاریخچهٔ واقعی مصرف ثبت‌شدهٔ سرویس‌ها؛ نمونه‌ها هر دقیقه ذخیره می‌شوند.</div></div><div class="usage-range-tabs" role="group" aria-label="بازهٔ نمودار مصرف"><button type="button" class="is-active" data-traffic-period="24h" aria-pressed="true" onclick="setTrafficChartPeriod('24h')">24h</button><button type="button" data-traffic-period="7d" aria-pressed="false" onclick="setTrafficChartPeriod('7d')">7d</button><button type="button" data-traffic-period="30d" aria-pressed="false" onclick="setTrafficChartPeriod('30d')">30d</button></div></div><div class="stats"><div class="card"><span>CPU</span><div class="num" id="dashCpu">—</div></div><div class="card"><span>RAM</span><div class="num" id="dashRam">—</div></div><div class="card"><span>دیسک</span><div class="num" id="dashDisk">—</div></div></div><canvas id="usageSparkline" height="112" aria-label="نمودار واقعی مصرف ثبت‌شده بر حسب گیگابایت"></canvas><div id="chartLegend" class="chart-legend"><span><i class="net"></i>مصرف ثبت‌شده (GB)</span></div><div id="chartNote" class="small" style="margin-top:7px">تاریخچهٔ واقعی مصرف در حال جمع‌آوری است…</div></section>
 <section class="card" data-section-page="clients"><div class="row"><div><div class="section-title" data-i18n="clients">مدیریت کاربران <span class="help-dot" title="ساخت سرویس، مدیریت زمان و حجم و کنترل دسترسی." aria-label="راهنمای مدیریت کاربران">؟</span></div><div class="small" data-i18n="clientHelp">ساخت سرویس، کنترل دسترسی و مدیریت لینک اشتراک</div></div><div class="users-search-actions"><input id="search" placeholder="جست‌وجوی نام یا شناسه…" oninput="scheduleClientRender()" data-i18n-placeholder="search"><button class="primary" type="button" onclick="showSection('create')">افزودن کاربر +</button></div></div>
@@ -689,7 +689,39 @@ async function editReseller(id,currentUsername,currentQuota){const username=prom
 async function toggleReseller(id,enabled){try{await api('/api/resellers/'+id,{method:'PATCH',body:JSON.stringify({enabled})});await load()}catch(e){alert(e.message)}}
 async function removeReseller(id){if(!confirm('نماینده حذف شود؟ ابتدا باید سهمیه‌های تخصیص‌یافته‌اش صفر باشد.'))return;try{await api('/api/resellers/'+id,{method:'DELETE'});await load()}catch(e){alert(e.message)}}
 async function restoreBackup(){const f=document.getElementById('restoreFile').files[0];if(!f){alert('ابتدا فایل پشتیبان را انتخاب کن.');return}if(!confirm('بازیابی، پایگاه داده فعلی را جایگزین می‌کند. قبل از ادامه مطمئن شو فایل درست است.'))return;try{const fd=new FormData();fd.append('backup',f);const r=await fetch('/api/backup/restore',{method:'POST',headers:{'X-CSRF-Token':csrf},body:fd});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.detail||'Restore failed');alert(d.message||'بازیابی انجام شد.');await load()}catch(e){alert('بازیابی ناموفق بود: '+e.message)}}
-function runGlobalSearch(){const box=document.getElementById('globalSearch'),target=document.getElementById('search');if(!target)return;showSection('clients');target.value=box?box.value.trim():'';renderClients();target.focus()}
+let __voidGlobalSearchMatches=[];
+function hideGlobalSearchResults(){const list=document.getElementById('globalSearchResults');if(list){list.hidden=true;list.replaceChildren()}__voidGlobalSearchMatches=[]}
+function renderGlobalSearchResults(){
+ const box=document.getElementById('globalSearch'),list=document.getElementById('globalSearchResults');if(!box||!list)return;
+ const q=box.value.trim().toLocaleLowerCase('fa');if(!q){hideGlobalSearchResults();return}
+ const candidates=[...document.querySelectorAll('.side-nav .nav-item,.abyss-utility-links a,.sidebar-quick-actions button,.workspace button,.workspace a.button-link,.tools button')];
+ const seen=new Set();__voidGlobalSearchMatches=[];
+ for(const el of candidates){
+  if(el.id==='menuToggle'||el.id==='globalSearch'||el.closest('#globalSearchResults')||el.disabled)continue;
+  const label=(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();if(label.length<2||!label.toLocaleLowerCase('fa').includes(q))continue;
+  const section=el.closest('[data-section-page]')?.dataset.sectionPage||el.dataset.nav||'';
+  const key=label+'|'+section;if(seen.has(key))continue;seen.add(key);
+  __voidGlobalSearchMatches.push({el,label,section});
+  if(__voidGlobalSearchMatches.length>=8)break;
+ }
+ list.replaceChildren();
+ if(!__voidGlobalSearchMatches.length){const empty=document.createElement('div');empty.className='global-search-empty';empty.textContent='موردی پیدا نشد';list.append(empty);list.hidden=false;return}
+ __voidGlobalSearchMatches.forEach((item,index)=>{const b=document.createElement('button');b.type='button';b.className='global-search-result';b.setAttribute('role','option');b.textContent=item.label;b.onclick=()=>chooseGlobalSearchResult(index);list.append(b)});
+ list.hidden=false;
+}
+function chooseGlobalSearchResult(index){
+ const item=__voidGlobalSearchMatches[index];if(!item)return;
+ const list=document.getElementById('globalSearchResults');if(list)list.hidden=true;
+ if(item.el.matches('.nav-item')){item.el.click();return}
+ if(item.section)showSection(item.section);
+ if(item.el.isConnected){item.el.scrollIntoView({block:'nearest',behavior:'smooth'});item.el.click()}
+}
+function runGlobalSearch(){
+ const box=document.getElementById('globalSearch');if(!box)return;
+ renderGlobalSearchResults();
+ if(__voidGlobalSearchMatches.length)chooseGlobalSearchResult(0);
+ else if(box.value.trim()) {const list=document.getElementById('globalSearchResults');if(list)list.hidden=false}
+}
 function showPanelHelp(){const dialog=document.getElementById('panelHelpDialog');if(dialog&&!dialog.open)dialog.showModal()}
 function showSection(name){const previous=document.querySelector('[data-section-page]:not(.nav-hidden)')?.dataset.sectionPage;document.querySelectorAll('[data-section-page]').forEach(el=>{const inactive=el.dataset.sectionPage!==name;el.classList.toggle('nav-hidden',inactive);if(inactive)el.style.setProperty('display','none','important');else el.style.removeProperty('display')});document.querySelectorAll('[data-nav]').forEach(el=>el.classList.toggle('active',el.dataset.nav===name));document.querySelectorAll('[data-settings-tab]').forEach(el=>el.classList.toggle('active',el.dataset.settingsTab===name));const titles={dashboard:'داشبورد',clients:'مدیریت کاربران',create:'ساخت سرویس',servers:'مدیریت سرورها',protocols:'پروتکل‌ها',reports:'گزارش‌ها',reseller:'حساب‌های نمایندگی و سهمیه',settings:'تنظیمات اتصال',diagnostics:'عیب‌یابی هوشمند',backup:'پشتیبان‌گیری و بازیابی',metrics:'پایش زنده سرویس',admins:'مدیریت مدیران داشبورد',apikeys:'API و اتصال ربات',events:'رویدادهای اخیر'};const title=document.getElementById('sectionTitle');if(title)title.textContent=titles[name]||'Abyss Tunnel';const side=document.getElementById('sidebar');if(side&&innerWidth<=850)side.classList.remove('open');if(name==='servers')loadServerStatus();if(name==='reports')loadReports();if(name==='protocols')loadProtocolCatalog();if((name==='dashboard'||name==='metrics')&&previous!==name&&latestOverview)loadMetrics();else if((previous==='dashboard'||previous==='metrics')&&name!==previous)trafficMetricsRequestId++}
 function toggleSidebar(){const side=document.getElementById('sidebar');if(side)side.classList.toggle('open')}
@@ -3120,6 +3152,40 @@ html body main.app-shell>aside.sidebar>.side-brand:before{
  }
 }
 
+
+/* Desktop/tablet reference cleanup: no second brand block above the navigation. */
+@media(min-width:701px){
+ html body main.app-shell>aside.sidebar>.side-brand{display:none!important}
+ html body main.app-shell>aside.sidebar>.side-caption.side-caption-top{padding-top:8px!important}
+}
+/* Keep creator links visible in the sidebar on wide layouts as well as in the drawer. */
+html body main.app-shell>aside.sidebar>.abyss-utility-links{
+ display:flex!important;visibility:visible!important;opacity:1!important;
+ align-items:center!important;flex-wrap:wrap!important;position:relative!important;
+ flex:0 0 auto!important;gap:6px!important;margin:10px 0 12px!important;
+}
+html body main.app-shell>aside.sidebar>.abyss-utility-links a{
+ display:inline-flex!important;visibility:visible!important;opacity:1!important;
+ min-height:34px!important;align-items:center!important;justify-content:center!important;
+}
+/* Global search finds panel sections and actions; the Users page keeps its own client filter. */
+html body .workspace>.top>.tools{position:relative!important;overflow:visible!important}
+.global-search-results{
+ position:absolute!important;top:calc(100% + 7px)!important;right:0!important;
+ z-index:120!important;width:min(360px,92vw)!important;max-height:320px!important;
+ overflow:auto!important;padding:6px!important;border:1px solid var(--ab-line)!important;
+ border-radius:12px!important;background:rgba(12,12,13,.98)!important;
+ box-shadow:0 18px 45px rgba(0,0,0,.55)!important;backdrop-filter:blur(16px)!important;
+}
+.global-search-results[hidden]{display:none!important}
+.global-search-result,.global-search-empty{
+ display:block!important;width:100%!important;text-align:right!important;
+ min-height:38px!important;padding:9px 11px!important;margin:0!important;
+ border:0!important;border-radius:8px!important;background:transparent!important;
+ color:var(--ab-text)!important;font:inherit!important;font-size:12px!important;
+}
+.global-search-result:hover,.global-search-result:focus{background:var(--ab-glass)!important;outline:1px solid var(--ab-line)!important}
+.global-search-empty{color:var(--ab-muted)!important}
 </style>"""
 
 
