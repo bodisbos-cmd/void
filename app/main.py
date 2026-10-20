@@ -3232,6 +3232,27 @@ html body .workspace>.top>.tools{position:relative!important;overflow:visible!im
 }
 .global-search-result:hover,.global-search-result:focus{background:var(--ab-glass)!important;outline:1px solid var(--ab-line)!important}
 .global-search-empty{color:var(--ab-muted)!important}
+
+/* Menu branding is text-only across every dashboard/menu breakpoint. The full logo stays on login. */
+html body main.app-shell .abyss-brand-row .abyss-logo-mark,
+html body main.app-shell .abyss-brand-row .abyss-logo-image,
+html body main.app-shell .abyss-brand-row .abyss-logo-svg{display:none!important}
+html body main.app-shell>aside.sidebar>.side-brand{
+  justify-content:flex-start!important;gap:0!important;
+  min-height:54px!important;margin:0 0 12px!important;
+  padding:10px 8px 14px!important;
+  background:transparent!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important
+}
+html body main.app-shell>aside.sidebar>.side-brand .brand-name{
+  display:grid!important;flex:1 1 auto!important;width:100%!important;
+  min-width:0!important;margin:0!important;padding:0!important;
+  text-align:start!important;justify-content:start!important
+}
+html body main.app-shell>.workspace>.top>.abyss-brand-row .brand-name{
+  margin:0!important;padding:0!important;background:transparent!important;
+  border:0!important;box-shadow:none!important
+}
 </style>"""
 
 
