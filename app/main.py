@@ -1972,7 +1972,7 @@ html body .app-shell{direction:rtl!important}
  html body main.app-shell>.workspace>#overviewStats{gap:8px!important}
  html body main.app-shell>.workspace>#overviewStats>.card{padding:12px 10px!important}
 }
-html body main.app-shell>aside.sidebar .side-brand{gap:7px!important;justify-content:center!important}
+/* Sidebar brand alignment is defined once in ABYSS_FINAL_LAYOUT_CSS. */
 html body main.app-shell>aside.sidebar .brand-name{font-size:11px!important;letter-spacing:.08em!important}
 html body main.app-shell>aside.sidebar .side-caption{font-size:10px!important;margin:8px 0 6px!important}
 html body main.app-shell>aside.sidebar .side-nav{gap:4px!important}
@@ -3156,36 +3156,8 @@ html body main.app-shell .workspace .client-card{
  @media(min-width:851px){html body main.app-shell .sidebar-close{display:none!important}}
 
 
-/* Small eclipse insignia in the navigation rail, matching the supplied reference without another image request. */
+/* Keep the drawer header pinned while scrolling; branding itself is text-only and styled in ABYSS_FINAL_LAYOUT_CSS. */
 html body main.app-shell>aside.sidebar>.side-brand{position:sticky!important;top:0!important;z-index:10014!important}
-html body main.app-shell>aside.sidebar>.side-brand:before{
- content:""!important;position:absolute!important;left:12px!important;top:50%!important;
- width:28px!important;height:28px!important;transform:translateY(-50%)!important;border-radius:50%!important;
- pointer-events:none!important;opacity:.76!important;
- background:radial-gradient(circle at center,#020202 0 27%,transparent 30%),
- repeating-conic-gradient(from 0deg,rgba(210,213,218,.72) 0deg .45deg,transparent .7deg 3.2deg)!important;
- filter:drop-shadow(0 0 6px rgba(205,210,218,.15))!important
-}
-@media(min-width:851px){
- html body main.app-shell>aside.sidebar>.side-brand{justify-content:flex-start!important;padding-left:44px!important}
- html body main.app-shell>aside.sidebar>.side-brand .brand-name{padding-left:0!important}
-}
-@media(max-width:850px){
- html body main.app-shell>aside.sidebar>.side-brand:before{display:none!important;content:none!important}
- /* Keep the sticky drawer header opaque so scrolled navigation never shows through it. */
- html body main.app-shell>aside.sidebar>.side-brand{
-  min-height:78px!important;box-sizing:border-box!important;
-  background:#070708!important;
-  border:0!important;border-bottom:1px solid rgba(185,188,194,.18)!important;
-  border-radius:0!important;box-shadow:none!important
- }
- html body main.app-shell>aside.sidebar>.side-brand .brand-name{
-  display:grid!important;visibility:visible!important;opacity:1!important;
-  flex:1 1 auto!important;min-width:0!important;padding:0!important;
-  background:transparent!important;border:0!important;border-radius:0!important;
-  box-shadow:none!important;outline:0!important;filter:none!important
- }
-}
 
 
 /* Desktop/tablet reference: preserve the compact AbyssTunnel brand above navigation. */
