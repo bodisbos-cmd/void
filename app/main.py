@@ -2512,6 +2512,17 @@ html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs{displa
 html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs button{min-height:30px!important;height:30px!important;min-width:42px!important;padding:4px 10px!important;border:1px solid var(--ab-line)!important;border-radius:9px!important;background:rgba(255,255,255,.018)!important;color:var(--ab-muted)!important;font-size:10px!important;line-height:1!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important}
 html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs button.is-active{border-color:rgba(220,225,232,.34)!important;background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.045))!important;color:var(--ab-text)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 3px 10px rgba(0,0,0,.12)!important}
 html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:108px!important;max-height:108px!important;margin-top:6px!important}
+
+/* Desktop reference correction: keep chart headings on the left and range controls in reading order. */
+@media(min-width:851px){
+ html body main.app-shell>.workspace>#dashboardUsageCard .usage-chart-head{direction:ltr!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard .usage-chart-head>div:first-child{direction:rtl!important;text-align:right!important}
+ html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs{direction:ltr!important}
+ html body .usage-chart-panel .section-head{direction:ltr!important}
+ html body .usage-chart-panel .section-head>h2{direction:rtl!important;text-align:right!important}
+ html body .usage-chart-panel .usage-chart-ranges{direction:ltr!important}
+}
+
 @media(max-width:560px){html body main.app-shell>.workspace>#dashboardUsageCard .usage-chart-head{align-items:stretch!important}html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs{justify-content:flex-start!important}html body main.app-shell>.workspace>#dashboardUsageCard .usage-range-tabs button{flex:1!important}}
 
 
