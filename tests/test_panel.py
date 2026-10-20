@@ -52,6 +52,33 @@ def admin_client(client):
     return overview.json()["csrf"]
 
 
+def test_support_url_is_rendered_safely_on_login_and_dashboard(client, monkeypatch):
+    support_url = "https://support.example/donate?source=void"
+    monkeypatch.setenv("SUPPORT_URL", support_url)
+
+    login = client.get("/login")
+    assert login.status_code == 200
+    expected_link = f'href="{support_url}" target="_blank" rel="noopener noreferrer"'
+    assert expected_link in login.text
+    assert 'href="#support-link-not-configured"' not in login.text
+
+    admin_client(client)
+    dashboard = client.get("/")
+    assert dashboard.status_code == 200
+    assert expected_link in dashboard.text
+    assert 'href="#support-link-not-configured"' not in dashboard.text
+
+
+def test_support_url_rejects_unsafe_or_malformed_values(monkeypatch):
+    marker = '<a href="#support-link-not-configured">support</a>'
+    for value in ("javascript:alert(1)", "https://user:pass@support.example/donate", "https://support.example:invalid/donate", "file:///etc/passwd"):
+        monkeypatch.setenv("SUPPORT_URL", value)
+        assert panel.inject_support_links(marker) == marker
+
+    monkeypatch.delenv("SUPPORT_URL", raising=False)
+    assert panel.inject_support_links(marker) == marker
+
+
 def test_fresh_install_uses_requested_admin_default(client, tmp_path):
     credential_file = tmp_path / "INITIAL_ADMIN_PASSWORD.txt"
     assert credential_file.exists()
@@ -98,10 +125,48 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'id="dashboardUsageCard"' in response.text
     assert 'id="panelHealthCard"' in response.text
     assert "grid-template-columns:repeat(4,minmax(0,1fr))!important" in response.text
-    assert '<span class="abyss-logo-mark" aria-hidden="true"></span>' in response.text
-    assert "repeating-conic-gradient" in response.text
+    assert '<img class="abyss-logo-image" src="/brand-logo" alt="" aria-hidden="true">' not in response.text
+    assert '<div class="abyss-utility-links" aria-label="پیوندهای پروژه">' in response.text
+    assert response.text.index('</nav>') < response.text.index('aria-label="پیوندهای پروژه"') < response.text.index('aria-label="حساب فعلی"')
+    assert '.client-details-panel{grid-row:2!important}' in response.text
+    login_page = client.get("/login")
+    assert '<img class="abyss-logo-image" src="/brand-logo" alt="" aria-hidden="true">' in login_page.text
+    logo = client.get("/brand-logo")
+    assert logo.status_code == 200
+    assert logo.headers.get("content-type", "").startswith("image/jpeg")
+    assert "background-image:url('/brand/abyss-tunnel-logo.jpg')" in response.text
+    assert "Desktop proportions from the reference dashboard" in response.text
+    assert "grid-column:1 / span 3!important;grid-row:3!important" in response.text
+    assert "grid-column:4 / span 3!important;grid-row:3!important" in response.text
+    assert "grid-column:7 / span 6!important;grid-row:3!important" in response.text
+    assert "#dashboardQuickCard #recentActivityList[hidden]{display:none!important}" in response.text
+    visual_workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "visual-preview.yml").read_text(encoding="utf-8")
+    assert "chartXBeforeHealth:chart.x<health.x" in visual_workflow
+    assert "healthXBeforeQuick:health.x<quick.x" in visual_workflow
+    assert 'dashboard_layout["chartXBeforeHealth"]' in visual_workflow
+    assert 'dashboard_layout["healthXBeforeQuick"]' in visual_workflow
+    assert "Administrator created a database backup" in visual_workflow
+    assert "Updated enabled connection profiles" in visual_workflow
+    assert 'expected_quick_values = ("user123"' in visual_workflow
+    assert 'out / "13-users-mobile.png"' in visual_workflow
+    assert 'out / "14-create-mobile.png"' in visual_workflow
+    assert "MOBILE_CLIENTS_LAYOUT=" in visual_workflow
+    assert "MOBILE_CREATE_LAYOUT=" in visual_workflow
+    assert 'out / "15-users-tablet.png"' in visual_workflow
+    assert 'out / "16-create-tablet.png"' in visual_workflow
+    assert "TABLET_CLIENTS_LAYOUT=" in visual_workflow
+    assert "TABLET_CREATE_LAYOUT=" in visual_workflow
+    assert "quickDetailCount:quickDetailRows.length,quickDetailLabels,quickDetailValues," in visual_workflow
+    assert "logoReady" in visual_workflow
+    assert "CREATE_MULTISELECT_CHECKED=" in visual_workflow
+    assert "protocol choices behave as single-select" in visual_workflow
     assert "ABYSS TUNNEL" in login_page.text
-    assert "Secure · Private · Unlimited" in login_page.text
+    assert 'class="visual-orbit" src="/brand/abyss-tunnel-logo.jpg" alt="AbyssTunnel · I.T.A."' in login_page.text
+    logo_response = client.get("/brand/abyss-tunnel-logo.jpg")
+    assert logo_response.status_code == 200
+    assert logo_response.headers.get("content-type", "").startswith("image/jpeg")
+    assert logo_response.content.startswith(b"\xff\xd8\xff")
+    assert logo_response.content.endswith(b"\xff\xd9")
     assert 'class="login-password-toggle"' in login_page.text
     assert 'aria-pressed="false"' in login_page.text
     assert 'data-nav="create"' in response.text
@@ -112,10 +177,18 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert 'id="serversPage"' in response.text
     assert 'id="protocolsPage"' in response.text
     assert 'id="reportsPage"' in response.text
+    assert 'data-settings-tab="backup"' in response.text
+    assert 'html body main.app-shell .workspace #reportsPage .report-event-table{display:table!important;width:100%!important;' in response.text
+    assert 'overflow-wrap:normal!important;word-break:normal!important' in response.text
+    assert 'unicode-bidi:isolate!important' in response.text
     assert 'id="protocolCatalog"' in response.text
     assert 'id="reportProfiles"' in response.text
     assert 'id="serverTableBody"' in response.text
     assert 'id="dashboardComponentStatus"' in response.text
+    assert 'id="dashboardQuickCard"' in response.text
+    assert 'id="dashboardQuickDetails"' in response.text
+    assert 'data-i18n="quickDetails"' in response.text
+    assert 'id="dashboardStatusAccessible"' in response.text
     assert 'id="globalSearch"' in response.text
     assert 'id="panelHelpDialog"' in response.text
     assert 'class="account-badge"' in response.text
@@ -123,22 +196,48 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     dashboard_script = client.get("/dashboard.js")
     assert dashboard_script.status_code == 200
     assert "function runGlobalSearch()" in dashboard_script.text
+    assert 'oninput="scheduleClientRender()"' in response.text
+    assert "function scheduleClientRender()" in dashboard_script.text
+    assert "activeSection==='dashboard'||activeSection==='metrics'" in dashboard_script.text
+    assert "function renderDashboardQuickDetails(data=latestOverview)" in dashboard_script.text
+    assert "latestService:'آخرین سرویس ساخته‌شده'" in dashboard_script.text
+    assert "latestPanelChange:'آخرین تغییر پنل'" in dashboard_script.text
+    assert "latestBackup:'آخرین پشتیبان'" in dashboard_script.text
     assert "function showPanelHelp()" in dashboard_script.text
     assert "function loadServerStatus()" in dashboard_script.text
-    assert "function loadReports()" in dashboard_script.text
-    assert "function renderProtocolCatalog(profiles)" in dashboard_script.text
     assert "setTimeout(()=>controller.abort(),20000)" in dashboard_script.text
-    assert "metricsRequestPending" in dashboard_script.text
-    assert "drawUsageSparkline(m,d.history)" in dashboard_script.text
-    assert "دریافت آمار نمودار ناموفق بود" in dashboard_script.text
     assert "درخواست API پس از ۲۰ ثانیه پاسخ نداد." in dashboard_script.text
+    assert "function loadReports()" in dashboard_script.text
+    assert "report-event-table" in dashboard_script.text
+    assert '<bdi dir="ltr">' in dashboard_script.text
+    assert "function renderProtocolCatalog(profiles)" in dashboard_script.text
     assert response.text.count('id="name"') == 1
     assert response.text.count('id="clientProfileChoices"') == 1
     assert 'data-section-page="clients"' in response.text
     assert 'id="metricsCard"' in response.text
     assert 'id="adminUsersCard"' in response.text
     assert 'id="apiKeysCard"' in response.text
-    assert '#menuToggle{display:inline-flex!important;position:fixed!important;top:14px!important;left:14px!important;right:auto!important;' in response.text
+    assert '<span class="abyss-logo-mark" aria-hidden="true"></span>' not in response.text
+    # Menu branding stays text-only at every breakpoint; the login page keeps its full logo.
+    assert 'html body main.app-shell .abyss-brand-row .abyss-logo-mark,' in response.text
+    assert 'html body main.app-shell .abyss-brand-row .abyss-logo-image,' in response.text
+    assert 'justify-content:flex-start!important;gap:0!important;' in response.text
+    assert 'background:transparent!important;border:0!important;border-radius:0!important;' in response.text
+    assert 'menu.textContent=\'☰\';' in response.text
+    assert '(brand||sidebar).prepend(closeButton);' in response.text
+    assert 'body.abyss-menu-open main.app-shell>#menuToggle{' in response.text
+    assert 'overflow-y:auto!important;overflow-x:hidden!important' in response.text
+    # Obsolete eclipse pseudo-element and mobile-only inset/header treatment must stay removed.
+    assert "Small eclipse insignia" not in response.text
+    assert "side-brand:before{" not in response.text
+    assert 'html body main.app-shell>aside.sidebar>.side-brand .brand-name{\n  display:grid!important;flex:1 1 auto!important;width:100%!important;' in response.text
+    assert 'html body main.app-shell>aside.sidebar>.side-brand{\n  justify-content:flex-start!important;gap:0!important;' in response.text
+    assert 'background:transparent!important;border:0!important;border-radius:0!important;' in response.text
+    assert 'width:24px!important;height:28px!important;' in response.text
+    assert 'font-size:16px!important;' in response.text
+    assert "closeButton.setAttribute('aria-label','بستن منو');" in response.text
+    assert 'MOBILE_DRAWER_BOTTOM=' in visual_workflow
+    assert 'The floating menu trigger must be icon-only and hidden while the drawer is open' in visual_workflow
     assert '.sidebar{position:fixed!important;top:0!important;left:0!important;right:auto!important;' in response.text
     assert "پیش‌فرض خاموش‌اند" in response.text
 
@@ -174,15 +273,18 @@ def test_dashboard_requires_login(client):
     assert client.get("/api/overview").status_code == 401
 
 
-def test_system_metrics_exposes_history_samples_for_chart(client):
+def test_system_metrics_exposes_traffic_history_for_dashboard_chart(client):
     admin_client(client)
-    response = client.get("/api/system/metrics")
-    assert response.status_code == 200
+    response = client.get("/api/system/metrics?period=24h")
+    assert response.status_code == 200, response.text
     payload = response.json()
-    history = payload.get("history")
+    assert payload["period"] == "24h"
+    assert isinstance(payload.get("history"), list)
+    history = payload.get("traffic_history")
     assert isinstance(history, list)
     assert history
-    assert {"at", "cpu_percent", "memory_used_percent", "traffic_bytes_per_second"} <= set(history[-1])
+    assert payload["traffic_history_count"] >= len(history)
+    assert {"at", "recorded_traffic_bytes"} <= set(history[-1])
 
 
 def test_create_pause_subscription_and_revoke(client):
@@ -258,6 +360,44 @@ def test_same_subscription_url_serves_branded_page_to_browsers(client):
     assert "Subscription-Userinfo" in subscription_client.headers
     assert "total=4294967296" in subscription_client.headers["Subscription-Userinfo"]
     assert client.get(f"/api/clients/{created.json()['id']}/subscription").json()["page_url"] == url
+
+
+def test_subscription_usage_chart_uses_scoped_real_client_history(client):
+    csrf = admin_client(client)
+    headers = {"X-CSRF-Token": csrf}
+    first = client.post("/api/clients", json={"name": "History A", "quota_gb": 20}, headers=headers)
+    second = client.post("/api/clients", json={"name": "History B", "quota_gb": 20}, headers=headers)
+    assert first.status_code == 200 and second.status_code == 200
+    first_id, second_id = first.json()["id"], second.json()["id"]
+
+    with panel.db() as conn:
+        conn.execute("UPDATE clients SET used_bytes=? WHERE id=?", (5 * 1024**3, first_id))
+        conn.execute("UPDATE clients SET used_bytes=? WHERE id=?", (3 * 1024**3, second_id))
+
+    now = int(panel.time.time()) - 7200
+    panel.record_client_usage_history(now=now)
+    with panel.db() as conn:
+        conn.execute("UPDATE clients SET used_bytes=? WHERE id=?", (6 * 1024**3, first_id))
+    panel.record_client_usage_history(now=now + panel.CLIENT_USAGE_HISTORY_SAMPLE_SECONDS + 1)
+
+    sample_time = now + panel.CLIENT_USAGE_HISTORY_SAMPLE_SECONDS + 1
+    first_history = panel.get_client_usage_history(first_id, now=sample_time)
+    second_history = panel.get_client_usage_history(second_id, now=sample_time)
+    assert [row["used_bytes"] for row in first_history] == [5 * 1024**3, 6 * 1024**3]
+    assert [row["used_bytes"] for row in second_history] == [3 * 1024**3, 3 * 1024**3]
+
+    token = client.get(f"/api/clients/{first_id}/subscription").json()["url"].rsplit("/sub/", 1)[1]
+    browser = client.get(
+        f"/sub/{token}",
+        headers={"Accept": "text/html,application/xhtml+xml", "User-Agent": "Mozilla/5.0 Chrome/130"},
+    )
+    assert browser.status_code == 200
+    assert 'id="clientUsageChart"' in browser.text
+    assert 'data-usage-days="7"' in browser.text
+    assert 'data-usage-days="30"' in browser.text
+    assert 'data-usage-days="90"' in browser.text
+    assert "__USAGE_HISTORY__" not in browser.text
+    assert f'"used_bytes":{6 * 1024**3}' in browser.text
 
 
 def _token_from_url(url):
@@ -408,6 +548,7 @@ def test_subscription_landing_page_and_qr_are_responsive_and_private(client):
     assert page.status_code == 200
     assert "viewport-fit=cover" in page.text
     assert "Abyss Tunnel" in page.text
+    assert '.usage-detail b{direction:ltr!important;unicode-bidi:isolate!important;display:block!important;text-align:left!important}' in page.text
     assert 'id="abyss-theme-polish"' in page.text
     assert "Portal user" in page.text
     assert "xhttp-auto" in page.text and "xhttp-packet-up" in page.text
@@ -715,6 +856,17 @@ def test_backup_and_restore_round_trip(client):
     assert restored.status_code == 200, restored.text
     assert client.get("/api/overview").json()["total"] == 1
 
+def test_legacy_sqlite_backup_is_removed_after_download(client):
+    admin_client(client)
+    before = set(Path(panel.DATA_DIR).glob("abyss-backup-*.sqlite3"))
+    backup = client.get("/api/backup/sqlite")
+    assert backup.status_code == 200
+    assert backup.headers["content-type"].startswith("application/vnd.sqlite3")
+    assert backup.content.startswith(b"SQLite format 3")
+    after = set(Path(panel.DATA_DIR).glob("abyss-backup-*.sqlite3"))
+    assert after == before
+
+
 def test_nested_reseller_allocation_is_atomic_and_scoped(client):
     csrf = admin_client(client)
     headers = {"X-CSRF-Token": csrf}
@@ -945,3 +1097,23 @@ def test_bootstrap_file_never_resets_a_changed_admin_password(client, tmp_path):
         ).fetchone()
     assert panel.verify_password("changed-password", owner["password_hash"])
     assert not panel.verify_password("admin", owner["password_hash"])
+
+
+def test_global_search_targets_panel_actions_and_keeps_client_filter_separate(client):
+    admin_client(client)
+    page = client.get("/").text
+    assert 'id="globalSearch"' in page
+    assert 'placeholder="جست‌وجوی بخش‌ها و ابزارها…"' in page
+    assert 'aria-label="جست‌وجوی بخش‌ها و ابزارهای پنل"' in page
+    dashboard_js = client.get("/dashboard.js").text
+    assert "function renderGlobalSearchResults()" in dashboard_js
+    assert "function chooseGlobalSearchResult(index)" in dashboard_js
+    assert 'id="search" placeholder="جست‌وجوی نام یا شناسه…"' in page
+    assert 'https://github.com/bodisbos-cmd/Void/stargazers' in page
+    assert '◇ حمایت از پروژه' in page
+    assert "aside.sidebar>.side-brand{display:flex!important;visibility:visible!important;opacity:1!important}" in page
+    assert "aside.sidebar>.side-caption.side-caption-top{display:none!important}" in page
+    assert "side-brand{gap:7px!important;justify-content:center!important}" not in page
+    assert "Small eclipse insignia" not in page
+    assert "background:transparent!important;border:0!important;border-radius:0!important;" in page
+    assert "aside.sidebar>.abyss-utility-links" in page

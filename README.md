@@ -7,7 +7,7 @@ A responsive Xray control dashboard designed to run on Railway. It includes a Pe
 ## Features
 
 - Responsive dark dashboard with Persian (RTL) and English language support.
-- First login on a fresh install uses username `admin` and password `admin`, as requested. Change the password immediately after signing in. The bootstrap record is stored in `/data/INITIAL_ADMIN_PASSWORD.txt` with restrictive permissions; logs never print the password, and restarts preserve any password change.
+- Local first login on a fresh install uses username `admin` and password `admin` for convenience. Railway/production installs require a unique `ABYSS_INITIAL_ADMIN_PASSWORD` of at least 16 characters before the first boot; missing, short, or common default passwords stop startup rather than exposing a public panel with default credentials. The initial credential record is stored in `/data/INITIAL_ADMIN_PASSWORD.txt` with restrictive permissions; logs never print the password, and restarts preserve any password change.
 - Signed HTTP-only session cookie, CSRF protection on mutations, login throttling, security headers, and scrypt password hashing.
 - SQLite database in `/data` for persistent Railway Volume storage.
 - Create, edit, pause/enable, revoke, and reset recorded usage for clients.
@@ -26,7 +26,7 @@ A responsive Xray control dashboard designed to run on Railway. It includes a Pe
 1. Deploy this repository to a Railway service using the included Dockerfile.
 2. Add a Railway Volume mounted at `/data`. It is required to preserve clients, admin credentials, session secret, and the database across deploys.
 3. Generate a public domain for port `8080`.
-4. Open the service after its first successful deployment. On a fresh database, sign in with username `admin` and password `admin`, then change the password immediately.
+4. Before the first deployment, add `ABYSS_INITIAL_ADMIN_PASSWORD` in Railway Variables with a strong, unique password. The app requires at least 16 characters and refuses common defaults such as `admin`, `password`, `12345678`, or `changeme`. On a fresh database, sign in as `admin` using the value you set, then change it through the panel after setup if needed.
 5. Set `BASE_URL` to the intended public HTTPS URL only if the automatically detected Railway domain is not the one you want to use for subscriptions.
 
 The app is intended to remain on Railway. Its HTTP transports are routed through Railway's HTTPS edge to local Xray inbounds; no separate public Xray TCP port is used in this design. Railway region changes can require volume migration and downtime, so do not change regions casually.
@@ -38,7 +38,7 @@ docker build -t void .
 docker run --rm -p 8080:8080 -e COOKIE_SECURE=0 -v "$PWD/data:/data" void
 ```
 
-Open `http://localhost:8080`. On a fresh database, sign in with username `admin` and password `admin`, then change the password immediately. The bootstrap file is stored in `data/INITIAL_ADMIN_PASSWORD.txt`; the password is not printed to logs.
+Open `http://localhost:8080`. On a fresh local database, sign in with username `admin` and password `admin`. The bootstrap file is stored in `data/INITIAL_ADMIN_PASSWORD.txt`; the password is not printed to logs. For a local test of production-like setup, set a strong `ABYSS_INITIAL_ADMIN_PASSWORD` environment variable before starting the container.
 
 ## Security and operational notes
 
