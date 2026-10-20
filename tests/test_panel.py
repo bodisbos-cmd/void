@@ -1065,3 +1065,18 @@ def test_bootstrap_file_never_resets_a_changed_admin_password(client, tmp_path):
         ).fetchone()
     assert panel.verify_password("changed-password", owner["password_hash"])
     assert not panel.verify_password("admin", owner["password_hash"])
+
+
+def test_global_search_targets_panel_actions_and_keeps_client_filter_separate(client):
+    admin_client(client)
+    page = client.get("/").text
+    assert 'id="globalSearch"' in page
+    assert 'placeholder="جست‌وجوی بخش‌ها و ابزارها…"' in page
+    assert 'aria-label="جست‌وجوی بخش‌ها و ابزارهای پنل"' in page
+    assert "function renderGlobalSearchResults()" in page
+    assert "function chooseGlobalSearchResult(index)" in page
+    assert 'id="search" placeholder="جست‌وجوی نام یا شناسه…"' in page
+    assert 'https://github.com/bodisbos-cmd/Void/stargazers' in page
+    assert '◇ حمایت از پروژه' in page
+    assert "aside.sidebar>.side-brand{display:none!important}" in page
+    assert "aside.sidebar>.abyss-utility-links" in page
