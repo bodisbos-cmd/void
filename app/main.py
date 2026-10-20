@@ -3260,8 +3260,14 @@ html body main.app-shell>aside.sidebar>.side-brand .brand-name:after{
   content:none!important;display:none!important;
 }
 html body main.app-shell>aside.sidebar>.side-brand img,
-html body main.app-shell>aside.sidebar>.side-brand svg{
+html body main.app-shell>aside.sidebar>.side-brand svg,
+html body main.app-shell>aside.sidebar>.side-brand .abyss-logo-image,
+html body main.app-shell>aside.sidebar>.side-brand .abyss-logo-mark{
   display:none!important;
+}
+/* Keep the AbyssTunnel · I.T.A. wordmark in every menu; remove only its circular mark. */
+html body main.app-shell>aside.sidebar>.side-brand .brand-name{
+  display:grid!important;visibility:visible!important;opacity:1!important;
 }
 </style>"""
 
