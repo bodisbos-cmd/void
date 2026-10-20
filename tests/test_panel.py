@@ -200,6 +200,7 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     # Guard the mobile drawer's reference-specific fix against future CSS regressions.
     assert 'html body main.app-shell>aside.sidebar>.side-brand:before{display:none!important;content:none!important}' in response.text
     assert 'html body main.app-shell>aside.sidebar>.side-brand .brand-name{\n  display:grid!important;visibility:visible!important;opacity:1!important;' in response.text
+    assert 'html body main.app-shell>aside.sidebar>.side-brand{\n  background:transparent!important;border:0!important;border-bottom:0!important;\n  border-radius:0!important;box-shadow:none!important\n }' in response.text
     assert 'width:24px!important;height:28px!important;' in response.text
     assert 'font-size:16px!important;' in response.text
     assert "closeButton.setAttribute('aria-label','بستن منو');" in response.text
