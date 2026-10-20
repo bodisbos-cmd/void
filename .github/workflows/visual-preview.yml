@@ -391,6 +391,26 @@ jobs:
                   capture_screenshot(page, out / filename, full_page=False)
               page.locator('[data-nav="dashboard"]').first.click()
               assert_active_section("dashboard")
+              # Exercise the global search as a real user would: keyboard submission must navigate,
+              # close the results, and preserve a useful empty state for unmatched queries.
+              global_search = page.locator("#globalSearch")
+              global_search.fill("ساخت سرویس")
+              page.wait_for_function("""() => {
+                const list=document.getElementById('globalSearchResults');
+                return list && !list.hidden && list.querySelectorAll('.global-search-result').length > 0;
+              }""", timeout=5000)
+              global_search.press("Enter")
+              assert_active_section("create")
+              page.wait_for_function("document.getElementById('globalSearchResults')?.hidden === true", timeout=5000)
+              global_search.fill("void-search-no-match-93827")
+              page.wait_for_function("""() => {
+                const list=document.getElementById('globalSearchResults');
+                return list && !list.hidden && !!list.querySelector('.global-search-empty');
+              }""", timeout=5000)
+              print("GLOBAL_SEARCH_INTERACTION=success")
+              global_search.fill("")
+              page.locator('[data-nav="dashboard"]').first.click()
+              assert_active_section("dashboard")
               page.set_viewport_size({"width":1024,"height":768})
               page.wait_for_timeout(300)
               tablet_layout = page.evaluate("""() => {
