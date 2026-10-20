@@ -233,7 +233,7 @@ jobs:
                 const nav=document.querySelector('#sidebar>.side-nav');
                 const captions=[...document.querySelectorAll('#sidebar>.side-caption')]; const caption=captions[captions.length-1];
                 const account=document.querySelector('#sidebar>.sidebar-account-badge');
-                const links=document.querySelector('#sidebar>.abyss-utility-links');
+                const links=document.querySelector('#sidebar .abyss-utility-links');
                 return {nav:nav?r(nav):null,account:account?r(account):null,caption:caption?r(caption):null,links:links?r(links):null,scrollHeight:document.querySelector('#sidebar')?.scrollHeight,clientHeight:document.querySelector('#sidebar')?.clientHeight};
               }""")
               print("SIDEBAR_LAYOUT=" + repr(sidebar_layout))
@@ -241,7 +241,7 @@ jobs:
                   raise SystemExit("Sidebar account overlaps navigation: " + repr(sidebar_layout))
               if sidebar_layout["account"]["top"] < sidebar_layout["caption"]["bottom"] - 1:
                   raise SystemExit("Sidebar creator label overlaps account identity: " + repr(sidebar_layout))
-              if sidebar_layout["links"] and sidebar_layout["caption"]["bottom"] > sidebar_layout["links"]["top"] + 1:
+              if sidebar_layout["links"] and sidebar_layout["links"]["bottom"] > sidebar_layout["caption"]["top"] + 1:
                   raise SystemExit("Sidebar utility links overlap creator label: " + repr(sidebar_layout))
               if dashboard_layout["documentWidth"] > dashboard_layout["viewport"] + 1:
                   raise SystemExit("Desktop layout has horizontal overflow: " + repr(dashboard_layout))
@@ -549,7 +549,7 @@ jobs:
               mobile.wait_for_timeout(350)
               drawer_layers = mobile.evaluate("""() => {
                 const sidebar=document.getElementById('sidebar'), shade=document.getElementById('abyssMenuShade'), menu=document.getElementById('menuToggle');
-                const captions=[...sidebar.querySelectorAll(':scope>.side-caption')], nav=sidebar.querySelector(':scope>.side-nav'), account=sidebar.querySelector(':scope>.sidebar-account-badge'), links=sidebar.querySelector(':scope>.abyss-utility-links');
+                const captions=[...sidebar.querySelectorAll(':scope>.side-caption')], nav=sidebar.querySelector(':scope>.side-nav'), account=sidebar.querySelector(':scope>.sidebar-account-badge'), links=sidebar.querySelector('.abyss-utility-links');
                 const close=sidebar.querySelector(':scope>.side-brand .sidebar-close'), mark=sidebar.querySelector(':scope>.side-brand .abyss-logo-mark');
                 const box=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height}};
                 return {shadeParent:shade?.parentElement?.className, shadeZ:shade?Number(getComputedStyle(shade).zIndex):null,
