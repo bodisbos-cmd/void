@@ -280,7 +280,8 @@ def test_profile_route_diagnostics_is_not_misrepresented_as_vpn_ping(client, mon
     assert response.status_code == 200, response.text
     data = response.json()
     assert len(data["checks"]) == 13
-    assert all(item["route_ok"] for item in data["checks"] if item["enabled"])
+    assert all(item["route_ok"] for item in data["checks"] if item["enabled"] and item["network"] == "xhttp")
+    assert all(not item["route_ok"] for item in data["checks"] if item["enabled"] and item["network"] in {"ws", "httpupgrade"})
     assert all(item["status"] == "disabled" for item in data["checks"] if not item["enabled"])
     assert "پینگ یا تونل واقعی" in data["note"]
 
