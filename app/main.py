@@ -3087,6 +3087,26 @@ html body main.app-shell .workspace .client-card{
  }
  @media(min-width:851px){html body main.app-shell .sidebar-close{display:none!important}}
 
+
+/* Small eclipse insignia in the navigation rail, matching the supplied reference without another image request. */
+html body main.app-shell>aside.sidebar>.side-brand{position:relative!important}
+html body main.app-shell>aside.sidebar>.side-brand:before{
+ content:""!important;position:absolute!important;left:12px!important;top:50%!important;
+ width:28px!important;height:28px!important;transform:translateY(-50%)!important;border-radius:50%!important;
+ pointer-events:none!important;opacity:.76!important;
+ background:radial-gradient(circle at center,#020202 0 27%,transparent 30%),
+ repeating-conic-gradient(from 0deg,rgba(210,213,218,.72) 0deg .45deg,transparent .7deg 3.2deg)!important;
+ filter:drop-shadow(0 0 6px rgba(205,210,218,.15))!important
+}
+@media(min-width:851px){
+ html body main.app-shell>aside.sidebar>.side-brand{justify-content:flex-start!important;padding-left:44px!important}
+ html body main.app-shell>aside.sidebar>.side-brand .brand-name{padding-left:0!important}
+}
+@media(max-width:850px){
+ html body main.app-shell>aside.sidebar>.side-brand:before{left:12px!important;width:26px!important;height:26px!important}
+ html body main.app-shell>aside.sidebar>.side-brand .brand-name{padding-left:34px!important}
+}
+
 </style>"""
 
 
