@@ -527,7 +527,7 @@ input,select,textarea{max-width:100%;min-width:0}table{display:block;max-width:1
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style><style id="abyss-premium-layout">.app-shell{max-width:1800px;grid-template-columns:258px minmax(0,1fr)}.sidebar{padding:26px 16px;background:linear-gradient(180deg,#0d1620,#080c13);border-left:1px solid #263849;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#343438 transparent}.side-brand{font-size:14px;letter-spacing:.16em;padding:10px 12px 25px}.side-caption{font-size:10px;letter-spacing:.14em}.nav-item{font-size:13px;min-height:43px}.nav-item.active{box-shadow:inset -3px 0 #8de8d6}.workspace{max-width:1460px;padding:26px clamp(14px,2.5vw,36px) 46px}.top{align-items:center;gap:18px;padding:12px 0 20px}.top .tools{justify-content:flex-start;flex-wrap:wrap}.section-heading{font-size:23px;letter-spacing:-.02em}.stats{gap:14px}.stats>.card,.workspace>section.card{border-radius:18px;padding:21px;background:linear-gradient(145deg,#111b28,#0c121c)}.fields{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.field{display:grid;gap:7px;min-width:0;color:#9aafc1;font-size:12px}.field input,.field select{height:44px;padding:11px 12px;border-radius:11px;background:#080e17;border-color:#2c3d50}.field input:focus,.field select:focus{border-color:#8de8d6;box-shadow:0 0 0 3px #8de8d61c}.workspace .section-title{font-size:16px}.workspace .small{line-height:1.85}.workspace .client{padding:16px 0;border-top-color:#263647}.workspace .actions{gap:7px}.workspace button,.workspace .button-link{border-radius:10px;min-height:40px}.workspace button.primary{box-shadow:0 7px 22px #8de8d61a}.workspace #clients{display:grid;gap:9px}.workspace #clients .client{padding:14px;border:1px solid #263749;border-radius:13px;background:#0a111b}.workspace #subDialog{border-color:#304556}.workspace .stats .num{font-size:29px}.workspace [data-section-page]{scroll-margin-top:20px}#menuToggle{border-radius:12px;box-shadow:0 10px 25px #0005}.sidebar.open{box-shadow:0 0 0 9999px #02050bc7}.workspace .tools button{white-space:nowrap}@media(max-width:850px){.workspace{padding:10px 12px 30px}.top{padding-top:10px}.top .tools{gap:7px}.top .tools button{flex:1}.fields{grid-template-columns:1fr}.sidebar{z-index:60}.workspace>section.card{padding:15px}.stats>.card{padding:15px}}@media(min-width:851px){#menuToggle{display:none!important}}@media(prefers-reduced-motion:reduce){.nav-item,.workspace button{transition:none!important}}</style><style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head><body><main class="app-shell">
 <button type="button" id="menuToggle" onclick="toggleSidebar()" aria-label="باز کردن منو">☰ منو</button>
-<aside class="sidebar" id="sidebar"><div class="side-brand abyss-brand-row"><span class="abyss-logo-mark" aria-hidden="true"></span><span class="brand-name">AbyssTunnel<small>• I T A •</small></span></div><div class="side-caption">مدیریت داشبورد</div><nav class="side-nav" aria-label="ناوبری داشبورد">
+<aside class="sidebar" id="sidebar"><div class="side-caption side-caption-top">مدیریت داشبورد</div><nav class="side-nav" aria-label="ناوبری داشبورد">
 <button class="nav-item active" data-nav="dashboard" onclick="showSection('dashboard')"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span>داشبورد</button>
 <button class="nav-item" data-nav="clients" onclick="showSection('clients')"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c.5-3.6 3-5.5 7-5.5s6.5 1.9 7 5.5"/></svg></span>مدیریت کاربران</button><button class="nav-item" data-nav="create" onclick="showSection('create')"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>ساخت سرویس</button><button class="nav-item" data-nav="servers" onclick="showSection('servers')"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01M10 7h7M10 17h7"/></svg></span>مدیریت سرورها</button><button class="nav-item" data-nav="protocols" onclick="showSection('protocols')"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 7v5a4 4 0 0 0 4 4h6M14 5h2M18 7v10"/></svg></span>پروتکل‌ها</button><button class="nav-item" data-nav="reports" onclick="showSection('reports')"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V9M10 18V5M16 18v-7M22 18V3" transform="translate(-1 1)"/></svg></span>گزارش‌ها</button>
 <button class="nav-item" data-nav="reseller" onclick="showSection('reseller')"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.3"/><path d="M3 20c.3-3.3 2.4-5 6-5s5.7 1.7 6 5M15 15c3.6-.5 5.5 1.1 6 4"/></svg></span>حساب‌های نمایندگی و سهمیه</button>
@@ -1247,6 +1247,9 @@ html[data-abyss-theme="angel"] .top-tools-search,html[data-abyss-theme="angel"] 
  .workspace{width:calc(100% - 220px)!important;margin-left:220px!important;padding-inline:18px!important}
  .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
+.side-caption-top{padding-top:38px!important}
+.sidebar-close{display:none;position:absolute;top:10px;right:10px;width:27px;height:27px;padding:0;border:1px solid rgba(190,192,198,.18);border-radius:50%;background:rgba(255,255,255,.035);color:var(--ab-muted);font-size:19px;line-height:1;align-items:center;justify-content:center;z-index:3;cursor:pointer}
+@media(max-width:850px){.sidebar-close{display:flex}}
 @media(max-width:850px){
  #menuToggle{display:inline-flex!important}
  .sidebar{transform:translateX(-105%)!important;visibility:visible!important}
@@ -1273,16 +1276,24 @@ ABYSS_LAYOUT_REPAIR_JS = r"""<script id="abyss-layout-repair-js">
     if(!sidebar || !menu) return;
     let shade=document.getElementById('abyssMenuShade');
     if(!shade){shade=document.createElement('div');shade.id='abyssMenuShade';shade.setAttribute('aria-hidden','true');const shell=document.querySelector('.app-shell');(shell||document.body).appendChild(shade);}
+    const closeButton=document.createElement('button');
+    closeButton.type='button';
+    closeButton.className='sidebar-close';
+    closeButton.setAttribute('aria-label','بستن منو');
+    closeButton.textContent='×';
+    sidebar.prepend(closeButton);
     const setOpen=(open)=>{
       sidebar.classList.toggle('open',open);
       document.body.classList.toggle('abyss-menu-open',open);
       menu.setAttribute('aria-expanded',String(open));
       menu.setAttribute('aria-label',open?'بستن منو':'باز کردن منو');
-      menu.innerHTML=open?'✕ <span>بستن</span>':'☰ <span>منو</span>';
+      menu.innerHTML='☰ <span>منو</span>';
     };
+    closeButton.addEventListener('click',()=>setOpen(false));
     window.toggleSidebar=()=>setOpen(!sidebar.classList.contains('open'));
     menu.removeAttribute('onclick');menu.addEventListener('click',e=>{e.preventDefault();setOpen(!sidebar.classList.contains('open'));});
     shade.addEventListener('click',()=>setOpen(false));
+    sidebar.addEventListener('click',e=>{if(e.target===sidebar && !e.target.closest('button,a,input,select,textarea'))setOpen(false);});
     sidebar.querySelectorAll('[data-nav]').forEach(item=>item.addEventListener('click',()=>setOpen(false)));
     document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
     const original=window.showSection;
