@@ -20,6 +20,7 @@ from fastapi.testclient import TestClient
 import pytest
 
 import app.main as panel
+import app.extended as extended
 
 
 @pytest.fixture
@@ -526,8 +527,92 @@ def test_diagnostics_distinguish_local_route_from_real_tunnel(client):
         assert "route_ok" in profile
         assert profile["tunnel_tested"] is False
         assert profile["status"] in {
-            "disabled", "listener_missing", "gateway_error", "route_reachable_tunnel_unverified"
+            "disabled", "listener_missing", "gateway_error", "upgrade_handshake_failed", "route_reachable_tunnel_unverified"
         }
+
+
+def _stub_profile_probe(monkeypatch, http_status):
+    observed = {}
+
+    class FakeSocket:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class FakeResponse:
+        status = http_status
+
+    class FakeHTTPConnection:
+        def __init__(self, host, port, timeout):
+            observed["target"] = (host, port, timeout)
+
+        def request(self, method, path, headers):
+            observed["request"] = (method, path, dict(headers))
+
+        def getresponse(self):
+            return FakeResponse()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(extended.socket, "create_connection", lambda address, timeout: FakeSocket())
+    monkeypatch.setattr(extended.http.client, "HTTPConnection", FakeHTTPConnection)
+    return observed
+
+
+@pytest.mark.parametrize("network", ["ws", "httpupgrade"])
+def test_profile_probe_sends_complete_upgrade_handshake(monkeypatch, network):
+    observed = _stub_profile_probe(monkeypatch, 101)
+    profile = {
+        "key": "test-profile", "label": network, "path": "/probe",
+        "port": 10001, "network": network, "mode": None,
+        "protocol": "vless", "enabled": True,
+    }
+
+    result = extended._probe_profile(profile)
+
+    method, path, headers = observed["request"]
+    assert method == "GET"
+    assert path == "/probe"
+    assert headers["Connection"] == "Upgrade"
+    assert headers["Upgrade"] == "websocket"
+    assert headers["Sec-WebSocket-Key"] == "dGhlIHNhbXBsZSBub25jZQ=="
+    assert headers["Sec-WebSocket-Version"] == "13"
+    assert result["listener_ok"] is True
+    assert result["route_ok"] is True
+    assert result["handshake_ok"] is True
+    assert result["status"] == "route_reachable_tunnel_unverified"
+    assert result["route_latency_ms"] is not None
+    assert result["probe_duration_ms"] is not None
+    assert result["latency_ms"] == result["route_latency_ms"]
+    assert result["tunnel_tested"] is False
+
+
+@pytest.mark.parametrize(
+    ("http_status", "expected_route_ok", "expected_probe_status"),
+    [
+        (400, False, "upgrade_handshake_failed"),
+        (502, False, "gateway_error"),
+        (101, True, "route_reachable_tunnel_unverified"),
+    ],
+)
+def test_profile_probe_does_not_mark_failed_upgrade_as_healthy(
+    monkeypatch, http_status, expected_route_ok, expected_probe_status
+):
+    _stub_profile_probe(monkeypatch, http_status)
+    profile = {
+        "key": "ws", "label": "WebSocket", "path": "/ws",
+        "port": 10001, "network": "ws", "mode": None,
+        "protocol": "vless", "enabled": True,
+    }
+
+    result = extended._probe_profile(profile)
+
+    assert result["route_ok"] is expected_route_ok
+    assert result["status"] == expected_probe_status
+    assert result["handshake_ok"] is (http_status == 101)
 
 
 def test_subscription_landing_page_and_qr_are_responsive_and_private(client):
