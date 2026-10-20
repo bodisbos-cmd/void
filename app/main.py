@@ -3142,6 +3142,7 @@ html body main.app-shell>aside.sidebar>.side-brand:before{
  html body main.app-shell>aside.sidebar>.side-brand:before{display:none!important;content:none!important}
  /* Keep the sticky drawer header opaque so scrolled navigation never shows through it. */
  html body main.app-shell>aside.sidebar>.side-brand{
+  min-height:78px!important;box-sizing:border-box!important;
   background:linear-gradient(180deg,rgba(7,7,8,.99),rgba(7,7,8,.97))!important;
   border:0!important;border-bottom:1px solid rgba(185,188,194,.18)!important;
   border-radius:0!important;box-shadow:none!important
