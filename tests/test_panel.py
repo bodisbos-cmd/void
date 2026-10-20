@@ -197,6 +197,12 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert '(brand||sidebar).prepend(closeButton);' in response.text
     assert 'body.abyss-menu-open main.app-shell>#menuToggle{' in response.text
     assert 'overflow-y:auto!important;overflow-x:hidden!important' in response.text
+    # Guard the mobile drawer's reference-specific fix against future CSS regressions.
+    assert 'html body main.app-shell>aside.sidebar>.side-brand:before{display:none!important;content:none!important}' in response.text
+    assert 'html body main.app-shell>aside.sidebar>.side-brand .brand-name{\n  display:grid!important;visibility:visible!important;opacity:1!important;' in response.text
+    assert 'width:24px!important;height:28px!important;' in response.text
+    assert 'font-size:16px!important;' in response.text
+    assert "closeButton.setAttribute('aria-label','بستن منو');" in response.text
     assert 'MOBILE_DRAWER_BOTTOM=' in visual_workflow
     assert 'The floating menu trigger must be icon-only and hidden while the drawer is open' in visual_workflow
     assert '.sidebar{position:fixed!important;top:0!important;left:0!important;right:auto!important;' in response.text
