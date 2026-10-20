@@ -610,14 +610,19 @@ jobs:
                 const sidebar=document.getElementById('sidebar'), actions=sidebar.querySelector('.sidebar-quick-actions'), close=sidebar.querySelector('.side-brand .sidebar-close');
                 sidebar.scrollTop=sidebar.scrollHeight;
                 const inside=e=>{if(!e)return false;const r=e.getBoundingClientRect(),s=sidebar.getBoundingClientRect();return r.top>=s.top-1&&r.bottom<=s.bottom+1};
+                const header=sidebar.querySelector('.side-brand');
+                const headerStyle=header?getComputedStyle(header):null;
                 return {scrollTop:sidebar.scrollTop,scrollHeight:sidebar.scrollHeight,clientHeight:sidebar.clientHeight,
                   reachedEnd:sidebar.scrollTop+sidebar.clientHeight>=sidebar.scrollHeight-2,
-                  actionsVisible:inside(actions),closeVisible:inside(close)};
+                  actionsVisible:inside(actions),closeVisible:inside(close),
+                  stickyHeaderOpaque:!!headerStyle&&headerStyle.position==='sticky'&&headerStyle.backgroundImage.includes('linear-gradient')};
               }""")
               print("MOBILE_DRAWER_BOTTOM=" + repr(drawer_bottom))
               if drawer_bottom["scrollHeight"] > drawer_bottom["clientHeight"] + 1:
                   if not drawer_bottom["reachedEnd"] or not drawer_bottom["actionsVisible"] or not drawer_bottom["closeVisible"]:
                       raise SystemExit("Mobile drawer lower controls are clipped or unreachable: " + repr(drawer_bottom))
+                  if not drawer_bottom["stickyHeaderOpaque"]:
+                      raise SystemExit("Mobile drawer's sticky brand header must remain opaque while scrolling: " + repr(drawer_bottom))
                   capture_screenshot(mobile, out / "10-mobile-menu-bottom.png", full_page=False)
               mobile.evaluate("document.getElementById('sidebar').scrollTop=0")
               capture_screenshot(mobile, out / "10-mobile-menu.png", full_page=False)
