@@ -3093,7 +3093,7 @@ html body main.app-shell .workspace .client-card{
 
 
 /* Small eclipse insignia in the navigation rail, matching the supplied reference without another image request. */
-html body main.app-shell>aside.sidebar>.side-brand{position:relative!important}
+html body main.app-shell>aside.sidebar>.side-brand{position:sticky!important;top:0!important;z-index:10014!important}
 html body main.app-shell>aside.sidebar>.side-brand:before{
  content:""!important;position:absolute!important;left:12px!important;top:50%!important;
  width:28px!important;height:28px!important;transform:translateY(-50%)!important;border-radius:50%!important;
