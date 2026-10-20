@@ -3110,7 +3110,9 @@ html body main.app-shell>aside.sidebar>.side-brand:before{
  html body main.app-shell>aside.sidebar>.side-brand:before{display:none!important;content:none!important}
  html body main.app-shell>aside.sidebar>.side-brand .brand-name{
   display:grid!important;visibility:visible!important;opacity:1!important;
-  flex:1 1 auto!important;min-width:0!important;padding-left:34px!important
+  flex:1 1 auto!important;min-width:0!important;padding:0!important;
+  background:transparent!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;outline:0!important;filter:none!important
  }
 }
 
