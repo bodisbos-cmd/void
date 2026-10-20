@@ -3086,7 +3086,7 @@ html body main.app-shell .workspace .client-card{
    font-weight:300!important;line-height:1!important;box-shadow:none!important;backdrop-filter:none!important;
    -webkit-backdrop-filter:none!important;z-index:10015!important
   }
-  html body main.app-shell>aside.sidebar>.side-brand{position:relative!important;padding-right:34px!important}
+  html body main.app-shell>aside.sidebar>.side-brand{position:sticky!important;top:0!important;z-index:10014!important;padding-right:34px!important}
   html body main.app-shell>aside.sidebar>.side-brand .brand-name{display:none!important}
  }
  @media(min-width:851px){html body main.app-shell .sidebar-close{display:none!important}}
