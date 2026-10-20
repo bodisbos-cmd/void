@@ -3108,7 +3108,10 @@ html body main.app-shell>aside.sidebar>.side-brand:before{
 }
 @media(max-width:850px){
  html body main.app-shell>aside.sidebar>.side-brand:before{left:12px!important;width:26px!important;height:26px!important}
- html body main.app-shell>aside.sidebar>.side-brand .brand-name{padding-left:34px!important}
+ html body main.app-shell>aside.sidebar>.side-brand .brand-name{
+  display:grid!important;visibility:visible!important;opacity:1!important;
+  flex:1 1 auto!important;min-width:0!important;padding-left:34px!important
+ }
 }
 
 </style>"""
