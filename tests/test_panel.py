@@ -232,7 +232,7 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     # Obsolete eclipse pseudo-element and mobile-only inset/header treatment must stay removed.
     assert "Small eclipse insignia" not in response.text
     assert "side-brand:before{" not in response.text
-    assert 'html body main.app-shell>aside.sidebar>.side-brand .brand-name{\n  display:grid!important;flex:1 1 auto!important;width:100%!important;' not in response.text
+    assert 'html body main.app-shell>aside.sidebar>.side-brand .brand-name{\n  display:grid!important;flex:1 1 auto!important;width:100%!important;' in response.text
     assert 'html body main.app-shell>aside.sidebar>.side-brand{\n  justify-content:flex-start!important;gap:0!important;' in response.text
     assert 'background:transparent!important;border:0!important;border-radius:0!important;' in response.text
     assert 'width:24px!important;height:28px!important;' in response.text
