@@ -99,7 +99,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS resellers(id TEXT PRIMARY KEY,username TEXT NOT NULL UNIQUE,password_hash TEXT NOT NULL,quota_bytes INTEGER NOT NULL CHECK(quota_bytes>0),enabled INTEGER NOT NULL DEFAULT 1,parent_id TEXT,created_at TEXT NOT NULL,FOREIGN KEY(parent_id) REFERENCES resellers(id) ON DELETE CASCADE);
         CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT,at TEXT NOT NULL,level TEXT NOT NULL,message TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT NOT NULL);
-        CREATE TABLE IF NOT EXISTS profile_feedback(id INTEGER PRIMARY KEY AUTOINCREMENT,client_id TEXT NOT NULL,carrier TEXT NOT NULL,profile_key TEXT NOT NULL,result TEXT NOT NULL CHECK(result IN ('ok','fail')),created_at TEXT NOT NULL,user_agent TEXT NOT NULL DEFAULT '',UNIQUE(client_id,carrier,profile_key));
+        CREATE TABLE IF NOT EXISTS profile_feedback(id INTEGER PRIMARY KEY AUTOINCREMENT,client_id TEXT NOT NULL,carrier TEXT NOT NULL,profile_key TEXT NOT NULL,result TEXT NOT NULL CHECK(result IN ('ok','fail')),latency_ms INTEGER,created_at TEXT NOT NULL,user_agent TEXT NOT NULL DEFAULT '',UNIQUE(client_id,carrier,profile_key));
         CREATE TABLE IF NOT EXISTS metrics_history(
             sampled_at INTEGER PRIMARY KEY,
             recorded_traffic_bytes INTEGER NOT NULL DEFAULT 0,
@@ -112,6 +112,9 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_profile_feedback_carrier ON profile_feedback(carrier,profile_key,created_at DESC);
         CREATE INDEX IF NOT EXISTS idx_clients_created ON clients(created_at DESC);
         """)
+        feedback_columns={row["name"] for row in c.execute("PRAGMA table_info(profile_feedback)")}
+        if "latency_ms" not in feedback_columns:
+            c.execute("ALTER TABLE profile_feedback ADD COLUMN latency_ms INTEGER")
         if not c.execute("SELECT id FROM admins WHERE id=1").fetchone():
             # Preserve admin/admin for local development, but fail closed on production installs.
             # A public deployment must provide its own non-default bootstrap secret.
@@ -3796,6 +3799,14 @@ async def submit_profile_feedback(token:str,r:Request):
     carrier=body.get("carrier")
     profile_key=body.get("profile_key")
     result=body.get("result")
+    latency_raw=body.get("latency_ms")
+    latency_ms=None
+    if latency_raw is not None:
+        if isinstance(latency_raw,bool) or not isinstance(latency_raw,int) or not 1 <= latency_raw <= 60000:
+            raise HTTPException(422,"latency_ms must be an integer between 1 and 60000")
+        if result != "ok":
+            raise HTTPException(422,"Latency can only be recorded for a successful profile")
+        latency_ms=latency_raw
     if carrier not in {"auto","mci","irancell","rightel","wifi"}:
         raise HTTPException(422,"Unsupported carrier")
     if profile_key not in {p["key"] for p in PROFILES}:
@@ -3803,8 +3814,8 @@ async def submit_profile_feedback(token:str,r:Request):
     if result not in {"ok","fail"}:
         raise HTTPException(422,"Result must be ok or fail")
     with db() as c:
-        c.execute("INSERT INTO profile_feedback(client_id,carrier,profile_key,result,created_at,user_agent) VALUES(?,?,?,?,?,?) ON CONFLICT(client_id,carrier,profile_key) DO UPDATE SET result=excluded.result,created_at=excluded.created_at,user_agent=excluded.user_agent",(client["id"],carrier,profile_key,result,utc_now(),r.headers.get("user-agent","")[:160]))
-    return {"ok":True,"message":"نتیجه برای پیشنهادهای همین اپراتور ثبت شد."}
+        c.execute("INSERT INTO profile_feedback(client_id,carrier,profile_key,result,latency_ms,created_at,user_agent) VALUES(?,?,?,?,?,?,?) ON CONFLICT(client_id,carrier,profile_key) DO UPDATE SET result=excluded.result,latency_ms=excluded.latency_ms,created_at=excluded.created_at,user_agent=excluded.user_agent",(client["id"],carrier,profile_key,result,latency_ms,utc_now(),r.headers.get("user-agent","")[:160]))
+    return {"ok":True,"message":"نتیجه و در صورت ورود، پینگ اندازه‌گیری‌شده برای پیشنهادهای همین اپراتور ثبت شد."}
 
 @app.get("/sub/{token}/qr")
 async def subscription_qr(token:str,r:Request):
