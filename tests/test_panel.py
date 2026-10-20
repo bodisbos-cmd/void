@@ -1081,5 +1081,5 @@ def test_global_search_targets_panel_actions_and_keeps_client_filter_separate(cl
     assert '◇ حمایت از پروژه' in page
     assert "aside.sidebar>.side-brand{display:flex!important;visibility:visible!important;opacity:1!important}" in page
     assert "aside.sidebar>.side-caption.side-caption-top{display:none!important}" in page
-    assert "background:linear-gradient(180deg,rgba(7,7,8,.99),rgba(7,7,8,.97))!important" in page
+    assert "background:#070708!important" in page
     assert "aside.sidebar>.abyss-utility-links" in page
