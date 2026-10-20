@@ -394,24 +394,35 @@ def install_extended(app, namespace):
         nginx_error=nginx_probe["error"]
         with p.db() as c:
             rows=c.execute(
-                "SELECT profile_key,COUNT(*) AS reports,SUM(CASE WHEN result='ok' THEN 1 ELSE 0 END) AS successes "
+                "SELECT profile_key,COUNT(*) AS reports,SUM(CASE WHEN result='ok' THEN 1 ELSE 0 END) AS successes,"
+                "AVG(CASE WHEN result='ok' THEN latency_ms END) AS avg_latency_ms,"
+                "COUNT(latency_ms) AS latency_reports "
                 "FROM profile_feedback WHERE carrier=? AND created_at>=? GROUP BY profile_key",
                 (carrier,(datetime.now(timezone.utc)-timedelta(days=30)).isoformat(timespec="seconds"))
             ).fetchall()
-        feedback={row["profile_key"]:{"reports":int(row["reports"]),"successes":int(row["successes"] or 0)} for row in rows}
+        feedback={row["profile_key"]:{
+            "reports":int(row["reports"]),
+            "successes":int(row["successes"] or 0),
+            "avg_latency_ms":round(float(row["avg_latency_ms"])) if row["avg_latency_ms"] is not None else None,
+            "latency_reports":int(row["latency_reports"] or 0)
+        } for row in rows}
         preferred={"ws","httpupgrade","xhttp_auto"}
         for item in checks:
-            stats=feedback.get(item["key"],{"reports":0,"successes":0})
+            stats=feedback.get(item["key"],{"reports":0,"successes":0,"avg_latency_ms":None,"latency_reports":0})
             rate=round(100*stats["successes"]/stats["reports"]) if stats["reports"] else None
             item["feedback_reports"]=stats["reports"]
             item["feedback_success_rate"]=rate
+            item["average_latency_ms"]=stats["avg_latency_ms"]
+            item["latency_reports"]=stats["latency_reports"]
             item["status_text"]=item.get("hint") or item.get("status","unknown")
             if not item["enabled"]:
                 item["recommendation"]="این پروفایل غیرفعال است؛ برای تست ابتدا آن را در تنظیمات فعال کن."
             elif not item["route_ok"] or not item["listener_ok"]:
                 item["recommendation"]="فعلاً انتخابش نکن؛ ابتدا خطای مسیر یا listener داخل داشبورد را برطرف کن."
             elif stats["reports"]>=3 and rate is not None and rate>=65:
-                item["recommendation"]=f"پیشنهادشده برای { {'auto':'شبکهٔ نامشخص','mci':'همراه اول','irancell':'ایرانسل','rightel':'رایتل','wifi':'وای‌فای'}[carrier] }؛ {rate}% موفقیت از {stats['reports']} گزارش ۳۰ روز اخیر."
+                network_label={'auto':'شبکهٔ نامشخص','mci':'همراه اول','irancell':'ایرانسل','rightel':'رایتل','wifi':'وای‌فای'}[carrier]
+                latency_note=f" میانگین پینگ گزارش‌شده: {stats['avg_latency_ms']} ms از {stats['latency_reports']} اندازه‌گیری." if stats["latency_reports"]>=3 and stats["avg_latency_ms"] is not None else ""
+                item["recommendation"]=f"پیشنهادشده برای {network_label}؛ {rate}% موفقیت از {stats['reports']} گزارش ۳۰ روز اخیر.{latency_note}"
             elif stats["reports"]>=3 and rate is not None and rate<=35:
                 item["recommendation"]=f"اولویت پایین برای { {'auto':'شبکهٔ نامشخص','mci':'همراه اول','irancell':'ایرانسل','rightel':'رایتل','wifi':'وای‌فای'}[carrier] }؛ {rate}% موفقیت از {stats['reports']} گزارش ۳۰ روز اخیر."
             elif item.get("experimental"):
@@ -423,6 +434,7 @@ def install_extended(app, namespace):
         checks.sort(key=lambda x:(
             not (x["enabled"] and x["listener_ok"] and x["route_ok"]),
             -(x["feedback_success_rate"] if x["feedback_success_rate"] is not None and x["feedback_reports"]>=3 else -1),
+            x["average_latency_ms"] if x["latency_reports"]>=3 and x["average_latency_ms"] is not None else float("inf"),
             x["key"]
         ))
         issues=[]
