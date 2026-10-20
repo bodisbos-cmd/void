@@ -3012,6 +3012,17 @@ html body main.app-shell .workspace .client-card{
  html body .workspace #clients .clients-table .actions{display:flex!important;flex-wrap:wrap!important;gap:5px!important}
  html body .workspace #clients .client-pagination{display:flex!important;flex-wrap:wrap!important;gap:8px!important;justify-content:space-between!important}
 }
+/* Mobile fit pass: preserve the centered brand and every control while reducing excess toolbar height. */
+@media(max-width:700px){
+ html body main.app-shell>.workspace>.top{gap:5px!important;padding-bottom:4px!important}
+ html body main.app-shell>.workspace>.top>.abyss-brand-row{margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important}
+ html body main.app-shell>.workspace>.top>.tools{gap:4px!important;row-gap:4px!important;padding:1px 0 4px!important}
+ html body main.app-shell>.workspace>.top>.tools>*{min-height:32px!important;height:auto!important;padding:5px 5px!important;font-size:10px!important;line-height:1.15!important}
+ html body main.app-shell>.workspace>.top>.tools>#globalSearch{min-height:34px!important;height:34px!important;padding:6px 9px!important}
+ html body main.app-shell>.workspace>.top>.tools>#abyssThemeDock{min-height:34px!important;padding:3px 5px!important}
+ html body main.app-shell>.workspace>.top>.tools>#abyssThemeDock select{font-size:10px!important;padding:3px!important;line-height:1.1!important}
+ html body main.app-shell>.workspace>.top>.tools>.account-badge{min-height:34px!important;padding:4px 6px!important}
+}
 </style>"""
 
 
