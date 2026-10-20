@@ -229,10 +229,12 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert '(brand||sidebar).prepend(closeButton);' in response.text
     assert 'body.abyss-menu-open main.app-shell>#menuToggle{' in response.text
     assert 'overflow-y:auto!important;overflow-x:hidden!important' in response.text
-    # Guard the mobile drawer's reference-specific fix against future CSS regressions.
-    assert 'html body main.app-shell>aside.sidebar>.side-brand:before{display:none!important;content:none!important}' in response.text
-    assert 'html body main.app-shell>aside.sidebar>.side-brand .brand-name{\n  display:grid!important;visibility:visible!important;opacity:1!important;' in response.text
-    assert 'html body main.app-shell>aside.sidebar>.side-brand{\n  min-height:78px!important;box-sizing:border-box!important;\n  background:#070708!important;\n  border:0!important;border-bottom:1px solid rgba(185,188,194,.18)!important;' in response.text
+    # Obsolete eclipse pseudo-element and mobile-only inset/header treatment must stay removed.
+    assert "Small eclipse insignia" not in response.text
+    assert "side-brand:before{" not in response.text
+    assert 'html body main.app-shell>aside.sidebar>.side-brand .brand-name{\n  display:grid!important;flex:1 1 auto!important;width:100%!important;' not in response.text
+    assert 'html body main.app-shell>aside.sidebar>.side-brand{\n  justify-content:flex-start!important;gap:0!important;' in response.text
+    assert 'background:transparent!important;border:0!important;border-radius:0!important;' in response.text
     assert 'width:24px!important;height:28px!important;' in response.text
     assert 'font-size:16px!important;' in response.text
     assert "closeButton.setAttribute('aria-label','بستن منو');" in response.text
@@ -1113,5 +1115,7 @@ def test_global_search_targets_panel_actions_and_keeps_client_filter_separate(cl
     assert '◇ حمایت از پروژه' in page
     assert "aside.sidebar>.side-brand{display:flex!important;visibility:visible!important;opacity:1!important}" in page
     assert "aside.sidebar>.side-caption.side-caption-top{display:none!important}" in page
-    assert "background:#070708!important" in page
+    assert "side-brand{gap:7px!important;justify-content:center!important}" not in page
+    assert "Small eclipse insignia" not in page
+    assert "background:transparent!important;border:0!important;border-radius:0!important;" in page
     assert "aside.sidebar>.abyss-utility-links" in page
