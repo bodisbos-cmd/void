@@ -3526,7 +3526,7 @@ def make_subscription_links(client, r):
         client_path=path
         # Xray HTTPUpgrade supports Early Data through a client-side `ed` path query.
         # The server still matches the path component; the first payload can avoid an extra round trip.
-        if network=="httpupgrade": client_path+="?ed=2560"
+        if network in {"ws","httpupgrade"}: client_path+="?ed=2560"
         common=f"type={network}&security=tls&sni={host}&fp=chrome&host={host}&path={quote(client_path,safe='')}"
         if mode: common+=f"&mode={quote(mode,safe='')}"
         uid=client["client_uuid"]
