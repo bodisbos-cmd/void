@@ -183,7 +183,7 @@ def test_subscription_diagnostics_help_and_official_downloads(client):
     assert 'data-profile-choice="ws"' in page.text
     assert 'data-mark="ok"' in page.text and 'data-mark="fail"' in page.text
     assert "abyss-profile-results:" in page.text
-    assert "به‌صورت آماری برای پیشنهادهای اپراتور ثبت می‌شود" in page.text
+    assert "به‌صورت آماری برای پیشنهادهای همان اپراتور ثبت می‌شود" in page.text
     assert "data-latency-save" in page.text
     assert "data-latency-input" in page.text
     assert "پینگ پایین‌تر و موفقیت بیشتر" in page.text
