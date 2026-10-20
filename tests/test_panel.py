@@ -1073,8 +1073,9 @@ def test_global_search_targets_panel_actions_and_keeps_client_filter_separate(cl
     assert 'id="globalSearch"' in page
     assert 'placeholder="جست‌وجوی بخش‌ها و ابزارها…"' in page
     assert 'aria-label="جست‌وجوی بخش‌ها و ابزارهای پنل"' in page
-    assert "function renderGlobalSearchResults()" in page
-    assert "function chooseGlobalSearchResult(index)" in page
+    dashboard_js = client.get("/dashboard.js").text
+    assert "function renderGlobalSearchResults()" in dashboard_js
+    assert "function chooseGlobalSearchResult(index)" in dashboard_js
     assert 'id="search" placeholder="جست‌وجوی نام یا شناسه…"' in page
     assert 'https://github.com/bodisbos-cmd/Void/stargazers' in page
     assert '◇ حمایت از پروژه' in page
