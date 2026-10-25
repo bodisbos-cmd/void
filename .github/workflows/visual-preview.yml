@@ -583,14 +583,33 @@ jobs:
               toggle = mobile.locator("#menuToggle")
               if not toggle.count():
                   raise SystemExit("Mobile drawer toggle is missing")
-              drawer_open_started = time.monotonic()
+              # Measure the real browser event-to-open response rather than including
+              # Playwright's remote click/round-trip overhead in the UI latency budget.
+              mobile.evaluate("""() => {
+                window.__voidDrawerMeasure = { started: null, elapsed: null };
+                const menu = document.getElementById('menuToggle');
+                const sidebar = document.getElementById('sidebar');
+                document.addEventListener('pointerdown', e => {
+                  if (e.target.closest('#menuToggle')) window.__voidDrawerMeasure.started = performance.now();
+                }, true);
+                const observer = new MutationObserver(() => {
+                  if (window.__voidDrawerMeasure.started !== null
+                      && document.body.classList.contains('abyss-menu-open')
+                      && sidebar.classList.contains('open')) {
+                    window.__voidDrawerMeasure.elapsed = performance.now() - window.__voidDrawerMeasure.started;
+                    observer.disconnect();
+                  }
+                });
+                observer.observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
+              }""")
               toggle.click()
               mobile.wait_for_function("document.body.classList.contains('abyss-menu-open') && document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
-              drawer_open_ms = round((time.monotonic() - drawer_open_started) * 1000, 1)
+              drawer_open_ms = round(mobile.evaluate("() => window.__voidDrawerMeasure.elapsed"), 1)
               print("MOBILE_DRAWER_FEEDBACK_MS=" + str(drawer_open_ms), flush=True)
               if drawer_open_ms > 1500:
-                  raise SystemExit("Mobile drawer exceeded the 1500 ms feedback budget: " + str(drawer_open_ms))
+                  raise SystemExit("Mobile drawer DOM response exceeded the 1500 ms feedback budget: " + str(drawer_open_ms))
               mobile.wait_for_timeout(350)
+              capture_screenshot(mobile, out / "10-mobile-menu.png", full_page=False)
               drawer_layers = mobile.evaluate("""() => {
                 const sidebar=document.getElementById('sidebar'), shade=document.getElementById('abyssMenuShade'), menu=document.getElementById('menuToggle');
                 const captions=[...sidebar.querySelectorAll(':scope>.side-caption')], nav=sidebar.querySelector(':scope>.side-nav'), account=sidebar.querySelector(':scope>.sidebar-account-badge'), links=sidebar.querySelector('.abyss-utility-links');
