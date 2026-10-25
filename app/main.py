@@ -53,7 +53,7 @@ def railway_tcp_reality_profile():
         return None
     return {"key":"vless_reality_tcp","label":"VLESS · REALITY · TCP مستقیم",
         "protocol":"vless","network":"raw","path":"","port":TCP_REALITY_INTERNAL_PORT,
-        "mode":None,"security":"reality","listen":"0.0.0.0","flow":"xtls-rprx-vision",
+        "mode":None,"security":"reality","listen":"0.0.0.0","flow":"xtls-rprx-vision", # nosec B104: listener is appended only for an explicit Railway TCP Proxy mapping
         "tcp_proxy_domain":domain,"tcp_proxy_port":port}
 _tcp_reality_profile=railway_tcp_reality_profile()
 if _tcp_reality_profile:
