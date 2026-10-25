@@ -1,50 +1,214 @@
-# Void
+<div align="center">
 
-A responsive self-hosted connection-management dashboard designed for deployment on Railway. It includes a Persian-first administrator dashboard, persistent SQLite state, per-client credentials, a branded subscription portal with QR codes, configurable connection profiles, quota/expiry enforcement, Xray configuration validation, and process recovery.
+<img src="docs/assets/void-header.svg" alt="Void — Abyss Tunnel" width="100%">
 
-> **Status:** standalone Xray test-stage build; it does not depend on third-party control systems. It is not production-audited. Automated tests cannot replace real connectivity checks from the target networks and supported client apps.
+[![Tests](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/tests.yml?branch=main&label=%D8%AA%D8%B3%D8%AA%E2%80%8C%D9%87%D8%A7&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/tests.yml)
+[![Security](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/security.yml?branch=main&label=%D8%A7%D9%85%D9%86%DB%8C%D8%AA&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/security.yml)
+[![Visual preview](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/visual-preview.yml?branch=main&label=%D9%BE%DB%8C%D8%B4%E2%80%8C%D9%86%D9%85%D8%A7%DB%8C%D8%B4%20%D8%A8%D8%B5%D8%B1%DB%8C&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/visual-preview.yml)
+![Python](https://img.shields.io/badge/Python-3.12-9da0a7?style=for-the-badge&labelColor=09090b)
+![Docker](https://img.shields.io/badge/Docker-ready-9da0a7?style=for-the-badge&labelColor=09090b)
+![Xray](https://img.shields.io/badge/Engine-Xray--core-9da0a7?style=for-the-badge&labelColor=09090b)
 
-## Features
+**پنل فارسی مدیریت سرویس‌های Xray با رابط واکنش‌گرا، اشتراک اختصاصی، سهمیه و پایش سرویس**
 
-- Responsive dark dashboard with Persian (RTL) and English language support.
-- On a fresh install, the initial login is username `admin` and password `admin`. This default is intended only for initial setup and is unsafe for a publicly reachable panel; protect access appropriately. The initial credential record is stored in `/data/INITIAL_ADMIN_PASSWORD.txt` with restrictive permissions, and restarts preserve any password change.
-- Signed HTTP-only session cookie, CSRF protection on mutations, login throttling, security headers, and scrypt password hashing.
-- SQLite database in `/data` for persistent Railway Volume storage.
-- Create, edit, pause/enable, revoke, and reset recorded usage for clients.
-- Hierarchical reseller accounts: the root admin allocates a finite GB pool to a reseller; resellers can delegate part of their remaining pool to sub-resellers and create finite-quota clients. Each account sees and manages only its own clients; over-allocation is rejected.
-- Optional expiry and traffic quota, with automatic disabling after expiry or quota exhaustion.
-- Settings page to enable/disable each connection profile; updates are rolled back if Xray cannot apply the configuration.
-- A single private subscription URL per client. `/sub/<token>` serves the branded responsive page in browsers and Base64 subscription content to compatible clients; the standard `Subscription-Userinfo` header carries usage, quota, and expiry metadata to compatible apps. QR and help pages remain available.
-- Usage counters are flushed before Xray restarts to reduce traffic-accounting loss.
-- Owner-only ZIP backup/restore with integrity/schema checks and rollback attempt; backup includes credential hashes and client data, so keep it private.
-- Thirteen supported profiles: ten VLESS paths across WebSocket, HTTPUpgrade, XHTTP auto/packet-up/stream-up/stream-one and alternate paths, plus Trojan WS, VMess WS, and Shadowsocks 2022 WS. The Shadowsocks plugin URI is fully percent-encoded and included in the real-tunnel smoke test. XHTTP stream-up/stream-one use their actual modes; all four stream-mode paths are attempted by CI and marked experimental because Railway’s HTTP/1.1 edge may limit them. VLESS/Trojan WebSocket and HTTPUpgrade subscription links request Xray Early Data (`ed=2560`) to reduce connection-setup round trips where the client and route support it; this does not reduce the underlying network RTT.
-- The browser subscription page has a latency-check button that runs server-side route diagnostics, displays the reported route response time beside each profile, and sorts successful checks from lowest to highest latency, with failed checks last. This is a server-side HTTP route measurement, not a real device-side VPN tunnel ping like a client app can perform.
-- Separate owner/admin/viewer accounts, scoped bot API keys, protected Swagger/ReDoc, resource diagnostics, official client download links, and a hamburger navigation drawer.
-- Operator-aware diagnostics with carrier-specific profile feedback aggregation, recent success-rate recommendations, Xray/Nginx validation, safe self-repair, route diagnostics and a health endpoint. Local route checks do not claim to be real carrier ping tests.
+[شروع سریع](#شروع-سریع) · [امکانات](#امکانات) · [نقشهٔ معماری](#نقشهٔ-معماری) · [راهنمای سرعت](docs/PERFORMANCE_FA.md) · [راهنمای نصب](docs/DEPLOY_FA.md) · [ماتریس امکانات](docs/FEATURE_MATRIX_FA.md)
 
-## Railway deployment
+</div>
 
-1. Deploy this repository to a Railway service using the included Dockerfile.
-2. Add a Railway Volume mounted at `/data`. It is required to preserve clients, admin credentials, session secret, and the database across deploys.
-3. Generate a public domain for port `8080`.
-4. On a fresh database, sign in with username `admin` and password `admin`. Because these are default credentials, do not leave the panel publicly accessible without appropriate access protection.
-5. Set `BASE_URL` to the intended public HTTPS URL only if the automatically detected Railway domain is not the one you want to use for subscriptions.
+<img src="docs/assets/divider.svg" alt="" width="100%">
 
-The deployment uses HTTP-based connection transports behind the platform's HTTPS edge; it does not expose a separate public transport port in this design. Region changes can require volume migration and downtime, so plan them carefully.
+## Void چیست؟
 
-## Local Docker test
+**Void** یک پنل مستقل برای مدیریت سرویس‌ها و پروفایل‌های اتصال مبتنی بر **Xray-core** است. رابط کاربری فارسی و راست‌چین است و برای اجرا در کانتینر Docker و استقرار روی Railway آماده شده. پنل برای مدیریت کاربران، لینک‌های اشتراک، گزارش مصرف، تنظیمات پروفایل و عیب‌یابی ساخته شده و به پنل‌های شخص ثالث وابستگی اجرایی ندارد.
 
-```sh
+> **وضعیت پروژه:** در مرحلهٔ آزمایش و یکپارچه‌سازی است. سبز بودن تست‌های خودکار، اتصال واقعی از تمام اپراتورها و کلاینت‌ها را تضمین نمی‌کند. پیش از استفادهٔ عمومی، کانفیگ‌ها را با گوشی و شبکه‌ای که قرار است از آن استفاده شود آزمایش کن.
+
+<img src="docs/assets/divider.svg" alt="" width="100%">
+
+## امکانات
+
+| بخش | چه کاری انجام می‌دهد؟ |
+|---|---|
+| داشبورد | نمایش وضعیت سرویس، شاخص‌های منابع کانتینر، ترافیک ثبت‌شده و رویدادهای اخیر |
+| مدیریت کاربران | ساخت، ویرایش، فعال/غیرفعال‌سازی، حذف و ریست مصرف کاربران |
+| سهمیه و انقضا | تعیین سقف مصرف و زمان انقضا؛ غیرفعال‌سازی خودکار پس از رسیدن به محدودیت |
+| لینک اشتراک | یک لینک برای صفحهٔ اختصاصی مرورگر یا محتوای اشتراک سازگار با کلاینت‌ها |
+| QR و راهنما | نمایش QR، وضعیت سرویس و توضیح واردکردن لینک |
+| پروفایل‌های اتصال | فعال‌سازی و غیرفعال‌سازی پروفایل‌های پشتیبانی‌شده و بازسازی امن تنظیمات Xray |
+| پایش و گزارش‌ها | ثبت مصرف ساعتی هر کاربر، نمودارها و گزارش خطاها |
+| عیب‌یابی | اعتبارسنجی پیکربندی Xray/Nginx و بررسی مسیرهای داخلی |
+| نقش‌های مدیریتی | نقش‌های مالک، مدیر و مشاهده‌گر؛ مشاهده‌گر برای عملیات مدیریتی محدود است |
+| API ربات | کلیدهای Bearer با مجوزهای محدود، تاریخ انقضا و امکان لغو |
+| بکاپ و بازیابی | فایل ZIP پشتیبان با بررسی ساختار و تلاش برای rollback هنگام خطا |
+| رابط موبایل | چیدمان واکنش‌گرا، منوی کناری، پشتیبانی از safe-area و کنترل‌های لمسی |
+
+**دربارهٔ پینگ و سرعت:** آزمون «سنجش تأخیر» در صفحهٔ اشتراک، زمان پاسخ مسیر وب را از سمت سرور اندازه می‌گیرد؛ این عدد پینگ واقعی تونل از گوشی و سرعت دانلود/آپلود نیست. توضیحات و برنامهٔ آزمایش در [راهنمای عملکرد و سرعت](docs/PERFORMANCE_FA.md) آمده است.
+
+<img src="docs/assets/divider.svg" alt="" width="100%">
+
+## پروفایل‌های اتصال
+
+نسخهٔ فعلی ۱۳ پروفایل در کد تعریف می‌کند. ۹ پروفایل عادی برای مسیرهای اصلی وجود دارد و چهار حالت XHTTP از نوع stream-up/stream-one آزمایشی‌اند و به‌صورت پیش‌فرض غیرفعال می‌مانند، چون سازگاری آن‌ها به مسیر شبکه و Edge بستگی دارد.
+
+| خانواده | پروفایل‌ها | وضعیت |
+|---|---|---|
+| VLESS | WebSocket، HTTPUpgrade، XHTTP auto، XHTTP packet-up | مسیرهای اصلی برای تست |
+| مسیرهای جایگزین VLESS | WebSocket و HTTPUpgrade | برای مقایسهٔ سازگاری مسیر |
+| XHTTP پیشرفته | stream-up، stream-one و دو مسیر جایگزین | آزمایشی؛ فعال‌سازی فقط پس از تست واقعی |
+| پروتکل‌های دیگر | Trojan/WS، VMess/WS، Shadowsocks 2022/WS | پشتیبانی در کد؛ نیازمند تست کلاینت واقعی |
+
+فهرست پروفایل‌ها به‌تنهایی تضمین سرعت یا پایداری نیست. هر مسیر را جداگانه روی همان دستگاه، سیم‌کارت/وای‌فای و کلاینت آزمایش کن. قابلیت مستقیم VLESS/TCP + REALITY/Vision در این نسخه فعال نشده؛ برای بررسی آن و اثر Railway TCP Proxy، [راهنمای سرعت](docs/PERFORMANCE_FA.md) را ببین.
+
+<img src="docs/assets/divider.svg" alt="" width="100%">
+
+## نقشهٔ معماری
+
+```mermaid
+flowchart TB
+    U["مرورگر مدیر / گوشی کاربر"]
+    EDGE["Railway HTTPS Edge"]
+    N["Nginx :8080"]
+    API["FastAPI · پنل فارسی و API"]
+    X["Xray-core · مسیرهای اتصال"]
+    DB[("SQLite + WAL<br/>داده‌های پایدار در Volume")]
+    OUT["اینترنت مقصد"]
+
+    U --> EDGE --> N
+    N -->|"صفحه، ورود، API"| API
+    N -->|"WS / HTTPUpgrade / XHTTP"| X
+    API -->|"ساخت و اعتبارسنجی کانفیگ"| X
+    API <--> DB
+    X -->|"خروجی freedom"| OUT
+```
+
+### مسیر هر اتصال
+
+```mermaid
+sequenceDiagram
+    participant C as کلاینت کاربر
+    participant R as Railway Edge
+    participant N as Nginx
+    participant X as Xray
+    participant I as اینترنت مقصد
+    C->>R: اتصال HTTPS و مسیر پروفایل
+    R->>N: درخواست ورودی
+    N->>X: ارسال به listener داخلی همان پروفایل
+    X->>I: برقراری اتصال خروجی
+    I-->>X: پاسخ داده
+    X-->>N: جریان پاسخ
+    N-->>R: پاسخ مسیر
+    R-->>C: داده برای کلاینت
+```
+
+### روند ساخت و انتشار
+
+```mermaid
+flowchart LR
+    A["GitHub · کد و تست"] --> B["Dockerfile"]
+    B --> C["تصویر Python + باینری رسمی Xray"]
+    C --> D["Railway · اجرای کانتینر"]
+    D --> E["Nginx :8080"]
+    D --- F[("/data یا مسیر Volume شناسایی‌شده")]
+    E --> G["/health"]
+    G --> H["ورود و تست اتصال"]
+```
+
+<img src="docs/assets/divider.svg" alt="" width="100%">
+
+## شروع سریع
+
+### استقرار روی Railway
+
+1. مخزن را در GitHub باز کن و آن را به سرویس Railway وصل کن؛ روش build باید **Dockerfile** باشد.
+2. برای نگهداری اطلاعات بعد از redeploy، یک **Volume پایدار** به سرویس متصل کن. مسیر پیش‌فرض `/data` است. برنامه متغیر خودکار Railway یعنی `RAILWAY_VOLUME_MOUNT_PATH` را هم می‌خواند، پس لازم نیست متغیر `DATA_DIR` را دستی تعریف کنی.
+3. دامنهٔ عمومی را برای پورت **8080** ایجاد کن.
+4. در نصب تازه، نام کاربری و رمز اولیه هر دو `admin` هستند. پس از ورود، رمز را فوراً عوض کن و پنل را با رمز پیش‌فرض در دسترس عمومی رها نکن.
+5. در صفحهٔ سلامت `/health` وضعیت پنل و Xray را بررسی کن؛ سپس یک کاربر آزمایشی بساز و همان لینک اشتراک را ابتدا در مرورگر و بعد در کلاینت واقعی تست کن.
+
+**آیا می‌شود Volume را کاملاً خودکار ساخت؟** خود برنامه می‌تواند مسیر Volume متصل‌شده را تشخیص بدهد، اما از داخل کانتینر نمی‌تواند یک Volume پایدار جدید در حساب Railway بسازد و به سرویس وصل کند. Volume باید یک‌بار از پنل Railway یا CLI ایجاد و متصل شود. اگر CLI را به پروژه و سرویس درست وصل کرده‌ای، راهنمای رسمی [مدیریت Volume با CLI](https://docs.railway.com/cli/volume) را ببین؛ برای مثال دستور ساخت Volume با مسیر `/data`، `railway volume add --mount-path /data` است. برای سرویس فعلی، Volume موجود را حذف یا جابه‌جا نکن.
+
+جزئیات نصب و نگهداری: [راهنمای نصب فارسی](docs/DEPLOY_FA.md).
+
+### اجرای آزمایشی محلی با Docker
+
+```bash
 docker build -t void .
 docker run --rm -p 8080:8080 -e COOKIE_SECURE=0 -v "$PWD/data:/data" void
 ```
 
-Open `http://localhost:8080`. On a fresh local database, sign in with username `admin` and password `admin`. The bootstrap file is stored in `data/INITIAL_ADMIN_PASSWORD.txt`; the password is not printed to logs. The same default initial credentials apply to a fresh local database.
+سپس `http://localhost:8080` را باز کن. این Volume محلی دیتابیس را بین اجرای کانتینرها حفظ می‌کند. متغیر `COOKIE_SECURE=0` فقط برای تست محلی با HTTP است؛ برای سایت عمومی آن را غیرفعال نکن.
 
-## Security and operational notes
+<img src="docs/assets/divider.svg" alt="" width="100%">
 
-- Never commit `/data`, initial credentials, cookies, or subscription URLs.
-- A subscription token grants access to that client's connection profiles. Treat it like a password; revoking or disabling the client invalidates its subscription page, QR, and raw subscription endpoint.
-- The dashboard is a control plane, not an uptime guarantee. Railway edge/protocol compatibility and real client traffic must be tested in the target region.
-- Public HTTPS is terminated at the hosting platform's edge. The connection engine listens only on loopback behind Nginx.
-- Still not production-audited: real end-to-end client connectivity must be tested in the target region and networks. Direct WireGuard UDP service is not implemented: Railway's public HTTP/HTTPS edge does not expose a general public UDP listener for this deployment design. Do not present WireGuard as working unless deployed on UDP-capable infrastructure. Automated tests cover API lifecycle, profile settings and rollback, quota enforcement, subscription links, and QR rendering; real network latency and every third-party client app must still be validated from the intended user networks.
+## منابع فشار و بهینه‌سازی
+
+چند بهینه‌سازی کم‌خطر در کد وجود دارد:
+
+- لایهٔ نصب Python در Docker قابل کش است و دانلودهای pip در build cache نگهداری می‌شوند تا rebuildها کم‌هزینه‌تر شوند.
+- ذرات پس‌زمینه با تعداد و نرخ فریم محدودتر رسم می‌شوند؛ تعامل لمسی حفظ شده و حرکت پس‌زمینه از تغییر مداوم `background-position` به transform کم‌هزینه‌تر منتقل شده است.
+- برای پاک‌سازی تاریخچهٔ مصرف، SQLite یک ایندکس اختصاصی بر زمان نمونه دارد؛ این کار اسکن بی‌دلیل تمام رکوردهای قدیمی را کاهش می‌دهد.
+- مسیر Volume در اجرا از تنظیم صریح `DATA_DIR` یا متغیر خودکار Railway تشخیص داده می‌شود.
+
+سرعت پایین تونل را صرفاً با تنظیمات CSS یا افزایش تعداد پروفایل‌ها نمی‌توان حل کرد. منطقهٔ استقرار، محدودیت شبکه/Edge، پورت‌های قابل‌دسترسی اپراتور، ظرفیت پلن و روش انتقال همگی مؤثرند. روش اندازه‌گیری و تفاوت مسیر فعلی HTTPS با TCP Proxy در [راهنمای عملکرد و سرعت](docs/PERFORMANCE_FA.md) شرح داده شده است.
+
+<img src="docs/assets/divider.svg" alt="" width="100%">
+
+## راهنمای بخش‌های پنل
+
+| بخش | کاربرد |
+|---|---|
+| داشبورد | سلامت سرویس و شاخص‌های فعلی؛ عدد «سرعت ثبت‌شده» معیار سرعت‌سنج گوشی نیست |
+| مدیریت کاربران | ساخت سرویس، سهمیه، انقضا، وضعیت و لینک اشتراک |
+| سرورها و پروتکل‌ها | وضعیت پروفایل‌های فعلی و فعال/غیرفعال‌کردن آن‌ها |
+| گزارش‌ها | مشاهدهٔ رویدادها و خطاهای اخیر |
+| تنظیمات | کنترل‌های پنل، پروفایل‌ها و گزینه‌های اجرایی موجود |
+| پایش | CPU، RAM، دیسک، Load و مصرف ثبت‌شدهٔ کانتینر |
+| عیب‌یابی | آزمون محلی listener، مسیر Nginx و اعتبارسنجی تنظیمات؛ نه آزمون کامل گوشی کاربر |
+| API و اتصال ربات | ساخت و لغو کلیدهای مجوزدار برای اتصال بات |
+| بکاپ و بازیابی | دریافت نسخهٔ پشتیبان و بازیابی دادهٔ پنل |
+
+برای اطلاعات فنی:
+- [نقشهٔ معماری و ساختار کد](docs/ARCHITECTURE_FA.md)
+- [راهنمای نصب و انتشار](docs/DEPLOY_FA.md)
+- [راهنمای عملکرد، سرعت و محدودیت‌های Railway](docs/PERFORMANCE_FA.md)
+- [ماتریس وضعیت قابلیت‌ها](docs/FEATURE_MATRIX_FA.md)
+- [API فارسی](docs/API_FA.md)
+- [مرور امنیتی](docs/SECURITY_REVIEW.md)
+
+<img src="docs/assets/divider.svg" alt="" width="100%">
+
+## ساختار اصلی مخزن
+
+| مسیر | وظیفه |
+|---|---|
+| `app/main.py` | برنامهٔ FastAPI، مدل داده، مدیریت کاربران، ساخت کانفیگ Xray، HTML/CSS/JS و صفحهٔ اشتراک |
+| `app/extended.py` | APIهای مدیریتی پیشرفته، کلیدهای API، پایش منابع و تشخیص مسیرها |
+| `nginx/nginx.conf` | تنظیمات اصلی Nginx و اتصال‌های داخلی محدودشده |
+| `nginx/default.conf` | مسیریابی وب و حمل‌ونقل به listenerهای Xray |
+| `scripts/start.sh` | آماده‌سازی مسیر داده، بررسی دسترسی‌ها و اجرای Nginx و FastAPI |
+| `Dockerfile` | ساخت تصویر با نسخهٔ مشخص Xray-core و نصب وابستگی‌های Python |
+| `tests/` | تست‌های هسته، API، تنظیمات استقرار و رگرسیون |
+| `.github/workflows/` | تست‌ها، بررسی امنیت وابستگی‌ها و اسکرین‌شات‌های خودکار |
+
+## امنیت و نکات مهم
+
+- لینک اشتراک مثل رمز عبور است؛ فقط برای صاحب سرویس ارسالش کن.
+- رمز پیش‌فرض `admin` را فوراً تغییر بده.
+- فایل بکاپ ممکن است اطلاعات کاربران، هش اعتبارنامه‌ها و تنظیمات را داشته باشد؛ آن را محرمانه نگه دار.
+- Volume حاوی دیتابیس و تنظیمات است. حذف، detach یا تغییر محل آن می‌تواند اطلاعات را از دسترس خارج کند.
+- تست مسیر داخلی یا CI جایگزین تست با اپلیکیشن واقعی، شبکهٔ مقصد و بررسی امنیتی مستقل نیست.
+- استقرار فعلی برای مسیرهای HTTP/HTTPS روی Railway طراحی شده است. UDP عمومی و WireGuard مستقیم در این معماری فعال نیست.
+
+## وضعیت تست‌ها و پیش‌نمایش
+
+در تب [Actions](https://github.com/bodisbos-cmd/void/actions)، خروجی تست Python، ساخت تصویر و تست مسیرهای Xray را بررسی کن. گردش کار [Visual preview](https://github.com/bodisbos-cmd/void/actions/workflows/visual-preview.yml) هم از دادهٔ ساختگی و محیط ایزوله برای بررسی صفحات دسکتاپ، تبلت و موبایل استفاده می‌کند؛ هیچ داده‌ای از Railway عملیاتی در آن استفاده نمی‌شود.
+
+---
+
+<div align="center">
+
+**Void · Abyss Tunnel**
+
+<sub>طراحی برای سادگی مدیریت؛ تأیید سرعت و سازگاری، همیشه با آزمایش واقعی انجام می‌شود.</sub>
+
+</div>
