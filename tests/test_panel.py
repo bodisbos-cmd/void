@@ -503,7 +503,7 @@ def test_reality_keypair_generation_is_persistent_and_parses_current_xray_output
     fake_xray.write_text(
         "#!/bin/sh\n"
         "echo 'PrivateKey: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'\n"
-        "echo 'Password: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'\n"
+        "echo 'Password (PublicKey): BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'\n"
         "echo 'Hash32: CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC'\n",
         encoding="utf-8",
     )
