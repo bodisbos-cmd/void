@@ -379,6 +379,14 @@ def test_same_subscription_url_serves_branded_page_to_browsers(client):
     assert client.get(f"/api/clients/{created.json()['id']}/subscription").json()["page_url"] == url
 
 
+def test_usage_history_has_index_for_retention_cleanup(client):
+    admin_client(client)
+    with panel.db() as conn:
+        indexes = {row["name"] for row in conn.execute("PRAGMA index_list(client_usage_history)")}
+    assert "idx_client_usage_history_sampled_at" in indexes
+    assert "idx_client_usage_history_retention" in indexes
+
+
 def test_subscription_usage_chart_uses_scoped_real_client_history(client):
     csrf = admin_client(client)
     headers = {"X-CSRF-Token": csrf}
