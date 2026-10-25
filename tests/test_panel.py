@@ -212,6 +212,11 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "report-event-table" in dashboard_script.text
     assert '<bdi dir="ltr">' in dashboard_script.text
     assert "function renderProtocolCatalog(profiles)" in dashboard_script.text
+    assert 'id="void-touch-responsive-polish"' in response.text
+    assert 'id="void-touch-interaction"' in response.text
+    assert "document.addEventListener('pointerdown',e=>respond" in response.text
+    assert "void-touch-compact" in response.text
+    assert 'content="width=device-width,initial-scale=1,viewport-fit=cover"' in response.text
     assert response.text.count('id="name"') == 1
     assert response.text.count('id="clientProfileChoices"') == 1
     assert 'data-section-page="clients"' in response.text
