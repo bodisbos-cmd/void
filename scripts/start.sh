@@ -13,7 +13,13 @@ ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 # Railway mounts persistent volumes at runtime, so image-build ownership
 # alone is not sufficient. Fix the mount ownership before dropping privileges.
 mkdir -p "$DATA_DIR" /tmp/nginx-client-body /tmp/nginx-proxy /tmp/nginx-fastcgi /tmp/nginx-uwsgi /tmp/nginx-scgi
-chown -R abyss:abyss "$DATA_DIR"
+# Railway mounts persistent volumes at runtime. The application's state is
+# stored as top-level files, so fix the mount and immediate children only instead
+# of recursively traversing the complete volume on every deployment.
+mkdir -p "$DATA_DIR" /tmp/nginx-client-body /tmp/nginx-proxy /tmp/nginx-fastcgi /tmp/nginx-uwsgi /tmp/nginx-scgi
+chown abyss:abyss "$DATA_DIR"
+find "$DATA_DIR" -mindepth 1 -maxdepth 1 ! -user abyss -exec chown abyss:abyss {} +
+chown -R abyss:abyss /tmp/nginx-client-body /tmp/nginx-proxy /tmp/nginx-fastcgi /tmp/nginx-uwsgi /tmp/nginx-scgi
 chown -R abyss:abyss /tmp/nginx-client-body /tmp/nginx-proxy /tmp/nginx-fastcgi /tmp/nginx-uwsgi /tmp/nginx-scgi
 
 # Fail early with a clear log if the persistent database volume is not writable.
