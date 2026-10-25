@@ -45,3 +45,18 @@ def test_railway_restarts_failed_or_stopped_service_and_waits_for_health():
     assert config["deploy"]["healthcheckPath"] == "/health"
     assert config["deploy"]["healthcheckTimeout"] == 300
     assert config["deploy"]["restartPolicyType"] == "ALWAYS"
+
+
+def test_docker_build_uses_a_pip_cache_without_baking_it_into_the_image():
+    dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
+    assert "# syntax=docker/dockerfile:1" in dockerfile
+    assert "RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt" in dockerfile
+    assert "DATA_DIR=/data" not in dockerfile
+
+
+def test_railway_volume_mount_path_is_detected_without_manual_data_dir_variable():
+    source = (ROOT / "app" / "main.py").read_text(encoding="utf-8")
+    start = (ROOT / "scripts" / "start.sh").read_text(encoding="utf-8")
+    assert 'os.getenv("RAILWAY_VOLUME_MOUNT_PATH") or "/data"' in source
+    assert 'DATA_DIR="${DATA_DIR:-${RAILWAY_VOLUME_MOUNT_PATH:-/data}}"' in start
+    assert 'touch "$DATA_DIR/.abyss-write-test"' in start
