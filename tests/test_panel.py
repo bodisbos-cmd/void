@@ -501,10 +501,10 @@ def test_tcp_reality_profile_is_only_detected_for_matching_railway_proxy(monkeyp
 def test_reality_keypair_generation_is_persistent_and_parses_current_xray_output(client, monkeypatch, tmp_path):
     fake_xray = tmp_path / "xray-keygen"
     fake_xray.write_text(
-        "#!/bin/sh\\nprintf '%s\\n' "
+        "#!/bin/sh\nprintf '%s\n' "
         "'PrivateKey: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' "
         "'Password: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB' "
-        "'Hash32: CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC'\\n",
+        "'Hash32: CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC'\n",
         encoding="utf-8",
     )
     fake_xray.chmod(0o755)
