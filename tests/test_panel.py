@@ -17,6 +17,7 @@ os.environ["COOKIE_SECURE"] = "0"
 os.environ["ABYSS_TEST_MODE"] = "1"
 
 from fastapi.testclient import TestClient
+from starlette.requests import Request
 import pytest
 
 import app.main as panel
@@ -212,6 +213,11 @@ def test_dashboard_is_not_cached_and_has_section_navigation(client):
     assert "report-event-table" in dashboard_script.text
     assert '<bdi dir="ltr">' in dashboard_script.text
     assert "function renderProtocolCatalog(profiles)" in dashboard_script.text
+    assert 'id="void-touch-responsive-polish"' in response.text
+    assert 'id="void-touch-interaction"' in response.text
+    assert "document.addEventListener('pointerdown',e=>respond" in response.text
+    assert "void-touch-compact" in response.text
+    assert 'content="width=device-width,initial-scale=1,viewport-fit=cover"' in response.text
     assert response.text.count('id="name"') == 1
     assert response.text.count('id="clientProfileChoices"') == 1
     assert 'data-section-page="clients"' in response.text
@@ -374,6 +380,14 @@ def test_same_subscription_url_serves_branded_page_to_browsers(client):
     assert client.get(f"/api/clients/{created.json()['id']}/subscription").json()["page_url"] == url
 
 
+def test_usage_history_has_index_for_retention_cleanup(client):
+    admin_client(client)
+    with panel.db() as conn:
+        indexes = {row["name"] for row in conn.execute("PRAGMA index_list(client_usage_history)")}
+    assert "idx_client_usage_history_sampled_at" in indexes
+    assert "idx_client_usage_history_retention" in indexes
+
+
 def test_subscription_usage_chart_uses_scoped_real_client_history(client):
     csrf = admin_client(client)
     headers = {"X-CSRF-Token": csrf}
@@ -459,6 +473,115 @@ def test_xray_config_has_unique_inbounds_and_stats_api(client):
     xhttp = [item for item in inbounds if item.get("streamSettings", {}).get("network") == "xhttp"]
     assert {item["streamSettings"]["xhttpSettings"]["mode"] for item in xhttp} == {"auto", "packet-up"}
     assert len({item["streamSettings"]["xhttpSettings"]["path"] for item in xhttp}) == 2
+
+
+def test_tcp_reality_profile_is_only_detected_for_matching_railway_proxy(monkeypatch):
+    for key in ("RAILWAY_TCP_PROXY_DOMAIN", "RAILWAY_TCP_PROXY_PORT", "RAILWAY_TCP_APPLICATION_PORT"):
+        monkeypatch.delenv(key, raising=False)
+    assert panel.railway_tcp_reality_profile() is None
+
+    monkeypatch.setenv("RAILWAY_TCP_PROXY_DOMAIN", "quiet.proxy.rlwy.net")
+    monkeypatch.setenv("RAILWAY_TCP_PROXY_PORT", "15140")
+    monkeypatch.setenv("RAILWAY_TCP_APPLICATION_PORT", str(panel.TCP_REALITY_INTERNAL_PORT))
+    profile = panel.railway_tcp_reality_profile()
+    assert profile["key"] == "vless_reality_tcp"
+    assert profile["network"] == "raw"
+    assert profile["port"] == 10014
+    assert profile["listen"] == "0.0.0.0"
+    assert profile["tcp_proxy_domain"] == "quiet.proxy.rlwy.net"
+    assert profile["tcp_proxy_port"] == 15140
+
+    monkeypatch.setenv("RAILWAY_TCP_APPLICATION_PORT", "8080")
+    assert panel.railway_tcp_reality_profile() is None
+    monkeypatch.setenv("RAILWAY_TCP_APPLICATION_PORT", str(panel.TCP_REALITY_INTERNAL_PORT))
+    monkeypatch.setenv("RAILWAY_TCP_PROXY_PORT", "not-a-port")
+    assert panel.railway_tcp_reality_profile() is None
+
+
+def test_reality_keypair_generation_is_persistent_and_parses_current_xray_output(client, monkeypatch, tmp_path):
+    fake_xray = tmp_path / "xray-keygen"
+    fake_xray.write_text(
+        "#!/bin/sh\n"
+        "echo 'PrivateKey: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'\n"
+        "echo 'Password (PublicKey): BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'\n"
+        "echo 'Hash32: CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC'\n",
+        encoding="utf-8",
+    )
+    fake_xray.chmod(0o755)
+    monkeypatch.setattr(panel, "XRAY_BIN", str(fake_xray))
+    monkeypatch.setenv("VOID_REALITY_SERVER_NAME", "www.microsoft.com")
+    monkeypatch.delenv("VOID_REALITY_TARGET", raising=False)
+
+    first = panel.get_reality_tcp_settings()
+    second = panel.get_reality_tcp_settings()
+    assert first == second
+    assert first["private_key"].startswith("A")
+    assert first["public_key"].startswith("B")
+    assert first["server_name"] == "www.microsoft.com"
+    assert first["target"] == "www.microsoft.com:443"
+    assert len(first["short_id"]) == 16
+    with panel.db() as conn:
+        saved = conn.execute("SELECT value FROM settings WHERE key='reality_tcp_config'").fetchone()
+    assert saved is not None
+
+
+def test_tcp_reality_profile_builds_xray_inbound_and_direct_subscription(client, monkeypatch):
+    csrf = admin_client(client)
+    created = client.post(
+        "/api/clients",
+        json={"name": "Direct TCP test"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert created.status_code == 200
+    with panel.db() as conn:
+        row = conn.execute("SELECT * FROM clients WHERE id=?", (created.json()["id"],)).fetchone()
+    assert row is not None
+    profile = {
+        "key": "vless_reality_tcp",
+        "label": "VLESS · REALITY · TCP مستقیم",
+        "protocol": "vless",
+        "network": "raw",
+        "path": "",
+        "port": 10014,
+        "mode": None,
+        "security": "reality",
+        "listen": "0.0.0.0",
+        "flow": "xtls-rprx-vision",
+        "tcp_proxy_domain": "quiet.proxy.rlwy.net",
+        "tcp_proxy_port": 15140,
+    }
+    monkeypatch.setattr(panel, "PROFILES", panel.PROFILES + [profile])
+    monkeypatch.setattr(panel, "get_reality_tcp_settings", lambda: {
+        "private_key": "PRIVATE_TEST_KEY",
+        "public_key": "PUBLIC_TEST_KEY",
+        "short_id": "a1b2c3d4e5f60718",
+        "server_name": "www.microsoft.com",
+        "target": "www.microsoft.com:443",
+    })
+
+    config = panel.make_xray_config()
+    inbound = next(item for item in config["inbounds"] if item["tag"] == "in-vless_reality_tcp")
+    assert inbound["listen"] == "0.0.0.0"
+    assert inbound["port"] == 10014
+    assert inbound["streamSettings"]["network"] == "raw"
+    assert inbound["streamSettings"]["security"] == "reality"
+    assert inbound["streamSettings"]["realitySettings"]["privateKey"] == "PRIVATE_TEST_KEY"
+    assert inbound["settings"]["clients"][0]["flow"] == "xtls-rprx-vision"
+
+    request = Request({
+        "type": "http", "method": "GET", "scheme": "https", "path": "/sub/test",
+        "raw_path": b"/sub/test", "query_string": b"",
+        "headers": [(b"host", b"void.example")],
+    })
+    links = panel.make_subscription_links(dict(row), request)
+    direct = next(item for item in links if item["key"] == "vless_reality_tcp")
+    assert "vless://" + row["client_uuid"] + "@quiet.proxy.rlwy.net:15140?" in direct["url"]
+    assert "security=reality" in direct["url"]
+    assert "pbk=PUBLIC_TEST_KEY" in direct["url"]
+    assert "sni=www.microsoft.com" in direct["url"]
+    assert "sid=a1b2c3d4e5f60718" in direct["url"]
+    assert "flow=xtls-rprx-vision" in direct["url"]
+    assert "type=tcp" in direct["url"]
 
 
 def test_subscription_feedback_validates_operator_and_result(client):

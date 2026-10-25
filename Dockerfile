@@ -1,10 +1,11 @@
+# syntax=docker/dockerfile:1
+
 FROM ghcr.io/xtls/xray-core:26.9.8 AS xray
 
 FROM python:3.12-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DATA_DIR=/data \
     XRAY_BIN=/usr/local/bin/xray \
     COOKIE_SECURE=1
 
@@ -19,7 +20,7 @@ RUN /usr/local/bin/xray version
 
 WORKDIR /app
 COPY requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 COPY app ./app
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf

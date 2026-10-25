@@ -135,6 +135,15 @@ def _probe_profile(profile):
     finally:
         result["listener_latency_ms"]=round((time.monotonic()-listener_started)*1000,1)
 
+    if profile["network"]=="raw":
+        result["route_latency_ms"]=result["listener_latency_ms"]
+        result["route_ok"]=bool(result["listener_ok"])
+        result["status"]="listener_reachable_tunnel_unverified" if result["listener_ok"] else "listener_missing"
+        result["hint"]="Listener TCP مستقیم در دسترس است؛ این بررسی handshake REALITY یا سرعت تونل از دستگاه کاربر را آزمایش نمی‌کند."
+        result["probe_duration_ms"]=round((time.monotonic()-started)*1000,1)
+        result["latency_ms"]=result["route_latency_ms"]
+        return result
+
     connection=None
     route_started=time.monotonic()
     try:

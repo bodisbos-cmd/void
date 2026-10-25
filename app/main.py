@@ -31,10 +31,33 @@ PROFILES=[
     {"key":"xhttp_stream_one_alt","label":"XHTTP · stream-one · مسیر جایگزین · آزمایشی","network":"xhttp","path":"/xhttp-stream-one-alt","port":10013,"mode":"stream-one","experimental":True,"subscription_label":"xhttp-stream-one-alt"},
     {"key":"ss_ws","label":"Shadowsocks 2022 · WebSocket TLS","protocol":"shadowsocks","network":"ws","path":"/ss-ws","port":10009,"mode":None},
 ]
-DATA_DIR=Path(os.getenv("DATA_DIR","/data")); DATA_DIR.mkdir(parents=True,exist_ok=True)
+DATA_DIR=Path(os.getenv("DATA_DIR") or os.getenv("RAILWAY_VOLUME_MOUNT_PATH") or "/data"); DATA_DIR.mkdir(parents=True,exist_ok=True)
 DB_PATH=DATA_DIR/"panel.sqlite3"; XRAY_CONFIG=DATA_DIR/"xray.json"
 XRAY_BIN=os.getenv("XRAY_BIN","/usr/local/bin/xray"); PUBLIC_DOMAIN=os.getenv("RAILWAY_PUBLIC_DOMAIN","").strip()
 BASE_URL=os.getenv("BASE_URL","").strip().rstrip("/")
+
+# Optional direct TCP Reality profile: only present when Railway TCP Proxy variables exist.
+TCP_REALITY_INTERNAL_PORT=10014
+def railway_tcp_reality_profile():
+    domain=os.getenv("RAILWAY_TCP_PROXY_DOMAIN","").strip()
+    external_port=os.getenv("RAILWAY_TCP_PROXY_PORT","").strip()
+    application_port=os.getenv("RAILWAY_TCP_APPLICATION_PORT","").strip()
+    if not domain or not external_port or application_port!=str(TCP_REALITY_INTERNAL_PORT):
+        return None
+    try:
+        parsed=urlsplit("//"+domain)
+        port=int(external_port)
+    except (ValueError,TypeError):
+        return None
+    if parsed.hostname!=domain or not parsed.hostname or not (1<=port<=65535) or any(ch.isspace() for ch in domain):
+        return None
+    return {"key":"vless_reality_tcp","label":"VLESS · REALITY · TCP مستقیم",
+        "protocol":"vless","network":"raw","path":"","port":TCP_REALITY_INTERNAL_PORT,
+        "mode":None,"security":"reality","listen":"0.0.0.0","flow":"xtls-rprx-vision", # nosec B104: listener is appended only for an explicit Railway TCP Proxy mapping
+        "tcp_proxy_domain":domain,"tcp_proxy_port":port}
+_tcp_reality_profile=railway_tcp_reality_profile()
+if _tcp_reality_profile:
+    PROFILES.append(_tcp_reality_profile)
 
 def configured_support_url():
     """Return a validated optional support URL from the environment."""
@@ -109,6 +132,7 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_metrics_history_sampled_at ON metrics_history(sampled_at DESC);
         CREATE TABLE IF NOT EXISTS client_usage_history(client_id TEXT NOT NULL,sampled_at INTEGER NOT NULL,used_bytes INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(client_id,sampled_at));
         CREATE INDEX IF NOT EXISTS idx_client_usage_history_sampled_at ON client_usage_history(client_id,sampled_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_client_usage_history_retention ON client_usage_history(sampled_at);
         CREATE INDEX IF NOT EXISTS idx_profile_feedback_carrier ON profile_feedback(carrier,profile_key,created_at DESC);
         CREATE INDEX IF NOT EXISTS idx_clients_created ON clients(created_at DESC);
         """)
@@ -169,6 +193,53 @@ def get_ss2022_server_password():
         c.execute("INSERT OR IGNORE INTO settings(key,value) VALUES('ss2022_server_password',?)",(generated,))
         return c.execute("SELECT value FROM settings WHERE key='ss2022_server_password'").fetchone()["value"]
 
+def get_reality_tcp_settings():
+    """Return a persistent Xray REALITY keypair and camouflage target."""
+    with db() as c:
+        row=c.execute("SELECT value FROM settings WHERE key='reality_tcp_config'").fetchone()
+        if row:
+            try:
+                saved=json.loads(row["value"])
+                if all(saved.get(k) for k in ("private_key","public_key","short_id","server_name","target")):
+                    return saved
+            except (TypeError,ValueError):
+                pass
+    if not Path(XRAY_BIN).is_file():
+        raise RuntimeError("The optional TCP REALITY profile requires the Xray binary.")
+    result=subprocess.run([XRAY_BIN,"x25519"],capture_output=True,text=True,timeout=10)
+    if result.returncode:
+        raise RuntimeError("Xray could not generate REALITY keys: "+(result.stderr or result.stdout)[-300:])
+    values={}
+    for line in (result.stdout or "").splitlines():
+        key,sep,value=line.partition(":")
+        if sep: values["".join(ch for ch in key.strip().lower() if ch.isalnum())]=value.strip()
+    private_key=values.get("privatekey")
+    public_key=values.get("passwordpublickey") or values.get("password") or values.get("publickey")
+    if not private_key or not public_key:
+        raise RuntimeError("Unrecognized Xray x25519 output; REALITY profile was not enabled.")
+    server_name=os.getenv("VOID_REALITY_SERVER_NAME","www.microsoft.com").strip()
+    target=os.getenv("VOID_REALITY_TARGET","").strip() or server_name+":443"
+    parsed=urlsplit("//"+target)
+    try:
+        target_port=parsed.port
+    except ValueError:
+        target_port=None
+        invalid_port=True
+    else:
+        invalid_port=False
+    if (not server_name or parsed.hostname is None or invalid_port or
+        any(ch.isspace() for ch in server_name+target) or
+        any(ch in server_name for ch in "/?#@") or any(ch in target for ch in "/?#@") or
+        (target_port is not None and not (1<=target_port<=65535))):
+        raise RuntimeError("VOID_REALITY_SERVER_NAME / VOID_REALITY_TARGET is invalid.")
+    generated={"private_key":private_key,"public_key":public_key,"short_id":secrets.token_hex(8),
+        "server_name":server_name,"target":target}
+    with db() as c:
+        c.execute("INSERT OR IGNORE INTO settings(key,value) VALUES('reality_tcp_config',?)",
+                  (json.dumps(generated,separators=(",",":")),))
+        row=c.execute("SELECT value FROM settings WHERE key='reality_tcp_config'").fetchone()
+    return json.loads(row["value"])
+
 def client_is_expired(expires_at):
     if not expires_at:
         return False
@@ -209,11 +280,21 @@ def make_xray_config():
             if selected is None or profile["key"] in selected:
                 profile_clients.append({"id":client["client_uuid"],"email":f"client-{client['id']}"})
         clients=profile_clients
-        stream={"network":network,"security":"none"}
-        stream[{"ws":"wsSettings","httpupgrade":"httpupgradeSettings","xhttp":"xhttpSettings"}[network]]={"path":path,**({"mode":profile["mode"]} if profile["mode"] else {})}
+        security=profile.get("security","none")
+        stream={"network":network,"security":security}
+        transport_settings={"ws":"wsSettings","httpupgrade":"httpupgradeSettings","xhttp":"xhttpSettings"}
+        if network in transport_settings:
+            stream[transport_settings[network]]={"path":path,**({"mode":profile["mode"]} if profile["mode"] else {})}
+        elif network!="raw":
+            raise ValueError("Unsupported Xray network: "+network)
+        if security=="reality":
+            reality=get_reality_tcp_settings()
+            stream["realitySettings"]={"show":False,"target":reality["target"],"xver":0,
+                "serverNames":[reality["server_name"]],"privateKey":reality["private_key"],
+                "shortIds":[reality["short_id"]]}
         protocol=profile.get("protocol","vless")
         if protocol=="vless":
-            settings={"clients":clients,"decryption":"none"}
+            settings={"clients":[{"id":x["id"],"email":x["email"],**({"flow":profile["flow"]} if profile.get("flow") else {})} for x in clients],"decryption":"none"}
         elif protocol=="trojan":
             settings={"clients":[{"password":x["id"],"email":x["email"]} for x in clients]}
         elif protocol=="vmess":
@@ -223,7 +304,7 @@ def make_xray_config():
             settings={"method":"2022-blake3-aes-128-gcm","password":get_ss2022_server_password(),"network":"tcp","clients":ss_clients}
         else:
             raise ValueError("Unsupported profile protocol: "+protocol)
-        inbound={"tag":f"in-{profile['key']}","listen":"127.0.0.1","port":port,"protocol":protocol,"settings":settings,"streamSettings":stream}
+        inbound={"tag":f"in-{profile['key']}","listen":profile.get("listen","127.0.0.1"),"port":port,"protocol":protocol,"settings":settings,"streamSettings":stream}
         ins.append(inbound)
     return {"log":{"loglevel":"debug" if os.getenv("ABYSS_TEST_MODE")=="1" else "warning"},"api":{"tag":"api","services":["StatsService"]},"stats":{},"policy":{"levels":{"0":{"statsUserUplink":True,"statsUserDownlink":True}}},"inbounds":ins,"outbounds":[{"protocol":"freedom","tag":"direct"},{"protocol":"blackhole","tag":"block"},{"protocol":"freedom","tag":"api"}],"routing":{"domainStrategy":"AsIs","rules":[{"type":"field","inboundTag":["api"],"outboundTag":"api"}]}}
 def validate_and_write_xray():
@@ -244,7 +325,19 @@ async def start_xray():
             xray_proc.terminate()
             try: xray_proc.wait(timeout=4)
             except subprocess.TimeoutExpired: xray_proc.kill()
-        err=open(DATA_DIR/"xray-stderr.log","ab")
+        err_path=DATA_DIR/"xray-stderr.log"
+        try:
+            # Keep the persistent volume bounded if a repeated upstream failure
+            # produces verbose Xray diagnostics.
+            if err_path.exists() and err_path.stat().st_size>=8*1024*1024:
+                second=DATA_DIR/"xray-stderr.log.2"
+                first=DATA_DIR/"xray-stderr.log.1"
+                if second.exists(): second.unlink()
+                if first.exists(): first.replace(second)
+                err_path.replace(first)
+        except OSError as e:
+            LOG.warning("Could not rotate Xray log: %s",e)
+        err=open(err_path,"ab")
         try: xray_proc=subprocess.Popen([XRAY_BIN,"run","-config",str(XRAY_CONFIG)],stdout=err,stderr=err)
         finally: err.close()
         await asyncio.sleep(.25)
@@ -279,10 +372,24 @@ def apply_xray_stats(stats):
 
 CLIENT_USAGE_HISTORY_SAMPLE_SECONDS=3600
 CLIENT_USAGE_HISTORY_RETENTION_SECONDS=90*86400
+_LAST_USAGE_HISTORY_SWEEP=0
+_LAST_USAGE_HISTORY_CLEANUP=0
 
 def record_client_usage_history(now=None, client_id=None):
-    """Store hourly per-client cumulative usage, never the panel-wide total."""
+    """Store hourly per-client cumulative usage; sweep and prune at most hourly."""
+    global _LAST_USAGE_HISTORY_SWEEP, _LAST_USAGE_HISTORY_CLEANUP
     now=int(time.time() if now is None else now)
+    # The quota monitor wakes every 10 seconds. Avoid walking every client's
+    # history index on every wake: a full-table sample is only needed hourly.
+    if client_id is None:
+        sweep_due=(_LAST_USAGE_HISTORY_SWEEP==0 or now<_LAST_USAGE_HISTORY_SWEEP or
+                   now-_LAST_USAGE_HISTORY_SWEEP>=CLIENT_USAGE_HISTORY_SAMPLE_SECONDS)
+        if not sweep_due:
+            return
+    else:
+        sweep_due=False
+    cleanup_due=(_LAST_USAGE_HISTORY_CLEANUP==0 or now<_LAST_USAGE_HISTORY_CLEANUP or
+                 now-_LAST_USAGE_HISTORY_CLEANUP>=CLIENT_USAGE_HISTORY_SAMPLE_SECONDS)
     with db() as c:
         if client_id is None:
             rows=c.execute(
@@ -300,11 +407,16 @@ def record_client_usage_history(now=None, client_id=None):
                     "INSERT OR REPLACE INTO client_usage_history(client_id,sampled_at,used_bytes) VALUES(?,?,?)",
                     (row["id"],now,max(0,int(row["used_bytes"] or 0)))
                 )
-        c.execute(
-            "DELETE FROM client_usage_history WHERE sampled_at < ?",
-            (now-CLIENT_USAGE_HISTORY_RETENTION_SECONDS,)
-        )
-        c.execute("DELETE FROM client_usage_history WHERE client_id NOT IN (SELECT id FROM clients)")
+        if cleanup_due:
+            c.execute(
+                "DELETE FROM client_usage_history WHERE sampled_at < ?",
+                (now-CLIENT_USAGE_HISTORY_RETENTION_SECONDS,)
+            )
+            c.execute("DELETE FROM client_usage_history WHERE client_id NOT IN (SELECT id FROM clients)")
+    if client_id is None:
+        _LAST_USAGE_HISTORY_SWEEP=now
+    if cleanup_due:
+        _LAST_USAGE_HISTORY_CLEANUP=now
 
 def get_client_usage_history(client_id, days=90, now=None):
     now=int(time.time() if now is None else now)
@@ -532,7 +644,7 @@ input,select,textarea{max-width:100%;min-width:0}table{display:block;max-width:1
 @media(max-width:600px){body{font-size:14px}main,.container,.wrap{padding-left:12px!important;padding-right:12px!important}.card,.panel,.box{border-radius:15px!important}.row{flex-wrap:wrap}.row>*{max-width:100%}button,.btn{min-height:42px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style><style id="abyss-login-premium">body{overflow:hidden;background:radial-gradient(ellipse at 15% 20%,rgba(38,107,112,.23),transparent 38%),radial-gradient(ellipse at 85% 85%,rgba(42,61,100,.22),transparent 40%),#070a10}.card{position:relative;overflow:hidden;border-color:#2b4653;background:linear-gradient(155deg,rgba(17,27,41,.98),rgba(9,14,23,.98));box-shadow:0 32px 110px #0009,0 0 0 1px #8de8d60a}.card:before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,#8de8d6,#547a9c,transparent)}.mint{font-size:10px;letter-spacing:.19em}.symbol{width:54px;height:54px;margin-top:26px;border-radius:17px;border-color:#396b6a;background:linear-gradient(145deg,#163b3d,#0d1c27);box-shadow:0 10px 35px #0005;font-size:25px}form{margin-top:20px}label{color:#b8c9d7}button{box-shadow:0 10px 26px #8de8d61b}button:hover{filter:brightness(1.06)}@media(max-width:420px){.card{border-radius:19px}.symbol{margin-top:20px}}</style><style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head><body><main class="card"><div class="abyss-brand-row login-brand"><img class="abyss-logo-image" src="/brand-logo" alt="" aria-hidden="true"><span class="brand-name">ABYSS TUNNEL<small>• I T A •</small></span></div><h1>ورود به پنل مدیریت</h1><p class="muted">برای ادامه، اطلاعات خود را وارد کنید.</p><form method="post"><input type="hidden" name="csrf_token" value="{{CSRF}}"><label for="username">نام کاربری</label><div class="login-input-wrap"><span class="login-input-icon" aria-hidden="true">♙</span><input id="username" name="username" placeholder="نام کاربری" autocomplete="username" required></div><label for="password">رمز عبور</label><div class="login-input-wrap"><span class="login-input-icon" aria-hidden="true">♧</span><input id="password" type="password" name="password" placeholder="رمز عبور" autocomplete="current-password" required><button type="button" class="login-password-toggle" aria-label="نمایش رمز عبور" aria-pressed="false" onclick="const i=document.getElementById('password');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='text'?'◌':'◉';this.setAttribute('aria-pressed',i.type==='text');this.setAttribute('aria-label',i.type==='text'?'پنهان کردن رمز عبور':'نمایش رمز عبور')">◉</button></div><div class="login-extra-row"><label class="remember-option"><input type="checkbox" name="remember_me" value="on"><span>مرا به خاطر بسپار</span></label><a href="#" onclick="document.getElementById('loginHelpDialog').showModal();return false">فراموشی رمز عبور؟</a></div><p class="err">{{ERROR}}</p><button>ورود</button></form></main></body></html>'''
-DASH='''<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400..800&display=swap" rel="stylesheet"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Abyss Tunnel</title><style>
+DASH='''<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400..800&display=swap" rel="stylesheet"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Abyss Tunnel</title><style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#080b12;color:#edf2ff;font:14px system-ui,-apple-system,sans-serif}.wrap{max-width:1100px;margin:auto;padding:22px 14px}.card{background:#101622;border:1px solid #222d40;border-radius:14px;padding:17px;margin:14px 0}.top,.row,.client{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.mint{color:#76e4d1;font-size:11px;letter-spacing:.12em}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.num{font-size:26px;font-weight:750}.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}input,button{font:inherit;border-radius:8px;padding:10px}input{min-width:0;width:100%;background:#090e17;color:white;border:1px solid #2a3548}button{cursor:pointer;background:#14202b;color:white;border:1px solid #2d3b50}button.primary{background:#76e4d1;color:#07120f;font-weight:700}.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.client{padding:14px 0;border-top:1px solid #222d40}.client-info{min-width:180px;flex:1}.actions{display:flex;gap:6px;flex-wrap:wrap}.small{font-size:11px;color:#8794ac;line-height:1.8}.section-title{font-weight:700}.hidden{display:none!important}#status{color:#76e4d1}.client-name{overflow-wrap:anywhere}dialog{width:min(720px,calc(100% - 20px));max-height:90dvh;overflow:auto;padding:20px;border:1px solid #304254;border-radius:18px;background:#101722;color:#edf2ff;box-shadow:0 25px 90px #0009}dialog::backdrop{background:#02050bd9;backdrop-filter:blur(5px)}.modal-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.modal-top h2{font-size:18px;margin:0}.sub-layout{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:16px;align-items:start}.sub-field{margin:12px 0}.sub-field label{display:block;font-size:12px;color:#9babc0;margin-bottom:6px}.sub-field input{direction:ltr;text-align:left;font-size:12px}.sub-buttons{display:flex;flex-wrap:wrap;gap:8px}.qr-preview{width:170px;max-width:100%;background:white;border-radius:12px;padding:8px;aspect-ratio:1}.danger{border-color:#70404a;color:#ffb5bd}.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:13px}.profile-setting{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #27384a;border-radius:10px;background:#0b111b;min-width:0}.profile-setting input{width:18px;height:18px;accent-color:#76e4d1;flex-shrink:0}.profile-setting span{overflow-wrap:anywhere}.button-link{display:inline-flex;align-items:center;padding:10px;border-radius:8px;border:1px solid #2d3b50;background:#14202b;color:white;text-decoration:none;font:inherit}@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}.fields{grid-template-columns:1fr 1fr}.wrap{padding:14px 10px}.actions button{padding:8px;font-size:12px}}@media(max-width:560px){.sub-layout{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr}.qr-preview{width:145px;display:block;margin:8px auto 0}}@media(max-width:420px){.stats,.fields{grid-template-columns:1fr}}
 </style><style id="abyss-premium-upgrade">
 :root{color-scheme:dark;--abyss-bg:#050505;--abyss-panel:#0d0d0e;--abyss-line:#2a2a2d;--abyss-mint:#c1c2c6;--abyss-text:#eeeeef;--abyss-muted:#9b9ba0}
@@ -1035,7 +1147,35 @@ html[data-abyss-theme="angel"] body:has(.login-brand) button{
 /* Bidi-safe data amounts on the subscription panel. */
 .usage-detail b{direction:ltr!important;unicode-bidi:isolate!important;display:block!important;text-align:left!important}
 </style>"""
-ABYSS_THEME_JS = r"""<script id="abyss-theme-controller">(()=>{const presets={abyss:'Abyss · مشکی و خاکستری',angel:'Angel · سفید و طلایی کمرنگ',graphite:'Graphite · خاکستری ساده',slate:'Slate · ذغالی ساده',ocean:'Ocean · آبی ساده',emerald:'Emerald · سبز ساده',paper:'Paper · روشن ساده'};let saved='abyss';try{saved=localStorage.getItem('abyss-visual-theme')||'abyss'}catch(e){}if(!presets[saved])saved='abyss';const apply=t=>{if(!presets[t])t='abyss';document.documentElement.dataset.abyssTheme=t;try{localStorage.setItem('abyss-visual-theme',t)}catch(e){}const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=(t==='angel'||t==='paper')?(t==='angel'?'#f4f3ef':'#f3f4f5'):t==='slate'?'#121820':t==='graphite'?'#111214':t==='ocean'?'#071216':t==='emerald'?'#0c130e':'#050505'};apply(saved);const init=()=>{if(document.getElementById('abyssThemeDock'))return;const dock=document.createElement('label');dock.id='abyssThemeDock';dock.innerHTML='<span class="theme-mark" aria-hidden="true">◉</span><span>تم</span><select id="abyssThemeSelect" aria-label="انتخاب تم">'+Object.entries(presets).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('')+'</select>';const tools=document.querySelector('.top .tools');const shellHeader=document.querySelector('.shell>.top');const target=tools||(!shellHeader?document.querySelector('.top'):null);if(target)target.appendChild(dock);else{dock.classList.add('floating');document.body.appendChild(dock)}const select=dock.querySelector('select');select.value=document.documentElement.dataset.abyssTheme;select.addEventListener('change',()=>apply(select.value));if(!document.getElementById('abyssParticleCanvas')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const canvas=document.createElement('canvas');canvas.id='abyssParticleCanvas';canvas.setAttribute('aria-hidden','true');document.body.prepend(canvas);const ctx=canvas.getContext('2d',{alpha:true});if(ctx){let w=0,h=0,points=[],raf=0,dirty=true;const resize=()=>{const coarse=matchMedia('(pointer:coarse), (max-width:700px)').matches;const dpr=Math.min(devicePixelRatio||1,coarse?1:1.25);w=innerWidth;h=innerHeight;canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);const count=Math.min(72,Math.max(coarse?20:28,Math.round(w*h/22000)));points=Array.from({length:count},()=>{const a=.14+Math.random()*.22;return{x:Math.random()*w,y:Math.random()*h,r:.45+Math.random()*.7,a,dx:(Math.random()-.5)*.08,dy:(Math.random()-.5)*.08,ix:0,iy:0,baseA:a}});dirty=true};let ripple=null,lastPaint=0,lastInteractionAt=-Infinity;const paint=(now=0)=>{raf=0;const frameInterval=now-lastInteractionAt<1800?16:24;if(now-lastPaint<frameInterval){if(document.visibilityState==='visible'&&!window.__voidVisualCapturePaused)raf=requestAnimationFrame(paint);return}lastPaint=now;for(const p of points){const pad=p.r+1.5;ctx.clearRect(p.x-pad,p.y-pad,pad*2,pad*2)}if(ripple){const pad=ripple.r+2;ctx.clearRect(ripple.x-pad,ripple.y-pad,pad*2,pad*2)}const theme=document.documentElement.dataset.abyssTheme;const light=theme==='angel'||theme==='paper';for(const p of points){p.x+=p.dx+p.ix;p.y+=p.dy+p.iy;p.ix*=.91;p.iy*=.91;p.a+=(p.baseA-p.a)*.025;if(p.x<0||p.x>w)p.dx*=-1;if(p.y<0||p.y>h)p.dy*=-1;ctx.beginPath();ctx.fillStyle=light?'rgba(145,130,99,'+p.a*.38+')':'rgba(195,199,207,'+p.a+')';ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()}if(ripple){ripple.r+=2.2;ripple.a*=.965;if(ripple.a<.025){ripple=null}else{ctx.beginPath();ctx.strokeStyle=light?'rgba(166,148,108,'+ripple.a+')':'rgba(195,199,207,'+ripple.a+')';ctx.lineWidth=1;ctx.arc(ripple.x,ripple.y,ripple.r,0,Math.PI*2);ctx.stroke()}}if(document.visibilityState==='visible'&&!window.__voidVisualCapturePaused)raf=requestAnimationFrame(paint)};resize();addEventListener('resize',()=>{cancelAnimationFrame(raf);resize()},{passive:true});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!window.__voidVisualCapturePaused&&!raf)raf=requestAnimationFrame(paint);else if((document.visibilityState!=='visible'||window.__voidVisualCapturePaused)&&raf){cancelAnimationFrame(raf);raf=0}},{passive:true});document.addEventListener('click',e=>{lastInteractionAt=performance.now();const x=e.clientX,y=e.clientY;ripple={x,y,r:2,a:.34};for(const p of points){const dx=p.x-x,dy=p.y-y,d=Math.hypot(dx,dy);if(d>0&&d<190){const force=(1-d/190)*.48;p.ix+=dx/d*force;p.iy+=dy/d*force;p.a=Math.min(.58,p.a+.18)}}},{passive:true});raf=requestAnimationFrame(paint)}}};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init()})();</script>"""
+ABYSS_THEME_JS = r"""<script id="abyss-theme-controller">(()=>{const presets={abyss:'Abyss · مشکی و خاکستری',angel:'Angel · سفید و طلایی کمرنگ',graphite:'Graphite · خاکستری ساده',slate:'Slate · ذغالی ساده',ocean:'Ocean · آبی ساده',emerald:'Emerald · سبز ساده',paper:'Paper · روشن ساده'};let saved='abyss';try{saved=localStorage.getItem('abyss-visual-theme')||'abyss'}catch(e){}if(!presets[saved])saved='abyss';const apply=t=>{if(!presets[t])t='abyss';document.documentElement.dataset.abyssTheme=t;try{localStorage.setItem('abyss-visual-theme',t)}catch(e){}const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=(t==='angel'||t==='paper')?(t==='angel'?'#f4f3ef':'#f3f4f5'):t==='slate'?'#121820':t==='graphite'?'#111214':t==='ocean'?'#071216':t==='emerald'?'#0c130e':'#050505'};apply(saved);const init=()=>{if(document.getElementById('abyssThemeDock'))return;const dock=document.createElement('label');dock.id='abyssThemeDock';dock.innerHTML='<span class="theme-mark" aria-hidden="true">◉</span><span>تم</span><select id="abyssThemeSelect" aria-label="انتخاب تم">'+Object.entries(presets).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('')+'</select>';const tools=document.querySelector('.top .tools');const shellHeader=document.querySelector('.shell>.top');const target=tools||(!shellHeader?document.querySelector('.top'):null);if(target)target.appendChild(dock);else{dock.classList.add('floating');document.body.appendChild(dock)}const select=dock.querySelector('select');select.value=document.documentElement.dataset.abyssTheme;select.addEventListener('change',()=>apply(select.value));if(!document.getElementById('abyssParticleCanvas')){const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;const canvas=document.createElement('canvas');canvas.id='abyssParticleCanvas';canvas.setAttribute('aria-hidden','true');document.body.prepend(canvas);const ctx=canvas.getContext('2d',{alpha:true});if(ctx){let w=0,h=0,points=[],raf=0,dirty=true;const resize=()=>{const coarse=matchMedia('(pointer:coarse), (max-width:700px)').matches;const dpr=Math.min(devicePixelRatio||1,coarse?1:1.25);w=innerWidth;h=innerHeight;canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);const count=Math.min(coarse?28:56,Math.max(coarse?16:28,Math.round(w*h/(coarse?30000:26000))));points=Array.from({length:count},()=>{const a=.14+Math.random()*.22;return{x:Math.random()*w,y:Math.random()*h,r:.45+Math.random()*.7,a,dx:(Math.random()-.5)*.08,dy:(Math.random()-.5)*.08,ix:0,iy:0,baseA:a}});dirty=true};let ripple=null,lastPaint=0,lastInteractionAt=-Infinity;const paint=(now=0)=>{raf=0;const frameInterval=now-lastInteractionAt<1800?24:40;if(now-lastPaint<frameInterval){if(!reduceMotion&&document.visibilityState==='visible'&&!window.__voidVisualCapturePaused)raf=requestAnimationFrame(paint);return}lastPaint=now;ctx.clearRect(0,0,w,h);const theme=document.documentElement.dataset.abyssTheme;const light=theme==='angel'||theme==='paper';for(const p of points){p.x+=p.dx+p.ix;p.y+=p.dy+p.iy;p.ix*=.91;p.iy*=.91;p.a+=(p.baseA-p.a)*.025;if(p.x<0||p.x>w)p.dx*=-1;if(p.y<0||p.y>h)p.dy*=-1;ctx.beginPath();ctx.fillStyle=light?'rgba(145,130,99,'+p.a*.38+')':'rgba(195,199,207,'+p.a+')';ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()}if(ripple){ripple.r+=2.2;ripple.a*=.965;if(ripple.a<.025){ripple=null}else{ctx.beginPath();ctx.strokeStyle=light?'rgba(166,148,108,'+ripple.a+')':'rgba(195,199,207,'+ripple.a+')';ctx.lineWidth=1;ctx.arc(ripple.x,ripple.y,ripple.r,0,Math.PI*2);ctx.stroke()}}if(!reduceMotion&&document.visibilityState==='visible'&&!window.__voidVisualCapturePaused)raf=requestAnimationFrame(paint)};resize();addEventListener('resize',()=>{cancelAnimationFrame(raf);resize()},{passive:true});document.addEventListener('visibilitychange',()=>{if(!reduceMotion&&document.visibilityState==='visible'&&!window.__voidVisualCapturePaused&&!raf)raf=requestAnimationFrame(paint);else if((document.visibilityState!=='visible'||window.__voidVisualCapturePaused)&&raf){cancelAnimationFrame(raf);raf=0}},{passive:true});const respond=(x,y)=>{lastInteractionAt=performance.now();ripple={x,y,r:reduceMotion?14:2,a:.34};for(const p of points){const dx=p.x-x,dy=p.y-y,d=Math.hypot(dx,dy);if(d>0&&d<190){const force=(1-d/190)*.48;p.ix+=dx/d*force;p.iy+=dy/d*force;p.a=Math.min(.58,p.a+.18)}}if(!raf&&document.visibilityState==='visible'&&!window.__voidVisualCapturePaused)raf=requestAnimationFrame(paint)};document.addEventListener('pointerdown',e=>respond(e.clientX,e.clientY),{passive:true});document.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'&&e.pointerType!=='pen'&&e.buttons===0)return;const x=e.clientX,y=e.clientY;lastInteractionAt=performance.now();for(const p of points){const dx=p.x-x,dy=p.y-y,d=Math.hypot(dx,dy);if(d>0&&d<150){const force=(1-d/150)*.28;p.ix+=dx/d*force;p.iy+=dy/d*force;p.a=Math.min(.58,p.a+.12)}}if(!raf&&document.visibilityState==='visible'&&!window.__voidVisualCapturePaused)raf=requestAnimationFrame(paint)},{passive:true});if(!window.PointerEvent)document.addEventListener('click',e=>respond(e.clientX,e.clientY),{passive:true});raf=requestAnimationFrame(paint)}}};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init()})();</script>"""
+ABYSS_TOUCH_RESPONSIVE_CSS = r"""<style id="void-touch-responsive-polish">
+@keyframes voidAmbientDrift{0%{transform:translate3d(-1.1%,-.6%,0) scale(1)}100%{transform:translate3d(1.1%,.6%,0) scale(1.025)}}
+@keyframes voidStarsDrift{0%{transform:translate3d(.6%,-.4%,0)}100%{transform:translate3d(-.6%,.4%,0)}}
+html body{background-size:100% 100%!important;background-attachment:fixed!important;animation:none!important}
+html body:before{inset:-12vh -12vw!important;background-size:100% 100%!important;animation:voidAmbientDrift 56s ease-in-out infinite alternate!important;will-change:transform}
+html body:after{inset:-12vh -12vw!important;background-size:460px 390px!important;animation:voidStarsDrift 88s linear infinite!important;will-change:transform}
+#abyssParticleCanvas{display:block!important;position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;pointer-events:none!important;z-index:0!important;opacity:.40!important}
+@media(max-width:700px),(pointer:coarse){html body{background-size:210% 210%!important;animation-duration:68s!important}html body:before{animation-duration:82s!important;opacity:.19!important}html body:after{animation-duration:100s!important;opacity:.10!important}#abyssParticleCanvas{opacity:.30!important}}
+html.void-touch-compact body{width:100%!important;overflow-x:hidden!important}
+html.void-touch-compact body main.app-shell{display:block!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;overflow-x:clip!important}
+html.void-touch-compact body main.app-shell>aside.sidebar{position:fixed!important;top:0!important;right:0!important;left:auto!important;bottom:0!important;width:min(300px,86vw)!important;height:100vh!important;height:100dvh!important;max-height:100dvh!important;transform:translateX(105%)!important;transition:transform .22s ease!important;z-index:1000!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+html.void-touch-compact body main.app-shell>aside.sidebar.open{transform:translateX(0)!important}
+html.void-touch-compact body main.app-shell>#menuToggle{display:inline-flex!important;position:fixed!important;top:calc(env(safe-area-inset-top) + 10px)!important;left:calc(env(safe-area-inset-left) + 10px)!important;right:auto!important;bottom:auto!important;z-index:1100!important;margin:0!important;min-width:44px!important;min-height:44px!important;padding:10px!important;align-items:center!important;justify-content:center!important;touch-action:manipulation!important}
+html.void-touch-compact body main.app-shell>.workspace{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:68px 12px 28px!important;overflow-wrap:anywhere!important}
+html.void-touch-compact body main.app-shell>.workspace>*{width:100%!important;max-width:100%!important;min-width:0!important;grid-column:auto!important;grid-row:auto!important}
+html.void-touch-compact body main.app-shell>.workspace>.stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+html.void-touch-compact body main.app-shell>.workspace .fields{grid-template-columns:minmax(0,1fr)!important}
+html.void-touch-compact body main.app-shell>.workspace .top{flex-wrap:wrap!important;gap:9px!important}
+html.void-touch-compact body main.app-shell>.workspace .top .tools{display:flex!important;flex-wrap:wrap!important;gap:7px!important;max-width:100%!important}
+html.void-touch-compact body main.app-shell>.workspace .top .tools button{flex:1 1 42%!important;min-width:115px!important}
+html.void-touch-compact body main.app-shell>.workspace .client{flex-wrap:wrap!important}
+html.void-touch-compact body main.app-shell>.workspace table{display:block!important;max-width:100%!important;overflow-x:auto!important}
+html.void-touch-compact body .login-layout{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:18px!important;width:100%!important;max-width:600px!important;min-height:100dvh!important;height:auto!important;margin-inline:auto!important;padding:18px 14px!important;align-content:start!important}
+html.void-touch-compact body:has(.login-layout){overflow-x:hidden!important;overflow-y:auto!important}
+html.void-touch-compact body .login-visual .visual-orbit{width:min(140px,34vw)!important;margin:8px auto 18px!important}
+@media(prefers-reduced-motion:reduce){html body,html body:before,html body:after{animation:none!important;scroll-behavior:auto!important}#abyssParticleCanvas{display:block!important;opacity:.18!important}}
+</style>"""
+ABYSS_TOUCH_RESPONSIVE_JS = r"""<script id="void-touch-interaction">(()=>{const root=document.documentElement;const fit=()=>{try{const sw=window.screen&&screen.width||innerWidth,sh=window.screen&&screen.height||innerHeight;const touch=(navigator.maxTouchPoints>0)||('ontouchstart'in window)||matchMedia('(pointer:coarse)').matches;root.classList.toggle('void-touch-compact',touch&&Math.min(sw,sh)<=700&&Math.max(sw,sh)<=1500)}catch(_){}};fit();addEventListener('resize',fit,{passive:true});addEventListener('orientationchange',fit,{passive:true});const sidebar=document.getElementById('sidebar'),menu=document.getElementById('menuToggle');if(sidebar&&menu)document.addEventListener('pointerdown',e=>{if(!sidebar.classList.contains('open')||sidebar.contains(e.target)||menu.contains(e.target))return;sidebar.classList.remove('open');menu.setAttribute('aria-expanded','false')},{passive:true,capture:true})})();</script>"""
 ABYSS_LAYOUT_REPAIR_CSS = r"""<style id="abyss-layout-repair">
 /* Abyss reference-led layout: absolute black, quiet contrast, one section at a time. */
 :root{--chart-cpu:#c8cad0;--chart-ram:#8e85b8;--chart-net:#a2b0ba;--ab-bg:#020202;--ab-panel:rgba(13,13,14,.94);--ab-line:rgba(178,181,187,.18);--ab-accent:#b9bbc1;--ab-accent-hi:#f0f0f2;--ab-text:#eeeef0;--ab-muted:#a2a2a7;--ab-glass:rgba(230,230,235,.035);--ab-glow:rgba(180,182,189,.055);--ab-input:rgba(5,5,6,.95)}
@@ -3267,8 +3407,8 @@ html body main.app-shell>aside.sidebar>.side-brand .brand-name{
 
 
 
-LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + "</body>")
-DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + '</body>')
+LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + "</body>")
+DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + '</body>')
 
 @app.get("/dashboard.js",response_class=PlainTextResponse)
 async def dashboard_js():
@@ -3517,14 +3657,23 @@ def make_subscription_links(client, r):
         network,path,mode=profile["network"],profile["path"],profile["mode"]
         proto=profile.get("protocol","vless")
         label=profile.get("subscription_label",profile["key"].replace("_","-"))
+        uid=client["client_uuid"]
+        title=quote("abysstunnel-"+client["name"]+"-"+label)
+        if profile.get("security")=="reality":
+            reality=get_reality_tcp_settings()
+            direct_host=profile["tcp_proxy_domain"]
+            direct_port=profile["tcp_proxy_port"]
+            url=(f"vless://{uid}@{direct_host}:{direct_port}?encryption=none&type=tcp&security=reality"
+                 f"&pbk={quote(reality['public_key'],safe='')}&fp=chrome&sni={quote(reality['server_name'],safe='')}"
+                 f"&sid={reality['short_id']}&flow={quote(profile['flow'],safe='')}#{title}")
+            links.append({"key":profile["key"],"label":profile["label"],"url":url})
+            continue
         client_path=path
         # Xray HTTPUpgrade supports Early Data through a client-side `ed` path query.
         # The server still matches the path component; the first payload can avoid an extra round trip.
         if network in {"ws","httpupgrade"}: client_path+="?ed=2560"
         common=f"type={network}&security=tls&sni={host}&fp=chrome&host={host}&path={quote(client_path,safe='')}"
         if mode: common+=f"&mode={quote(mode,safe='')}"
-        uid=client["client_uuid"]
-        title=quote("abysstunnel-"+client["name"]+"-"+label)
         if proto=="vless":
             url=f"vless://{uid}@{host}:443?{common}&encryption=none#{title}"
         elif proto=="trojan":
@@ -3753,7 +3902,7 @@ const clientUsageHistory=__USAGE_HISTORY__;
         .replace("__COUNT__",str(len(links)))
         .replace("__QR_URL__",html_escape(qr_url,quote=True))
         .replace("__USAGE_HISTORY__",json.dumps(usage_history,separators=(",",":")))
-        .replace("__SUB_JSON__",json.dumps(sub_url))).replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>",ABYSS_THEME_CSS+ABYSS_THEME_POLISH_CSS+"<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>",ABYSS_THEME_JS+"</body>"))
+        .replace("__SUB_JSON__",json.dumps(sub_url))).replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>",ABYSS_THEME_CSS+ABYSS_THEME_POLISH_CSS+"<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>",ABYSS_THEME_JS+ABYSS_TOUCH_RESPONSIVE_CSS+ABYSS_TOUCH_RESPONSIVE_JS+"</body>"))
 
 @app.get("/api/clients/{cid}/subscription")
 async def subscription_link(cid:str,r:Request):
