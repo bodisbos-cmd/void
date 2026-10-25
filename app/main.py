@@ -36,6 +36,29 @@ DB_PATH=DATA_DIR/"panel.sqlite3"; XRAY_CONFIG=DATA_DIR/"xray.json"
 XRAY_BIN=os.getenv("XRAY_BIN","/usr/local/bin/xray"); PUBLIC_DOMAIN=os.getenv("RAILWAY_PUBLIC_DOMAIN","").strip()
 BASE_URL=os.getenv("BASE_URL","").strip().rstrip("/")
 
+# Optional direct TCP Reality profile: only present when Railway TCP Proxy variables exist.
+TCP_REALITY_INTERNAL_PORT=10014
+def railway_tcp_reality_profile():
+    domain=os.getenv("RAILWAY_TCP_PROXY_DOMAIN","").strip()
+    external_port=os.getenv("RAILWAY_TCP_PROXY_PORT","").strip()
+    application_port=os.getenv("RAILWAY_TCP_APPLICATION_PORT","").strip()
+    if not domain or not external_port or application_port!=str(TCP_REALITY_INTERNAL_PORT):
+        return None
+    try:
+        parsed=urlsplit("//"+domain)
+        port=int(external_port)
+    except (ValueError,TypeError):
+        return None
+    if parsed.hostname!=domain or not parsed.hostname or not (1<=port<=65535) or any(ch.isspace() for ch in domain):
+        return None
+    return {"key":"vless_reality_tcp","label":"VLESS · REALITY · TCP مستقیم",
+        "protocol":"vless","network":"raw","path":"","port":TCP_REALITY_INTERNAL_PORT,
+        "mode":None,"security":"reality","listen":"0.0.0.0","flow":"xtls-rprx-vision",
+        "tcp_proxy_domain":domain,"tcp_proxy_port":port}
+_tcp_reality_profile=railway_tcp_reality_profile()
+if _tcp_reality_profile:
+    PROFILES.append(_tcp_reality_profile)
+
 def configured_support_url():
     """Return a validated optional support URL from the environment."""
     value=os.getenv("SUPPORT_URL","").strip()
@@ -170,6 +193,53 @@ def get_ss2022_server_password():
         c.execute("INSERT OR IGNORE INTO settings(key,value) VALUES('ss2022_server_password',?)",(generated,))
         return c.execute("SELECT value FROM settings WHERE key='ss2022_server_password'").fetchone()["value"]
 
+def get_reality_tcp_settings():
+    """Return a persistent Xray REALITY keypair and camouflage target."""
+    with db() as c:
+        row=c.execute("SELECT value FROM settings WHERE key='reality_tcp_config'").fetchone()
+        if row:
+            try:
+                saved=json.loads(row["value"])
+                if all(saved.get(k) for k in ("private_key","public_key","short_id","server_name","target")):
+                    return saved
+            except (TypeError,ValueError):
+                pass
+    if not Path(XRAY_BIN).is_file():
+        raise RuntimeError("The optional TCP REALITY profile requires the Xray binary.")
+    result=subprocess.run([XRAY_BIN,"x25519"],capture_output=True,text=True,timeout=10)
+    if result.returncode:
+        raise RuntimeError("Xray could not generate REALITY keys: "+(result.stderr or result.stdout)[-300:])
+    values={}
+    for line in (result.stdout or "").splitlines():
+        key,sep,value=line.partition(":")
+        if sep: values[key.strip().lower().replace(" ","")]=value.strip()
+    private_key=values.get("privatekey")
+    public_key=values.get("password") or values.get("publickey")
+    if not private_key or not public_key:
+        raise RuntimeError("Unrecognized Xray x25519 output; REALITY profile was not enabled.")
+    server_name=os.getenv("VOID_REALITY_SERVER_NAME","www.microsoft.com").strip()
+    target=os.getenv("VOID_REALITY_TARGET","").strip() or server_name+":443"
+    parsed=urlsplit("//"+target)
+    try:
+        target_port=parsed.port
+    except ValueError:
+        target_port=None
+        invalid_port=True
+    else:
+        invalid_port=False
+    if (not server_name or parsed.hostname is None or invalid_port or
+        any(ch.isspace() for ch in server_name+target) or
+        any(ch in server_name for ch in "/?#@") or any(ch in target for ch in "/?#@") or
+        (target_port is not None and not (1<=target_port<=65535))):
+        raise RuntimeError("VOID_REALITY_SERVER_NAME / VOID_REALITY_TARGET is invalid.")
+    generated={"private_key":private_key,"public_key":public_key,"short_id":secrets.token_hex(8),
+        "server_name":server_name,"target":target}
+    with db() as c:
+        c.execute("INSERT OR IGNORE INTO settings(key,value) VALUES('reality_tcp_config',?)",
+                  (json.dumps(generated,separators=(",",":")),))
+        row=c.execute("SELECT value FROM settings WHERE key='reality_tcp_config'").fetchone()
+    return json.loads(row["value"])
+
 def client_is_expired(expires_at):
     if not expires_at:
         return False
@@ -210,11 +280,21 @@ def make_xray_config():
             if selected is None or profile["key"] in selected:
                 profile_clients.append({"id":client["client_uuid"],"email":f"client-{client['id']}"})
         clients=profile_clients
-        stream={"network":network,"security":"none"}
-        stream[{"ws":"wsSettings","httpupgrade":"httpupgradeSettings","xhttp":"xhttpSettings"}[network]]={"path":path,**({"mode":profile["mode"]} if profile["mode"] else {})}
+        security=profile.get("security","none")
+        stream={"network":network,"security":security}
+        transport_settings={"ws":"wsSettings","httpupgrade":"httpupgradeSettings","xhttp":"xhttpSettings"}
+        if network in transport_settings:
+            stream[transport_settings[network]]={"path":path,**({"mode":profile["mode"]} if profile["mode"] else {})}
+        elif network!="raw":
+            raise ValueError("Unsupported Xray network: "+network)
+        if security=="reality":
+            reality=get_reality_tcp_settings()
+            stream["realitySettings"]={"show":False,"target":reality["target"],"xver":0,
+                "serverNames":[reality["server_name"]],"privateKey":reality["private_key"],
+                "shortIds":[reality["short_id"]]}
         protocol=profile.get("protocol","vless")
         if protocol=="vless":
-            settings={"clients":clients,"decryption":"none"}
+            settings={"clients":[{"id":x["id"],"email":x["email"],**({"flow":profile["flow"]} if profile.get("flow") else {})} for x in clients],"decryption":"none"}
         elif protocol=="trojan":
             settings={"clients":[{"password":x["id"],"email":x["email"]} for x in clients]}
         elif protocol=="vmess":
@@ -224,7 +304,7 @@ def make_xray_config():
             settings={"method":"2022-blake3-aes-128-gcm","password":get_ss2022_server_password(),"network":"tcp","clients":ss_clients}
         else:
             raise ValueError("Unsupported profile protocol: "+protocol)
-        inbound={"tag":f"in-{profile['key']}","listen":"127.0.0.1","port":port,"protocol":protocol,"settings":settings,"streamSettings":stream}
+        inbound={"tag":f"in-{profile['key']}","listen":profile.get("listen","127.0.0.1"),"port":port,"protocol":protocol,"settings":settings,"streamSettings":stream}
         ins.append(inbound)
     return {"log":{"loglevel":"debug" if os.getenv("ABYSS_TEST_MODE")=="1" else "warning"},"api":{"tag":"api","services":["StatsService"]},"stats":{},"policy":{"levels":{"0":{"statsUserUplink":True,"statsUserDownlink":True}}},"inbounds":ins,"outbounds":[{"protocol":"freedom","tag":"direct"},{"protocol":"blackhole","tag":"block"},{"protocol":"freedom","tag":"api"}],"routing":{"domainStrategy":"AsIs","rules":[{"type":"field","inboundTag":["api"],"outboundTag":"api"}]}}
 def validate_and_write_xray():
@@ -3546,14 +3626,23 @@ def make_subscription_links(client, r):
         network,path,mode=profile["network"],profile["path"],profile["mode"]
         proto=profile.get("protocol","vless")
         label=profile.get("subscription_label",profile["key"].replace("_","-"))
+        uid=client["client_uuid"]
+        title=quote("abysstunnel-"+client["name"]+"-"+label)
+        if profile.get("security")=="reality":
+            reality=get_reality_tcp_settings()
+            direct_host=profile["tcp_proxy_domain"]
+            direct_port=profile["tcp_proxy_port"]
+            url=(f"vless://{uid}@{direct_host}:{direct_port}?encryption=none&type=tcp&security=reality"
+                 f"&pbk={quote(reality['public_key'],safe='')}&fp=chrome&sni={quote(reality['server_name'],safe='')}"
+                 f"&sid={reality['short_id']}&flow={quote(profile['flow'],safe='')}#{title}")
+            links.append({"key":profile["key"],"label":profile["label"],"url":url})
+            continue
         client_path=path
         # Xray HTTPUpgrade supports Early Data through a client-side `ed` path query.
         # The server still matches the path component; the first payload can avoid an extra round trip.
         if network in {"ws","httpupgrade"}: client_path+="?ed=2560"
         common=f"type={network}&security=tls&sni={host}&fp=chrome&host={host}&path={quote(client_path,safe='')}"
         if mode: common+=f"&mode={quote(mode,safe='')}"
-        uid=client["client_uuid"]
-        title=quote("abysstunnel-"+client["name"]+"-"+label)
         if proto=="vless":
             url=f"vless://{uid}@{host}:443?{common}&encryption=none#{title}"
         elif proto=="trojan":
