@@ -42,6 +42,8 @@
 | بکاپ و بازیابی | فایل ZIP پشتیبان با بررسی ساختار و تلاش برای rollback هنگام خطا |
 | رابط موبایل | چیدمان واکنش‌گرا، منوی کناری، پشتیبانی از safe-area و کنترل‌های لمسی |
 
+<div align="center"><img src="docs/assets/features.svg" alt="نمای تصویری قابلیت‌های Void" width="100%"></div>
+
 **دربارهٔ پینگ و سرعت:** آزمون «سنجش تأخیر» در صفحهٔ اشتراک، زمان پاسخ مسیر وب را از سمت سرور اندازه می‌گیرد؛ این عدد پینگ واقعی تونل از گوشی و سرعت دانلود/آپلود نیست. توضیحات و برنامهٔ آزمایش در [راهنمای عملکرد و سرعت](docs/PERFORMANCE_FA.md) آمده است.
 
 <img src="docs/assets/divider.svg" alt="" width="100%">
@@ -63,6 +65,8 @@
 
 ## نقشهٔ معماری
 
+<div align="center"><img src="docs/assets/deployment-map.svg" alt="نقشهٔ استقرار از GitHub تا Railway و Xray" width="100%"></div>
+
 ```mermaid
 flowchart TB
     U["مرورگر مدیر / گوشی کاربر"]
@@ -82,6 +86,8 @@ flowchart TB
 ```
 
 ### مسیر هر اتصال
+
+<div align="center"><img src="docs/assets/connection-flow.svg" alt="مسیر HTTPS پیش‌فرض و مسیر TCP Reality اختیاری" width="100%"></div>
 
 ```mermaid
 sequenceDiagram
