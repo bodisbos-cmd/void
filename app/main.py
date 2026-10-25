@@ -325,7 +325,19 @@ async def start_xray():
             xray_proc.terminate()
             try: xray_proc.wait(timeout=4)
             except subprocess.TimeoutExpired: xray_proc.kill()
-        err=open(DATA_DIR/"xray-stderr.log","ab")
+        err_path=DATA_DIR/"xray-stderr.log"
+        try:
+            # Keep the persistent volume bounded if a repeated upstream failure
+            # produces verbose Xray diagnostics.
+            if err_path.exists() and err_path.stat().st_size>=8*1024*1024:
+                second=DATA_DIR/"xray-stderr.log.2"
+                first=DATA_DIR/"xray-stderr.log.1"
+                if second.exists(): second.unlink()
+                if first.exists(): first.replace(second)
+                err_path.replace(first)
+        except OSError as e:
+            LOG.warning("Could not rotate Xray log: %s",e)
+        err=open(err_path,"ab")
         try: xray_proc=subprocess.Popen([XRAY_BIN,"run","-config",str(XRAY_CONFIG)],stdout=err,stderr=err)
         finally: err.close()
         await asyncio.sleep(.25)
@@ -360,10 +372,24 @@ def apply_xray_stats(stats):
 
 CLIENT_USAGE_HISTORY_SAMPLE_SECONDS=3600
 CLIENT_USAGE_HISTORY_RETENTION_SECONDS=90*86400
+_LAST_USAGE_HISTORY_SWEEP=0
+_LAST_USAGE_HISTORY_CLEANUP=0
 
 def record_client_usage_history(now=None, client_id=None):
-    """Store hourly per-client cumulative usage, never the panel-wide total."""
+    """Store hourly per-client cumulative usage; sweep and prune at most hourly."""
+    global _LAST_USAGE_HISTORY_SWEEP, _LAST_USAGE_HISTORY_CLEANUP
     now=int(time.time() if now is None else now)
+    # The quota monitor wakes every 10 seconds. Avoid walking every client's
+    # history index on every wake: a full-table sample is only needed hourly.
+    if client_id is None:
+        sweep_due=(_LAST_USAGE_HISTORY_SWEEP==0 or now<_LAST_USAGE_HISTORY_SWEEP or
+                   now-_LAST_USAGE_HISTORY_SWEEP>=CLIENT_USAGE_HISTORY_SAMPLE_SECONDS)
+        if not sweep_due:
+            return
+    else:
+        sweep_due=False
+    cleanup_due=(_LAST_USAGE_HISTORY_CLEANUP==0 or now<_LAST_USAGE_HISTORY_CLEANUP or
+                 now-_LAST_USAGE_HISTORY_CLEANUP>=CLIENT_USAGE_HISTORY_SAMPLE_SECONDS)
     with db() as c:
         if client_id is None:
             rows=c.execute(
@@ -381,11 +407,16 @@ def record_client_usage_history(now=None, client_id=None):
                     "INSERT OR REPLACE INTO client_usage_history(client_id,sampled_at,used_bytes) VALUES(?,?,?)",
                     (row["id"],now,max(0,int(row["used_bytes"] or 0)))
                 )
-        c.execute(
-            "DELETE FROM client_usage_history WHERE sampled_at < ?",
-            (now-CLIENT_USAGE_HISTORY_RETENTION_SECONDS,)
-        )
-        c.execute("DELETE FROM client_usage_history WHERE client_id NOT IN (SELECT id FROM clients)")
+        if cleanup_due:
+            c.execute(
+                "DELETE FROM client_usage_history WHERE sampled_at < ?",
+                (now-CLIENT_USAGE_HISTORY_RETENTION_SECONDS,)
+            )
+            c.execute("DELETE FROM client_usage_history WHERE client_id NOT IN (SELECT id FROM clients)")
+    if client_id is None:
+        _LAST_USAGE_HISTORY_SWEEP=now
+    if cleanup_due:
+        _LAST_USAGE_HISTORY_CLEANUP=now
 
 def get_client_usage_history(client_id, days=90, now=None):
     now=int(time.time() if now is None else now)
