@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="34" viewBox="0 0 1200 34" role="img" aria-label="خط تزئینی نقره‌ای">
+  <defs><linearGradient id="g"><stop offset="0" stop-color="#85858a" stop-opacity="0"/><stop offset=".25" stop-color="#a9a9af" stop-opacity=".2"/><stop offset=".5" stop-color="#e0e0e4" stop-opacity=".65"/><stop offset=".75" stop-color="#a9a9af" stop-opacity=".2"/><stop offset="1" stop-color="#85858a" stop-opacity="0"/></linearGradient></defs>
+  <path d="M0 17 H1200" stroke="url(#g)" stroke-width="1"/>
+  <path d="M470 17 L590 17 L600 14 L610 17 L730 17" fill="none" stroke="#d4d4d9" stroke-opacity=".35" stroke-width="1"/>
+  <circle cx="600" cy="17" r="2" fill="#eeeef1" fill-opacity=".75"/>
+</svg>
