@@ -212,9 +212,9 @@ def get_reality_tcp_settings():
     values={}
     for line in (result.stdout or "").splitlines():
         key,sep,value=line.partition(":")
-        if sep: values[key.strip().lower().replace(" ","")]=value.strip()
+        if sep: values["".join(ch for ch in key.strip().lower() if ch.isalnum())]=value.strip()
     private_key=values.get("privatekey")
-    public_key=values.get("password") or values.get("publickey")
+    public_key=values.get("passwordpublickey") or values.get("password") or values.get("publickey")
     if not private_key or not public_key:
         raise RuntimeError("Unrecognized Xray x25519 output; REALITY profile was not enabled.")
     server_name=os.getenv("VOID_REALITY_SERVER_NAME","www.microsoft.com").strip()
