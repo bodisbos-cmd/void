@@ -22,6 +22,8 @@ flowchart TB
     Xray -->|"آمار ترافیک"| FastAPI
 ```
 
+**مسیر اختیاری مستقیم:** اگر Railway TCP Proxy به پورت 10014 متصل شود، یک listener VLESS + REALITY/Vision روی TCP با bind مشخص به همان پورت اضافه می‌شود و ترافیک آن از Nginx عبور نمی‌کند. بدون متغیرهای خودکار TCP Proxy این listener ساخته نمی‌شود.
+
 **اصل مهم:** Nginx تنها ورودی وب کانتینر است. listenerهای عادی Xray در تنظیم فعلی روی loopback قرار دارند و Nginx مسیرهای WS، HTTPUpgrade و XHTTP را به listener متناسب هدایت می‌کند. این طراحی برای استقرار HTTP/HTTPS روی Railway است و به‌معنای وجود ورودی عمومی UDP یا WireGuard نیست.
 
 ## فایل‌ها و ماژول‌ها
