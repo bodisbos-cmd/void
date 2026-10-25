@@ -212,6 +212,92 @@ def main():
                     proc.wait(timeout=3)
                 stderr_file.close()
                 config_path.unlink(missing_ok=True)
+        # Exercise the optional direct VLESS + REALITY/Vision profile against the
+        # actual Xray binary in this isolated CI container. Railway's external TCP
+        # proxy itself is not simulated here; only the inner TCP listener is.
+        conn = sqlite3.connect(DB, timeout=10)
+        try:
+            reality_row = conn.execute(
+                "SELECT value FROM settings WHERE key='reality_tcp_config'"
+            ).fetchone()
+        finally:
+            conn.close()
+        if reality_row:
+            reality = json.loads(reality_row[0])
+            reality_socks_port = 11092
+            reality_config = {
+                "log": {"loglevel": "warning"},
+                "inbounds": [{
+                    "listen": "127.0.0.1",
+                    "port": reality_socks_port,
+                    "protocol": "socks",
+                    "settings": {"auth": "noauth", "udp": False},
+                }],
+                "outbounds": [{
+                    "protocol": "vless",
+                    "settings": {"vnext": [{
+                        "address": "127.0.0.1",
+                        "port": 10014,
+                        "users": [{
+                            "id": client_uuid,
+                            "encryption": "none",
+                            "flow": "xtls-rprx-vision",
+                        }],
+                    }]},
+                    "streamSettings": {
+                        "network": "raw",
+                        "security": "reality",
+                        "realitySettings": {
+                            "serverName": reality["server_name"],
+                            "fingerprint": "chrome",
+                            "password": reality["public_key"],
+                            "shortId": reality["short_id"],
+                        },
+                    },
+                }],
+            }
+            reality_config_path = Path("/tmp/abyss-client-reality.json")
+            reality_stderr_path = Path("/tmp/abyss-client-reality.stderr")
+            reality_config_path.write_text(json.dumps(reality_config), encoding="utf-8")
+            reality_stderr_file = reality_stderr_path.open("wb")
+            reality_proc = subprocess.Popen(
+                [XRAY, "run", "-config", str(reality_config_path)],
+                stdout=subprocess.DEVNULL,
+                stderr=reality_stderr_file,
+            )
+            try:
+                wait_until(
+                    lambda: reality_proc.poll() is not None or port_ready(reality_socks_port),
+                    5,
+                    "REALITY client did not start",
+                )
+                result = subprocess.run([
+                    "curl", "--noproxy", "", "--silent", "--show-error", "--location", "--max-time", "12",
+                    "--socks5-hostname", f"127.0.0.1:{reality_socks_port}", "https://example.com/",
+                ], capture_output=True, timeout=15)
+                if result.returncode or b"Example Domain" not in result.stdout:
+                    reality_stderr_file.flush()
+                    detail = reality_stderr_path.read_text(errors="replace")[-2000:]
+                    server_log = Path("/data/xray-stderr.log")
+                    server_detail = server_log.read_text(errors="replace")[-3000:] if server_log.exists() else "(no server Xray log)"
+                    raise RuntimeError(
+                        "Direct VLESS REALITY/Vision tunnel failed "
+                        f"(curl={result.returncode}, stderr={result.stderr.decode(errors='replace')[-800:]}, "
+                        f"client_stderr={detail}, server_stderr={server_detail})"
+                    )
+                print("PASS real VLESS REALITY/Vision tunnel on internal TCP listener")
+            finally:
+                reality_proc.terminate()
+                try:
+                    reality_proc.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    reality_proc.kill()
+                    reality_proc.wait(timeout=3)
+                reality_stderr_file.close()
+                reality_config_path.unlink(missing_ok=True)
+        else:
+            raise RuntimeError("TCP REALITY smoke profile was not enabled in the isolated CI container")
+
         wait_until(
             lambda: read_client(client_id)[2] > 0,
             18,
