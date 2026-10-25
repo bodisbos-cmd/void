@@ -4,6 +4,10 @@
 
 ## نمای کلی
 
+<div align="center"><img src="assets/deployment-map.svg" alt="نقشهٔ استقرار Void" width="100%"></div>
+
+<div align="center"><img src="assets/connection-flow.svg" alt="مسیرهای اتصال پیش‌فرض و مستقیم اختیاری" width="100%"></div>
+
 ```mermaid
 flowchart TB
     Browser["مرورگر مدیر"]
