@@ -129,6 +129,9 @@ jobs:
               errors = []
               page.on("pageerror", lambda e: errors.append(str(e) + " | " + str(getattr(e, "stack", ""))))
               page.goto(base + "/login", wait_until="domcontentloaded")
+              # Make the locale deterministic for the language-toggle regression test.
+              # The production app still persists each user's own language preference.
+              page.evaluate("localStorage.setItem('abyss-lang', 'fa')")
               page.wait_for_function("""() => {
                 const image = document.querySelector('.login-visual img.visual-orbit');
                 return image && image.complete && image.naturalWidth > 0 && image.alt === 'AbyssTunnel · I.T.A.';
