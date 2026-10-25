@@ -23,23 +23,33 @@ class CoreTests(unittest.TestCase):
         self.assertTrue(mod.verify_password("a-strong-test-password-123", hashed))
         self.assertFalse(mod.verify_password("wrong-password", hashed))
 
-    def test_production_install_rejects_missing_or_default_bootstrap_password(self):
-        previous_env = {key: os.environ.get(key) for key in ("APP_ENV", "ENVIRONMENT", "RAILWAY_ENVIRONMENT_NAME", "RAILWAY_PROJECT_ID", "RAILWAY_SERVICE_ID", "ABYSS_INITIAL_ADMIN_PASSWORD")}
+    def test_fresh_install_bootstraps_admin_without_external_password_setting(self):
+        env_keys = (
+            "APP_ENV", "ENVIRONMENT", "RAILWAY_ENVIRONMENT_NAME",
+            "RAILWAY_PROJECT_ID", "RAILWAY_SERVICE_ID",
+            "ABYSS_INITIAL_ADMIN_PASSWORD", "ABYSS_TEST_MODE",
+        )
+        previous_env = {key: os.environ.get(key) for key in env_keys}
         try:
-            for key in ("APP_ENV", "ENVIRONMENT", "RAILWAY_ENVIRONMENT_NAME", "RAILWAY_PROJECT_ID", "RAILWAY_SERVICE_ID"):
+            for key in env_keys:
                 os.environ.pop(key, None)
             os.environ["APP_ENV"] = "production"
             with mod.db() as conn:
                 conn.execute("DELETE FROM panel_admins WHERE username='admin'")
                 conn.execute("DELETE FROM admins WHERE id=1")
-            for password in ("", "admin", "password", "12345678", "changeme", "tiny-unique"):
-                if password:
-                    os.environ["ABYSS_INITIAL_ADMIN_PASSWORD"] = password
-                else:
-                    os.environ.pop("ABYSS_INITIAL_ADMIN_PASSWORD", None)
-                with self.subTest(password=password or "<missing>"):
-                    with self.assertRaisesRegex(RuntimeError, "strong, unique ABYSS_INITIAL_ADMIN_PASSWORD"):
-                        mod.init_db()
+
+            # Void intentionally supports a simple first login; it records the
+            # bootstrap credential with restrictive permissions for the owner.
+            mod.init_db()
+            with mod.db() as conn:
+                row = conn.execute(
+                    "SELECT password_hash FROM panel_admins WHERE username='admin'"
+                ).fetchone()
+            self.assertIsNotNone(row)
+            self.assertTrue(mod.verify_password("admin", row["password_hash"]))
+            credential_file = Path(mod.DATA_DIR) / "INITIAL_ADMIN_PASSWORD.txt"
+            self.assertIn("Username: admin", credential_file.read_text(encoding="utf-8"))
+            self.assertIn("Password: admin", credential_file.read_text(encoding="utf-8"))
         finally:
             for key, value in previous_env.items():
                 if value is None:
