@@ -92,7 +92,9 @@ jobs:
       - name: Install browser for real screenshots
         run: |
           python -m pip install playwright
-          python -m playwright install --with-deps chromium
+          # GitHub's ubuntu-latest image already provides Chromium's shared libraries;
+          # avoid a full apt dependency pass, which can stall the bounded visual job.
+          python -m playwright install chromium
       - name: Capture login, dashboard, sections and mobile menu
         run: |
           mkdir -p visual-preview
