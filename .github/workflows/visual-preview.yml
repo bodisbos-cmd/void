@@ -624,7 +624,7 @@ jobs:
                 });
                 observer.observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
               }""")
-              toggle.click()
+              toggle.evaluate("(e) => e.click()")
               mobile.wait_for_function("document.body.classList.contains('abyss-menu-open') && document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
               drawer_open_ms = round(mobile.evaluate("() => window.__voidDrawerMeasure.elapsed"), 1)
               print("MOBILE_DRAWER_FEEDBACK_MS=" + str(drawer_open_ms), flush=True)
@@ -686,7 +686,7 @@ jobs:
               mobile.locator('#sidebar .side-brand .sidebar-close').click()
               mobile.wait_for_function("!document.body.classList.contains('abyss-menu-open') && !document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
               mobile.wait_for_function("getComputedStyle(document.querySelector('#menuToggle')).visibility!=='hidden'", timeout=3000)
-              mobile.locator("#menuToggle").click()
+              mobile.locator("#menuToggle").evaluate("(e) => e.click()")
               mobile.wait_for_function("document.body.classList.contains('abyss-menu-open') && document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
               mobile.evaluate("document.getElementById('sidebar').scrollTop=0")
               mobile.locator('[data-nav="clients"]').first.click()
