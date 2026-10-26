@@ -8,3 +8,11 @@ venv
 /data
 *.sqlite3
 *.log
+
+# Not copied into the runtime image; keep them out of the build context too.
+docs
+tests
+README.md
+.env.example
+railway.json
+scripts/smoke_transports.py
