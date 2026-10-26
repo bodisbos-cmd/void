@@ -4,16 +4,19 @@
 
 # Void · Abyss Tunnel
 
-<img src="docs/assets/quick-connect.svg" alt="سه نماد تصویری برای مراحل اتصال؛ توضیح هر مرحله در متن پایین آمده است" width="100%">
+<img src="docs/assets/quick-connect.svg" alt="نمای متحرک سه مرحلهٔ اتصال" width="100%">
 
-<p dir="rtl" align="center">۱. لینک اشتراک را بگیر　←　۲. لینک را داخل برنامه وارد کن　←　۳. اتصال را بزن</p>
+<div dir="rtl" align="center">
 
-[![Tests](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/tests.yml?branch=main&label=%D8%AA%D8%B3%D8%AA%E2%80%8C%D9%87%D8%A7&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/tests.yml)
-[![Security](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/security.yml?branch=main&label=%D8%A7%D9%85%D9%86%DB%8C%D8%AA&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/security.yml)
-[![Visual preview](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/visual-preview.yml?branch=main&label=%D9%BE%DB%8C%D8%B4%E2%80%8C%D9%86%D9%85%D8%A7%DB%8C%D8%B4%20%D8%A8%D8%B5%D8%B1%DB%8C&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/visual-preview.yml)
-![Python](https://img.shields.io/badge/Python-3.12-9da0a7?style=for-the-badge&labelColor=09090b)
-![Docker](https://img.shields.io/badge/Docker-ready-9da0a7?style=for-the-badge&labelColor=09090b)
-![Xray](https://img.shields.io/badge/Engine-Xray--core-9da0a7?style=for-the-badge&labelColor=09090b)
+**۱. دریافت لینک اشتراک**　→　**۲. واردکردن در برنامه**　→　**۳. اتصال**
+
+</div>
+
+<p dir="rtl" align="center">
+
+[🧪 وضعیت تست‌ها](https://github.com/bodisbos-cmd/void/actions/workflows/tests.yml)　·　[🛡️ بررسی امنیت](https://github.com/bodisbos-cmd/void/actions/workflows/security.yml)　·　[✦ پیش‌نمایش بصری](https://github.com/bodisbos-cmd/void/actions/workflows/visual-preview.yml)
+
+</p>
 
 **پنل فارسی مدیریت سرویس‌های Xray با رابط واکنش‌گرا، اشتراک اختصاصی، سهمیه و پایش سرویس**
 
@@ -138,30 +141,62 @@ flowchart LR
 
 <img src="docs/assets/divider.svg" alt="" width="100%">
 
-## شروع سریع برای بار اول
-
-<div dir="rtl" align="right">
-
-**اگر فقط می‌خواهی وصل شوی:** پنل را نصب نکن. از کسی که سرویس را در اختیارت گذاشته، لینک اشتراک بگیر؛ یک برنامهٔ سازگار نصب کن؛ لینک را در برنامه وارد کن و روی اتصال بزن. برای مراحل کامل و لینک دانلود برنامه‌ها، [راهنمای ساده اتصال](docs/CONNECT_FA.md) را ببین.
-
-**اگر می‌خواهی خود پنل را روی Railway اجرا کنی:** این کار مخصوص مدیر سرور است. Railway باید کد پروژه را از GitHub دریافت کند، آن را بسازد و اجرا کند. برای راه‌اندازی مرحله‌به‌مرحله، [راهنمای نصب ساده‌شده](docs/DEPLOY_FA.md) را ببین. در آن، معنی هر گزینه را هم توضیح داده‌ام.
-
-</div>
-
 ## شروع سریع
 
-### استقرار روی Railway
+### راه‌اندازی روی Railway؛ از صفر تا اجرا
 
 <div dir="rtl" align="right">
 
-1. **پروژه را به Railway معرفی کن.** در Railway گزینهٔ ساخت پروژه از GitHub را بزن و مخزن **bodisbos-cmd/void** را انتخاب کن. یعنی Railway کدهای برنامه را از GitHub می‌گیرد؛ لازم نیست فایل‌ها را دستی آپلود کنی.
-2. **روش ساخت را انتخاب کن، اگر از تو پرسید.** گزینهٔ **Dockerfile** را بزن. این فقط فایل دستورهای آمادهٔ ساخت برنامه است؛ لازم نیست آن را باز کنی یا چیزی داخلش بنویسی. اگر Railway خودش این روش را تشخیص داد، تغییری لازم نیست.
-3. **اطلاعات را حفظ کن.** یک فضای ذخیره‌سازی پایدار (**Volume**) به مسیر **/data** وصل کن. این فضا اطلاعات کاربران را نگه می‌دارد؛ آن را بعداً حذف نکن. برنامه مسیر خودکار Railway را هم می‌شناسد و لازم نیست متغیر DATA_DIR را دستی تنظیم کنی.
-4. **آدرس پنل را بساز.** برای سرویس دامنهٔ عمومی ایجاد کن؛ پورت داخلی برنامه **8080** است.
-5. **رمز اولیهٔ مدیر را تنظیم کن.** در بخش متغیرهای محرمانهٔ Railway متغیر **ABYSS_INITIAL_ADMIN_PASSWORD** بساز و یک رمز قوی و منحصربه‌فرد قرار بده. بدون آن، نصب تولیدی عمداً بالا نمی‌آید. نام کاربری اولیه **admin** است؛ رمز را از همین متغیر تعیین می‌کنی، نه با فرض admin/admin.
-6. **سرویس را آزمایش کن.** آدرس **/health** را در انتهای دامنه باز کن. بعد یک کاربر آزمایشی بساز و لینک اشتراک را در یک برنامهٔ واقعی امتحان کن.
+**۱. آماده‌کردن GitHub**
+
+- اگر حساب نداری، از [صفحهٔ ثبت‌نام GitHub](https://github.com/signup) حساب بساز و وارد شو.
+- [مخزن اصلی Void](https://github.com/bodisbos-cmd/void) را باز کن؛ روی **Star** بزن تا پروژه در فهرست علاقه‌مندی‌هایت بماند.
+- روی **Fork** بزن و **Create fork** را انتخاب کن. از این به بعد، نسخهٔ خودت از پروژه را به Railway وصل می‌کنی.
+
+**۲. وصل‌کردن پروژه به Railway**
+
+- وارد [Railway](https://railway.com/) شو و **New Project** یا **Deploy** را بزن؛ گزینهٔ **GitHub Repo / Deploy from GitHub Repo** را انتخاب کن.
+- اگر خواست، GitHub را به Railway وصل کن و دسترسی مخزن فورک‌شده‌ات را تأیید کن.
+- از فهرست، مخزن فورک‌شدهٔ خودت با نام **void** را انتخاب کن. اگر در فهرست نبود، صفحهٔ فورک خودت را در GitHub باز کن، نشانی بالای مرورگر را کپی کن و در Railway وارد کن.
+- روی **Deploy Now** بزن و صبر کن پروژه ساخته شود. اگر از تو روش ساخت پرسید، **Dockerfile** را انتخاب کن؛ لازم نیست فایلش را ویرایش کنی.
+
+**۳. بازکردن تنظیمات سرویس**
+
+پس از ساخته‌شدن پروژه، روی کارت سرویس **void** کلیک کن (در گوشی یک بار روی کارت بزن). وارد **Settings** شو. اگر صفحهٔ سرویس را نمی‌بینی، ابتدا پروژه را باز کن و کارت سرویس را انتخاب کن.
+
+**۴. انتخاب کشور هلند**
+
+در **Settings → Scale → Regions** منطقهٔ **EU West Metal (Amsterdam, Netherlands)** را انتخاب کن و تعداد نمونه‌ها را روی یک نگه دار. این کار را پیش از ساخت Volume انجام بده؛ جابه‌جایی منطقه پس از اتصال Volume ممکن است نیازمند انتقال داده و توقف موقت سرویس باشد.
+
+**۵. نگه‌داشتن اطلاعات در Volume**
+
+روی بوم پروژه، روی کارت سرویس راست‌کلیک کن (در گوشی این گزینه ممکن است درست کار نکند) و **Attach Volume** را انتخاب کن؛ اگر منو این گزینه را ندارد، از منوی سه‌نقطهٔ سرویس یا Command Palette استفاده کن. مسیر **Mount Path** را دقیقاً روی `/data` بگذار و تغییر را ذخیره کن. این فضا اطلاعات کاربران و تنظیمات را حفظ می‌کند؛ آن را حذف یا جابه‌جا نکن.
+
+> **نکتهٔ موبایل:** برای ساخت و اتصال Volume، اگر گزینه در گوشی دیده نمی‌شود یا واکنش ندارد، Railway استفاده از مرورگر دسکتاپ را پیشنهاد می‌کند. بقیهٔ مراحل را می‌توانی با گوشی انجام بدهی.
+
+**۶. تنظیم رمز مدیر**
+
+در صفحهٔ سرویس، بخش **Variables** را باز کن و متغیر زیر را با یک رمز قوی و یکتا (حداقل ۱۴ نویسه) بساز:
+
+`ABYSS_INITIAL_ADMIN_PASSWORD`
+
+نام کاربری اولیه `admin` است؛ رمز را خودت در مقدار این متغیر تعیین می‌کنی. بدون این متغیر، اجرای تولیدی عمداً متوقف می‌شود.
+
+**۷. ساخت دامنه و تنظیم پورت**
+
+در **Settings → Networking → Public Networking** روی **Generate Domain** بزن. اگر فیلد **Port / Target Port / Custom Port** نمایش داده شد، مقدار **8080** را وارد کن و ذخیره کن. لازم نیست `:8080` را به انتهای آدرس عمومی اضافه کنی.
+
+**۸. اجرای نهایی**
+
+اگر Railway تغییرات را در حالت انتظار نگه داشته، دکمهٔ **Deploy** یا **Apply Changes** را بزن و منتظر بمان تا ساخت و استقرار تمام شود. در تب **Deployments** باید آخرین اجرا موفق باشد.
+
+**۹. آزمایش پنل**
+
+نشانی دامنه را باز کن و سپس `/health` را به انتهای آن اضافه کن؛ پاسخ سالم باید نمایش داده شود. بعد با نام کاربری `admin` و رمزی که تنظیم کردی وارد شو و ساخت یک کاربر آزمایشی و بازشدن لینک اشتراک را بررسی کن.
 
 </div>
+
+برای جزئیات پیشرفته‌تر، متغیرهای اختیاری، بکاپ و آزمایش پروفایل‌ها، [راهنمای کامل نصب و انتشار](docs/DEPLOY_FA.md) را ببین.
 
 **آیا می‌شود Volume را کاملاً خودکار ساخت؟** خود برنامه می‌تواند مسیر Volume متصل‌شده را تشخیص بدهد، اما از داخل کانتینر نمی‌تواند یک Volume پایدار جدید در حساب Railway بسازد و به سرویس وصل کند. Volume باید یک‌بار از پنل Railway یا CLI ایجاد و متصل شود. اگر CLI را به پروژه و سرویس درست وصل کرده‌ای، راهنمای رسمی [مدیریت Volume با CLI](https://docs.railway.com/cli/volume) را ببین؛ برای مثال دستور ساخت Volume با مسیر `/data`، `railway volume add --mount-path /data` است. برای سرویس فعلی، Volume موجود را حذف یا جابه‌جا نکن.
 
