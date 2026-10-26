@@ -3070,14 +3070,20 @@ html body .login-visual .visual-orbit{
 
 /* Final reference QA: fit quick details and tablet toolbar without changing page structure. */
 @media(min-width:1151px){
+ html body main.app-shell>.workspace>#dashboardUsageCard,
+ html body main.app-shell>.workspace>#panelHealthCard,
  html body main.app-shell>.workspace>#dashboardQuickCard{
-  height:220px!important;min-height:220px!important;max-height:220px!important;overflow:hidden!important;padding:10px!important
+  height:240px!important;min-height:240px!important;max-height:240px!important
+ }
+ html body main.app-shell>.workspace>#dashboardQuickCard{
+  overflow:hidden!important;padding:10px!important
  }
  html body main.app-shell>.workspace>#dashboardQuickDetails{
-  gap:4px!important;margin-top:6px!important
+  gap:3px!important;margin-top:5px!important
  }
  html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-row{
-  padding:4px 7px!important;gap:6px!important;border-radius:9px!important;min-height:0!important
+  height:44px!important;max-height:44px!important;box-sizing:border-box!important;
+  padding:3px 7px!important;gap:6px!important;border-radius:9px!important;min-height:0!important;overflow:hidden!important
  }
  html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-copy{gap:1px!important}
  html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-copy>.small{
