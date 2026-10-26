@@ -740,12 +740,13 @@ def install_extended(app, namespace):
         # spending time on unrelated/disabled config variants and keeps the results aligned
         # with the cards the user can open.
         subscription_keys={item["key"] for item in links}
+        enabled_profiles=[x["key"] for x in p.PROFILES if flags[x["key"]]]
         selected=[x for x in p.PROFILES if flags[x["key"]] and x["key"] in subscription_keys]
         route_checks=await asyncio.gather(*(asyncio.to_thread(_probe_profile,profile) for profile in selected))
         return {"ok":not expired and (remaining is None or remaining>0) and bool(links),
           "service_enabled":bool(client["enabled"]),"expiry_ok":not expired,"quota_ok":remaining is None or remaining>0,
           "xray_installed":Path(p.XRAY_BIN).exists(),"xray_running":bool(p.xray_proc and p.xray_proc.poll() is None),
-          "subscription_fetchable":True,"enabled_profiles":[x["key"] for x in selected],
+          "subscription_fetchable":True,"enabled_profiles":enabled_profiles,"checked_profiles":[x["key"] for x in selected],
           "profile_count":len(links),"used_bytes":used,"remaining_bytes":remaining,"expires_at":expires,
           "route_checks":route_checks,
           "note":"Route checks test the HTTP gateway from inside the server only; they cannot prove a working connection tunnel or measure real client latency."}
