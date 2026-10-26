@@ -96,9 +96,10 @@ jobs:
           # avoid a full apt dependency pass, which can stall the bounded visual job.
           python -m playwright install chromium
       - name: Capture login, dashboard, sections and mobile menu
+        timeout-minutes: 7
         run: |
           mkdir -p visual-preview
-          python - <<'PY'
+          timeout --signal=TERM --kill-after=10s 6m python - <<'PY'
           from pathlib import Path
           from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
           import faulthandler, sys
@@ -127,6 +128,10 @@ jobs:
           with sync_playwright() as p:
               browser = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist", "--enable-unsafe-swiftshader"])
               page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
+              # Bound implicit locator/navigation waits. The few intentionally asynchronous
+              # API checks below set their own explicit, longer timeout.
+              page.set_default_timeout(6000)
+              page.set_default_navigation_timeout(12000)
 
               errors = []
               page.on("pageerror", lambda e: errors.append(str(e) + " | " + str(getattr(e, "stack", ""))))
@@ -531,6 +536,8 @@ jobs:
                   raise SystemExit("Subscription QR failed to render: " + repr(qr_result))
               capture_screenshot(subscription, out / "11-subscription-desktop.png", full_page=True)
               subscription_mobile = browser.new_page(viewport={"width":390,"height":844}, device_scale_factor=1, is_mobile=True, has_touch=True)
+              subscription_mobile.set_default_timeout(6000)
+              subscription_mobile.set_default_navigation_timeout(12000)
               subscription_mobile.on("pageerror", lambda e: errors.append("subscription mobile: " + str(e) + " | " + str(getattr(e, "stack", ""))))
               sub_response = subscription_mobile.goto(base + "/sub/preview-visual-token-0001", wait_until="domcontentloaded")
               if sub_response is None or sub_response.status >= 400:
@@ -562,6 +569,8 @@ jobs:
                   raise SystemExit("Subscription mobile layout diverged from the reference order: " + repr(sub_mobile_layout))
               capture_screenshot(subscription_mobile, out / "12-subscription-mobile.png", full_page=True)
               mobile = browser.new_page(viewport={"width":390,"height":844}, device_scale_factor=1, is_mobile=True, has_touch=True)
+              mobile.set_default_timeout(6000)
+              mobile.set_default_navigation_timeout(12000)
               mobile.on("pageerror", lambda e: errors.append("mobile: " + str(e) + " | " + str(getattr(e, "stack", ""))))
               mobile.goto(base + "/login", wait_until="domcontentloaded")
               mobile.locator('input[name="username"]').fill("admin")
