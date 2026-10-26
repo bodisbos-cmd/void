@@ -337,8 +337,8 @@ def test_create_pause_subscription_and_revoke(client):
     assert any("type=httpupgrade" in line for line in configs)
     httpupgrade_configs = [line for line in configs if "type=httpupgrade" in line]
     assert len(httpupgrade_configs) == 2
-    assert any("path=%2Fhttpupgrade%3Fed%3D2560" in line for line in httpupgrade_configs)
-    assert any("path=%2Fupgrade%3Fed%3D2560" in line for line in httpupgrade_configs)
+    assert any("path=%2Fhttpupgrade" in line and "ed%3D2560" not in line for line in httpupgrade_configs)
+    assert any("path=%2Fupgrade" in line and "ed%3D2560" not in line for line in httpupgrade_configs)
     websocket_configs = [line for line in configs if "type=ws" in line]
     assert len(websocket_configs) == 3
     assert any("path=%2Fws%3Fed%3D2560" in line for line in websocket_configs)
@@ -480,6 +480,11 @@ def test_xray_config_has_unique_inbounds_and_stats_api(client):
     assert config["api"]["services"] == ["StatsService"]
     assert config["policy"]["levels"]["0"]["statsUserUplink"] is True
     assert config["policy"]["levels"]["0"]["statsUserDownlink"] is True
+    by_tag = {item["tag"]: item for item in inbounds}
+    ws_settings = by_tag["in-ws"]["streamSettings"]["wsSettings"]
+    assert ws_settings["maxEarlyData"] == 2560
+    assert ws_settings["earlyDataHeaderName"] == "Sec-WebSocket-Protocol"
+    assert "maxEarlyData" not in by_tag["in-ss_ws"]["streamSettings"]["wsSettings"]
     xhttp = [item for item in inbounds if item.get("streamSettings", {}).get("network") == "xhttp"]
     assert {item["streamSettings"]["xhttpSettings"]["mode"] for item in xhttp} == {"auto", "packet-up"}
     assert len({item["streamSettings"]["xhttpSettings"]["path"] for item in xhttp}) == 2
@@ -963,9 +968,6 @@ def test_profile_settings_update_xray_and_subscription(client):
     httpupgrade_paths = [u for u in query_by_scheme if "type=httpupgrade" in u.query]
     assert httpupgrade_paths and all("ed=2560" not in u.query and "ed%3D2560" not in u.query for u in httpupgrade_paths)
     inbounds = {item["tag"]: item for item in panel.make_xray_config()["inbounds"]}
-    ws_settings = inbounds["in-ws"]["streamSettings"]["wsSettings"]
-    assert ws_settings["maxEarlyData"] == 2560
-    assert ws_settings["earlyDataHeaderName"] == "Sec-WebSocket-Protocol"
     # The Shadowsocks v2ray-plugin URI does not send Xray's WebSocket Early Data header.
     assert "maxEarlyData" not in inbounds["in-ss_ws"]["streamSettings"]["wsSettings"]
     assert "ed=2560" not in next(line for line in links if "ss://" in line)
