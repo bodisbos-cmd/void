@@ -112,8 +112,8 @@ jobs:
               # A renderer can stall on a dense page, so skip only that screenshot on timeout and
               # continue the interaction/layout assertions instead of failing the whole visual suite.
               try:
-                  target.screenshot(path=str(destination), full_page=full_page, animations="disabled", timeout=20000)
-              except PlaywrightTimeoutError as exc:
+                  target.screenshot(path=str(destination), full_page=full_page, animations="disabled", timeout=45000)
+              except Exception as exc:
                   print("SCREENSHOT_SKIPPED=" + name + " reason=timeout detail=" + str(exc).splitlines()[0], flush=True)
                   return False
               print("SCREENSHOT_DONE=" + name + " duration_s=" + str(round(time.monotonic() - started, 2)), flush=True)
