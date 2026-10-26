@@ -47,10 +47,13 @@ def test_railway_restarts_failed_or_stopped_service_and_waits_for_health():
     assert config["deploy"]["restartPolicyType"] == "ALWAYS"
 
 
-def test_docker_build_uses_a_pip_cache_without_baking_it_into_the_image():
+def test_docker_build_reuses_package_caches_without_baking_them_into_the_image():
     dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
     assert "# syntax=docker/dockerfile:1" in dockerfile
-    assert "RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt" in dockerfile
+    assert "RUN --mount=type=cache,target=/root/.cache/pip pip install --no-compile -r requirements.txt" in dockerfile
+    assert "target=/var/cache/apt,sharing=locked" in dockerfile
+    assert "target=/var/lib/apt/lists,sharing=locked" in dockerfile
+    assert "rm -f /etc/apt/apt.conf.d/docker-clean" in dockerfile
     assert "DATA_DIR=/data" not in dockerfile
 
 
