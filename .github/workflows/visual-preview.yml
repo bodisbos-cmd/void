@@ -289,6 +289,10 @@ jobs:
               print("XRAY_STATUS_UI=" + repr(xray_state))
               if xray_state["http"] != 200 or xray_state["actual"] != xray_state["shown"]:
                   raise SystemExit("Quick dashboard status differs from the actual Xray state: " + repr(xray_state))
+              # Return to the authenticated shell before checking the persistent toolbar control.
+              # Section navigation can replace page content; don't assume the toolbar node survived.
+              page.goto(base + "/", wait_until="domcontentloaded")
+              page.wait_for_selector("#langBtn", state="attached", timeout=10000)
               # The language button inherits a continuously animated glass effect, so Playwright's
               # "stable element" heuristic can time out even though the control is visible and enabled.
               # Dispatch the real DOM click and still assert the complete language/direction change.
