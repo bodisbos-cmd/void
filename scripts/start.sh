@@ -16,7 +16,9 @@ ulimit -n 65535 2>/dev/null || ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 mkdir -p "$DATA_DIR" /tmp/nginx-client-body /tmp/nginx-proxy /tmp/nginx-fastcgi /tmp/nginx-uwsgi /tmp/nginx-scgi
 chown abyss:abyss "$DATA_DIR"
 find "$DATA_DIR" -mindepth 1 -maxdepth 1 ! -user abyss -exec chown abyss:abyss {} +
-chown -R abyss:abyss /tmp/nginx-client-body /tmp/nginx-proxy /tmp/nginx-fastcgi /tmp/nginx-uwsgi /tmp/nginx-scgi
+
+# These /tmp directories are already created and owned by abyss in the image;
+# recursively chowning them on every boot is redundant.
 
 # Fail early with a clear log if the persistent database volume is not writable.
 if ! touch "$DATA_DIR/.abyss-write-test" 2>/dev/null; then
