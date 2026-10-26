@@ -16,6 +16,8 @@ from starlette.datastructures import MutableHeaders
 from starlette.middleware.sessions import SessionMiddleware
 
 APP_NAME="Void"
+# Short location marker shown in client names. Override when deploying outside the Netherlands.
+ABYSS_LOCATION_FLAG=os.getenv("ABYSS_LOCATION_FLAG","🇳🇱").strip() or "🌐"
 PROFILES=[
     {"key":"ws","label":"WebSocket","network":"ws","path":"/ws","port":10001,"mode":None},
     {"key":"httpupgrade","label":"HTTPUpgrade","network":"httpupgrade","path":"/httpupgrade","port":10002,"mode":None},
@@ -3657,7 +3659,10 @@ def make_subscription_links(client, r):
         proto=profile.get("protocol","vless")
         label=profile.get("subscription_label",profile["key"].replace("_","-"))
         uid=client["client_uuid"]
-        title=quote("abysstunnel-"+client["name"]+"-"+label)
+        # Client apps already display protocol/transport below each entry. Keep the visible
+        # name clean and append only the service brand plus deployment-location flag.
+        display_name="abysstunnel-"+client["name"]+" "+ABYSS_LOCATION_FLAG
+        title=quote(display_name)
         if profile.get("security")=="reality":
             reality=get_reality_tcp_settings()
             direct_host=profile["tcp_proxy_domain"]
@@ -3678,7 +3683,7 @@ def make_subscription_links(client, r):
         elif proto=="trojan":
             url=f"trojan://{uid}@{host}:443?{common}#{title}"
         elif proto=="vmess":
-            vmess={"v":"2","ps":"abysstunnel-"+client["name"]+"-"+label,"add":host,"port":"443","id":uid,"aid":"0","scy":"auto","net":"ws","type":"none","host":host,"path":path,"tls":"tls","sni":host,"alpn":""}
+            vmess={"v":"2","ps":display_name,"add":host,"port":"443","id":uid,"aid":"0","scy":"auto","net":"ws","type":"none","host":host,"path":path,"tls":"tls","sni":host,"alpn":""}
             url="vmess://"+base64.b64encode(json.dumps(vmess,separators=(",",":")).encode()).decode()
         elif proto=="shadowsocks":
             ss_password=base64.b64encode(hashlib.sha256(uid.encode()).digest()[:16]).decode()
