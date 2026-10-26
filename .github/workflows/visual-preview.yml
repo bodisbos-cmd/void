@@ -281,11 +281,14 @@ jobs:
               print("XRAY_STATUS_UI=" + repr(xray_state))
               if xray_state["http"] != 200 or xray_state["actual"] != xray_state["shown"]:
                   raise SystemExit("Quick dashboard status differs from the actual Xray state: " + repr(xray_state))
-              page.locator("#langBtn").click()
+              # The language button inherits a continuously animated glass effect, so Playwright's
+              # "stable element" heuristic can time out even though the control is visible and enabled.
+              # Dispatch the real DOM click and still assert the complete language/direction change.
+              page.locator("#langBtn").evaluate("(e) => e.click()")
               page.wait_for_function("""() => document.documentElement.lang==='en'
                 && document.documentElement.dir==='ltr'
                 && document.getElementById('langBtn')?.textContent?.trim()==='فارسی'""", timeout=5000)
-              page.locator("#langBtn").click()
+              page.locator("#langBtn").evaluate("(e) => e.click()")
               page.wait_for_function("""() => document.documentElement.lang==='fa'
                 && document.documentElement.dir==='rtl'
                 && document.getElementById('langBtn')?.textContent?.trim()==='English'""", timeout=5000)
