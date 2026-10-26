@@ -41,7 +41,7 @@
     <circle cx="1084" cy="54" r="1.1" opacity=".65"/><circle cx="1122" cy="221" r="1.4" opacity=".6"/>
     <circle cx="1017" cy="267" r=".8" opacity=".65"/><circle cx="690" cy="156" r=".8" opacity=".45"/>
   </g>
-  <g font-family="Vazirmatn,Tahoma,Arial,sans-serif">
+  <g font-family="Vazirmatn,Tahoma,Arial,sans-serif" direction="rtl" unicode-bidi="plaintext">
     <text x="75" y="122" fill="#f2f2f3" font-size="63" font-weight="800" letter-spacing="12">VOID</text>
     <path d="M80 145 H380" stroke="url(#silver)" stroke-width="1.5"/>
     <text x="80" y="181" fill="#c9c9ce" font-size="19" font-weight="600">Abyss Tunnel · I.T.A.</text>
