@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="docs/assets/void-header.svg" alt="Void — Abyss Tunnel" width="100%">
+<img src="docs/assets/void-header.svg" alt="پس‌زمینهٔ تیره و نقره‌ای Void" width="100%">
+
+<img src="docs/assets/quick-connect.svg" alt="سه نماد تصویری برای مراحل اتصال؛ توضیح هر مرحله در متن پایین آمده است" width="100%">
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/tests.yml?branch=main&label=%D8%AA%D8%B3%D8%AA%E2%80%8C%D9%87%D8%A7&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/tests.yml)
 [![Security](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/security.yml?branch=main&label=%D8%A7%D9%85%D9%86%DB%8C%D8%AA&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/security.yml)
@@ -131,11 +133,16 @@ flowchart LR
 
 ### استقرار روی Railway
 
-1. مخزن را در GitHub باز کن و آن را به سرویس Railway وصل کن؛ روش build باید **Dockerfile** باشد.
-2. برای نگهداری اطلاعات بعد از redeploy، یک **Volume پایدار** به سرویس متصل کن. مسیر پیش‌فرض `/data` است. برنامه متغیر خودکار Railway یعنی `RAILWAY_VOLUME_MOUNT_PATH` را هم می‌خواند، پس لازم نیست متغیر `DATA_DIR` را دستی تعریف کنی.
-3. دامنهٔ عمومی را برای پورت **8080** ایجاد کن.
-4. در نصب تازه، نام کاربری و رمز اولیه هر دو `admin` هستند. پس از ورود، رمز را فوراً عوض کن و پنل را با رمز پیش‌فرض در دسترس عمومی رها نکن.
-5. در صفحهٔ سلامت `/health` وضعیت پنل و Xray را بررسی کن؛ سپس یک کاربر آزمایشی بساز و همان لینک اشتراک را ابتدا در مرورگر و بعد در کلاینت واقعی تست کن.
+<div dir="rtl" align="right">
+
+1. **پروژه را به Railway معرفی کن.** در Railway گزینهٔ ساخت پروژه از GitHub را بزن و مخزن **bodisbos-cmd/void** را انتخاب کن. یعنی Railway کدهای برنامه را از GitHub می‌گیرد؛ لازم نیست فایل‌ها را دستی آپلود کنی.
+2. **روش ساخت را انتخاب کن، اگر از تو پرسید.** گزینهٔ **Dockerfile** را بزن. این فقط فایل دستورهای آمادهٔ ساخت برنامه است؛ لازم نیست آن را باز کنی یا چیزی داخلش بنویسی. اگر Railway خودش این روش را تشخیص داد، تغییری لازم نیست.
+3. **اطلاعات را حفظ کن.** یک فضای ذخیره‌سازی پایدار (**Volume**) به مسیر **/data** وصل کن. این فضا اطلاعات کاربران را نگه می‌دارد؛ آن را بعداً حذف نکن. برنامه مسیر خودکار Railway را هم می‌شناسد و لازم نیست متغیر DATA_DIR را دستی تنظیم کنی.
+4. **آدرس پنل را بساز.** برای سرویس دامنهٔ عمومی ایجاد کن؛ پورت داخلی برنامه **8080** است.
+5. **رمز اولیهٔ مدیر را تنظیم کن.** در بخش متغیرهای محرمانهٔ Railway متغیر **ABYSS_INITIAL_ADMIN_PASSWORD** بساز و یک رمز قوی و منحصربه‌فرد قرار بده. بدون آن، نصب تولیدی عمداً بالا نمی‌آید. نام کاربری اولیه **admin** است؛ رمز را از همین متغیر تعیین می‌کنی، نه با فرض admin/admin.
+6. **سرویس را آزمایش کن.** آدرس **/health** را در انتهای دامنه باز کن. بعد یک کاربر آزمایشی بساز و لینک اشتراک را در یک برنامهٔ واقعی امتحان کن.
+
+</div>
 
 **آیا می‌شود Volume را کاملاً خودکار ساخت؟** خود برنامه می‌تواند مسیر Volume متصل‌شده را تشخیص بدهد، اما از داخل کانتینر نمی‌تواند یک Volume پایدار جدید در حساب Railway بسازد و به سرویس وصل کند. Volume باید یک‌بار از پنل Railway یا CLI ایجاد و متصل شود. اگر CLI را به پروژه و سرویس درست وصل کرده‌ای، راهنمای رسمی [مدیریت Volume با CLI](https://docs.railway.com/cli/volume) را ببین؛ برای مثال دستور ساخت Volume با مسیر `/data`، `railway volume add --mount-path /data` است. برای سرویس فعلی، Volume موجود را حذف یا جابه‌جا نکن.
 
