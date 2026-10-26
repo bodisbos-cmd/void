@@ -176,7 +176,7 @@ def test_subscription_diagnostics_help_and_official_downloads(client):
     assert page.status_code == 200
     assert "بررسی اتصال" in page.text
     assert "دانلود برنامه‌های رسمی" in page.text
-    assert "xhttp-auto" in page.text and "xhttp-packet-up" in page.text
+    assert "XHTTP" in page.text and "auto" in page.text and "packet-up" in page.text
     assert "xhttp-stream-up" not in page.text and "xhttp-stream-one" not in page.text
     assert "Trojan" in page.text and "VMess" in page.text and "Shadowsocks 2022" in page.text
     assert 'id="measureProfileLatency"' in page.text
