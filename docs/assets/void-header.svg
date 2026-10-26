@@ -1,32 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="270" viewBox="0 0 1200 270" role="img" aria-label="پس‌زمینه انتزاعی تیره و نقره‌ای Void">
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="420" viewBox="0 0 1440 420" role="img" aria-label="کهکشان تیره با سیاره حلقه‌دار نقره‌ای">
 <defs>
- <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#020202"/><stop offset=".52" stop-color="#0a0a0c"/><stop offset="1" stop-color="#1b1b1f"/></linearGradient>
- <linearGradient id="beam"><stop stop-color="#8e8e96" stop-opacity="0"/><stop offset=".5" stop-color="#ededf3" stop-opacity=".76"/><stop offset="1" stop-color="#8e8e96" stop-opacity="0"/></linearGradient>
- <radialGradient id="halo"><stop stop-color="#d7d7dd" stop-opacity=".22"/><stop offset="1" stop-color="#d7d7dd" stop-opacity="0"/></radialGradient>
- <filter id="blur"><feGaussianBlur stdDeviation="18"/></filter>
+ <linearGradient id="space" x2="1" y2="1"><stop stop-color="#020203"/><stop offset=".5" stop-color="#09090c"/><stop offset="1" stop-color="#17171b"/></linearGradient>
+ <radialGradient id="nebula"><stop stop-color="#a6a6b3" stop-opacity=".23"/><stop offset=".5" stop-color="#656571" stop-opacity=".09"/><stop offset="1" stop-color="#08080a" stop-opacity="0"/></radialGradient>
+ <radialGradient id="planet"><stop stop-color="#53535d"/><stop offset=".45" stop-color="#25252c"/><stop offset=".82" stop-color="#08080b"/><stop offset="1" stop-color="#020203"/></radialGradient>
+ <linearGradient id="ring"><stop stop-color="#9999a4" stop-opacity="0"/><stop offset=".28" stop-color="#d4d4df" stop-opacity=".2"/><stop offset=".5" stop-color="#f4f4fa" stop-opacity=".85"/><stop offset=".72" stop-color="#aaaab7" stop-opacity=".22"/><stop offset="1" stop-color="#9999a4" stop-opacity="0"/></linearGradient>
+ <linearGradient id="beam"><stop stop-color="#f2f2fa" stop-opacity="0"/><stop offset=".5" stop-color="#f2f2fa" stop-opacity=".6"/><stop offset="1" stop-color="#f2f2fa" stop-opacity="0"/></linearGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="22"/></filter>
+ <clipPath id="planetClip"><circle cx="1010" cy="218" r="130"/></clipPath>
 </defs>
-<rect width="1200" height="270" rx="26" fill="url(#bg)"/>
-<ellipse cx="880" cy="132" rx="350" ry="205" fill="url(#halo)"/>
-<ellipse cx="880" cy="132" rx="190" ry="80" fill="#d8d8e0" opacity=".07" filter="url(#blur)"><animate attributeName="opacity" values=".03;.12;.03" dur="8s" repeatCount="indefinite"/></ellipse>
+<rect width="1440" height="420" rx="26" fill="url(#space)"/>
+<ellipse cx="990" cy="220" rx="430" ry="300" fill="url(#nebula)"/>
+<ellipse cx="970" cy="218" rx="330" ry="110" fill="#a8a8b7" opacity=".06" filter="url(#blur)"><animate attributeName="opacity" values=".025;.1;.025" dur="9s" repeatCount="indefinite"/></ellipse>
 <g fill="none" stroke="url(#beam)">
- <path d="M-30 240 L540 -20" stroke-width="3" opacity=".5"><animate attributeName="opacity" values=".12;.8;.12" dur="7s" repeatCount="indefinite"/></path>
- <path d="M-30 240 L540 -20" stroke-width="1.5"/>
- <path d="M120 290 L800 -20" stroke-width="1.5"><animateTransform attributeName="transform" type="translate" values="0 0;24 0;0 0" dur="13s" repeatCount="indefinite"/></path>
- <path d="M450 290 L1030 -20" stroke-width="1.2"/>
- <path d="M770 290 L1250 15" stroke-width="2"><animateTransform attributeName="transform" type="translate" values="0 0;-20 0;0 0" dur="11s" repeatCount="indefinite"/></path>
- <path d="M-30 90 L1220 180" stroke-width=".8" opacity=".35"><animate attributeName="opacity" values=".05;.35;.05" dur="9s" repeatCount="indefinite"/></path>
+ <path d="M-40 355 L700 -25" stroke-width="2"><animate attributeName="opacity" values=".15;.75;.15" dur="8s" repeatCount="indefinite"/></path>
+ <path d="M100 450 L850 -10" stroke-width="1.2"/>
+ <path d="M470 440 L1120 -10" stroke-width="1.5"><animateTransform attributeName="transform" type="translate" values="0 0;18 0;0 0" dur="15s" repeatCount="indefinite"/></path>
+ <path d="M790 450 L1470 30" stroke-width="1.4"/>
+ <path d="M0 90 Q700 160 1440 80" stroke-width=".7" opacity=".25"><animate attributeName="opacity" values=".04;.3;.04" dur="10s" repeatCount="indefinite"/></path>
 </g>
-<g fill="none" stroke="#d6d6dc" stroke-opacity=".25">
- <ellipse cx="900" cy="132" rx="175" ry="78"><animateTransform attributeName="transform" type="rotate" from="0 900 132" to="360 900 132" dur="80s" repeatCount="indefinite"/></ellipse>
- <ellipse cx="900" cy="132" rx="118" ry="58" transform="rotate(-25 900 132)"/>
- <ellipse cx="900" cy="132" rx="68" ry="110" transform="rotate(28 900 132)"/>
+<g fill="#dedee8">
+ <circle cx="92" cy="62" r="1.4"><animate attributeName="opacity" values=".15;1;.15" dur="3.2s" repeatCount="indefinite"/></circle>
+ <circle cx="214" cy="320" r="1.2"/><circle cx="370" cy="115" r="1.6"><animate attributeName="opacity" values="1;.2;1" dur="4s" repeatCount="indefinite"/></circle>
+ <circle cx="550" cy="62" r="1.2"/><circle cx="680" cy="350" r="1.7"><animate attributeName="opacity" values=".2;1;.2" dur="5s" repeatCount="indefinite"/></circle>
+ <circle cx="780" cy="100" r="1.3"/><circle cx="1270" cy="58" r="1.4"><animate attributeName="opacity" values=".15;.9;.15" dur="4.8s" repeatCount="indefinite"/></circle>
+ <circle cx="1370" cy="320" r="1.1"/><circle cx="1180" cy="380" r="1.5"><animate attributeName="opacity" values=".9;.15;.9" dur="3.8s" repeatCount="indefinite"/></circle>
+ <circle cx="880" cy="44" r="1.3"/><circle cx="300" cy="235" r="1.1"><animate attributeName="cy" values="235;180;235" dur="8s" repeatCount="indefinite"/></circle>
 </g>
-<circle cx="900" cy="132" r="5" fill="#f5f5f6"><animate attributeName="opacity" values=".25;1;.25" dur="4s" repeatCount="indefinite"/><animate attributeName="r" values="3;5;3" dur="4s" repeatCount="indefinite"/></circle>
-<g fill="#d8d8de">
- <circle cx="80" cy="45" r="1.5"><animate attributeName="opacity" values=".2;1;.2" dur="3.2s" repeatCount="indefinite"/></circle>
- <circle cx="180" cy="222" r="1.2"><animate attributeName="opacity" values="1;.25;1" dur="5s" repeatCount="indefinite"/></circle>
- <circle cx="310" cy="70" r="1.2"/><circle cx="440" cy="187" r="1.4"><animate attributeName="opacity" values=".15;.9;.15" dur="4.2s" repeatCount="indefinite"/></circle>
- <circle cx="640" cy="40" r="1.2"/><circle cx="1080" cy="56" r="1.4"><animate attributeName="opacity" values=".2;1;.2" dur="4.8s" repeatCount="indefinite"/></circle>
- <circle cx="1120" cy="226" r="1.1"/><circle cx="740" cy="210" r="1.3"><animate attributeName="cy" values="210;80;210" dur="12s" repeatCount="indefinite"/></circle>
+<ellipse cx="1010" cy="218" rx="255" ry="77" transform="rotate(-17 1010 218)" fill="none" stroke="url(#ring)" stroke-width="24" opacity=".85"><animateTransform attributeName="transform" type="rotate" values="-17 1010 218;-14 1010 218;-17 1010 218" dur="18s" repeatCount="indefinite"/></ellipse>
+<circle cx="1010" cy="218" r="130" fill="url(#planet)"/>
+<g clip-path="url(#planetClip)" opacity=".55" stroke="#9a9aa7" fill="none">
+ <path d="M870 145 Q1000 110 1150 155" stroke-width="2"/>
+ <path d="M875 180 Q1010 142 1145 190" stroke-width="1.4"/>
+ <path d="M880 225 Q1010 194 1140 230" stroke-width="2"/>
+ <path d="M900 275 Q1010 250 1120 280" stroke-width="1.2"/>
+ <path d="M920 125 Q965 205 925 310" stroke-width="1.1" opacity=".6"/>
+ <path d="M1040 90 Q1080 210 1045 345" stroke-width="1.1" opacity=".4"/>
 </g>
+<ellipse cx="1010" cy="218" rx="260" ry="78" transform="rotate(-17 1010 218)" fill="none" stroke="url(#ring)" stroke-width="8" opacity=".85"><animateTransform attributeName="transform" type="rotate" values="-17 1010 218;-14 1010 218;-17 1010 218" dur="18s" repeatCount="indefinite"/></ellipse>
+<circle cx="1010" cy="218" r="135" fill="none" stroke="#e7e7ef" stroke-opacity=".12" stroke-width="1.5"/>
+<circle cx="1010" cy="218" r="4" fill="#f0f0f8" opacity=".7"><animate attributeName="opacity" values=".2;.9;.2" dur="5s" repeatCount="indefinite"/></circle>
+<path d="M0 390 Q700 350 1440 392" stroke="url(#beam)" fill="none" stroke-width="1"/>
 </svg>
