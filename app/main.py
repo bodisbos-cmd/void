@@ -3608,8 +3608,30 @@ VOID_LENIS_JS = r"""<script id="void-lenis-controller">
 })();
 </script>"""
 
-LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + ABYSS_MOTION_CSS + ABYSS_MOTION_JS + ABYSS_LUXE_CSS + VOID_SIGNATURE_CSS + VOID_LENIS_JS + "</body>")
-DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + ABYSS_MOTION_CSS + ABYSS_MOTION_JS + ABYSS_LUXE_CSS + VOID_SIGNATURE_CSS + VOID_LENIS_JS + '</body>')
+
+# GSAP is an optional progressive enhancement: CSS remains the fallback if the CDN is unavailable.
+VOID_GSAP_JS = r"""<script id="void-gsap-micro-motion">
+(()=> {
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const fine=window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+ if(reduced||!fine||!document.querySelector('.workspace')||(navigator.connection&&navigator.connection.saveData))return;
+ const run=()=> {
+  if(!window.gsap||window.__voidGsapApplied)return;
+  window.__voidGsapApplied=true;
+  try {
+   const targets=[...document.querySelectorAll('.workspace>.top .section-heading,#overviewStats>.card,#dashboardUsageCard,#panelHealthCard,#dashboardQuickCard')].filter(e=>getComputedStyle(e).display!=='none');
+   if(targets.length)window.gsap.fromTo(targets,{y:7,opacity:.78},{y:0,opacity:1,duration:.42,stagger:.035,ease:'power2.out',clearProps:'transform,opacity'});
+  } catch(_e) {}
+ };
+ if(window.gsap){run();return}
+ const script=document.createElement('script');
+ script.src='https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js';
+ script.async=true;script.onload=run;script.onerror=()=>{};document.head.appendChild(script);
+})();
+</script>"""
+
+LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + ABYSS_MOTION_CSS + ABYSS_MOTION_JS + ABYSS_LUXE_CSS + VOID_SIGNATURE_CSS + VOID_LENIS_JS + VOID_GSAP_JS + "</body>")
+DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + ABYSS_MOTION_CSS + ABYSS_MOTION_JS + ABYSS_LUXE_CSS + VOID_SIGNATURE_CSS + VOID_LENIS_JS + VOID_GSAP_JS + '</body>')
 
 @app.get("/dashboard.js",response_class=PlainTextResponse)
 async def dashboard_js():
