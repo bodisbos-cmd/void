@@ -96,10 +96,10 @@ jobs:
           # avoid a full apt dependency pass, which can stall the bounded visual job.
           python -m playwright install chromium
       - name: Capture login, dashboard, sections and mobile menu
-        timeout-minutes: 7
+        timeout-minutes: 5
         run: |
           mkdir -p visual-preview
-          timeout --signal=TERM --kill-after=10s 6m python - <<'PY'
+          timeout --signal=TERM --kill-after=10s 4m python - <<'PY'
           from pathlib import Path
           from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
           import faulthandler, sys
@@ -166,12 +166,12 @@ jobs:
               page.locator('input[name="username"]').fill("admin")
               page.locator('input[name="password"]').fill("admin")
               page.locator("form button").last.click()
-              page.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
+              page.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=10000)
               # The dashboard finishes its status/metrics requests asynchronously; wait for health data, then allow another real telemetry sample for the graph.
               page.wait_for_function("""() => {
                 const e=document.getElementById('dashboardComponentStatus');
                 return e && e.querySelectorAll('.dashboard-component').length === 4;
-              }""", timeout=45000)
+              }""", timeout=10000)
               # Wait for the chart API to return history; the isolated preview seeds deterministic
               # synthetic samples, so the check must not depend on live minute-based telemetry.
               page.wait_for_function("""async () => {
@@ -181,14 +181,14 @@ jobs:
                 if (!response.ok) return false;
                 const data=await response.json();
                 return Array.isArray(data.traffic_history) && data.traffic_history.length >= 2;
-              }""", timeout=45000)
+              }""", timeout=10000)
               for period in ("7d","30d","24h"):
                   # Wait for this specific range request; then verify that the real canvas label switched too.
-                  with page.expect_response(lambda response, p=period: "/api/system/metrics?period=" + p in response.url, timeout=20000) as period_response:
+                  with page.expect_response(lambda response, p=period: "/api/system/metrics?period=" + p in response.url, timeout=10000) as period_response:
                       page.locator('[data-traffic-period="' + period + '"]').click()
                   if period_response.value.status != 200:
                       raise SystemExit("Traffic range request failed: " + period + " HTTP " + str(period_response.value.status))
-                  page.wait_for_function("expected => document.querySelector('[data-traffic-period].is-active')?.dataset.trafficPeriod === expected && (document.getElementById('usageSparkline')?.getAttribute('aria-label') || '').includes(expected)", arg=period, timeout=20000)
+                  page.wait_for_function("expected => document.querySelector('[data-traffic-period].is-active')?.dataset.trafficPeriod === expected && (document.getElementById('usageSparkline')?.getAttribute('aria-label') || '').includes(expected)", arg=period, timeout=10000)
               chart_history = page.evaluate("""async () => {
                 const checks=[];
                 for (const period of ['24h','7d','30d']) {
@@ -367,7 +367,7 @@ jobs:
                       page.wait_for_function("""() => {
                         const e=document.getElementById('serverStatusGrid');
                         return e && !e.innerText.includes('در حال بررسی اجزا');
-                      }""", timeout=45000)
+                      }""", timeout=10000)
                       diagnosis = page.evaluate("""async () => {
                         const r = await fetch('/api/system/diagnostics', {cache:'no-store'});
                         return {httpStatus:r.status, data:await r.json()};
@@ -391,13 +391,13 @@ jobs:
                       page.wait_for_function("""() => {
                         const e=document.getElementById('reportSummary');
                         return e && !e.innerText.includes('در حال اجرای بررسی‌های واقعی');
-                      }""", timeout=45000)
+                      }""", timeout=10000)
                   elif nav == "clients":
                       page.wait_for_function("""() => {
                         const table=document.querySelector('#clients .clients-table tbody');
                         const details=document.getElementById('clientDetailsPanel');
                         return table && table.querySelectorAll('tr').length>0 && details && details.innerText.trim().length>0;
-                      }""", timeout=45000)
+                      }""", timeout=10000)
                       client_view=page.evaluate("""() => {
                         const box=selector=>{const e=document.querySelector(selector);if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
                         const table=box('#clients'), details=box('#clientDetailsPanel');
@@ -419,7 +419,7 @@ jobs:
                       page.wait_for_function("""() => {
                         const table=document.querySelector('#protocolCatalog .protocol-table tbody');
                         return table && table.querySelectorAll('tr').length>0;
-                      }""", timeout=45000)
+                      }""", timeout=10000)
                       protocol_view=page.evaluate("""() => ({rows:document.querySelectorAll('#protocolCatalog .protocol-table tbody tr').length,toggles:document.querySelectorAll('#protocolCatalog .protocol-table-toggle input[type=checkbox]').length})""")
                       print("PROTOCOL_TABLE_VIEW=" + repr(protocol_view))
                       if protocol_view["rows"]<1 or protocol_view["toggles"] != protocol_view["rows"]:
@@ -576,7 +576,7 @@ jobs:
               mobile.locator('input[name="username"]').fill("admin")
               mobile.locator('input[name="password"]').fill("admin")
               mobile.locator("form button").last.click()
-              mobile.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
+              mobile.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=10000)
               mobile.wait_for_function("""async () => {
                 const canvas=document.getElementById('usageSparkline');
                 if(!canvas)return false;
@@ -587,7 +587,7 @@ jobs:
                 const count=Number(label.match(/;\s*(\d+)$/)?.[1]||0);
                 return Array.isArray(data.traffic_history)&&data.traffic_history.length>=2
                   &&label.includes('(24h);')&&count===data.traffic_history.length;
-              }""", timeout=15000)
+              }""", timeout=10000)
               mobile.wait_for_timeout(100)
               mobile_overflow = mobile.evaluate("() => ({viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,headerHeight:document.querySelector('.workspace>.top')?.getBoundingClientRect().height})")
               print("MOBILE_OVERFLOW=" + repr(mobile_overflow))
@@ -733,11 +733,11 @@ jobs:
               tablet.locator('input[name="username"]').fill("admin")
               tablet.locator('input[name="password"]').fill("admin")
               tablet.locator("form button").last.click()
-              tablet.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
+              tablet.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=10000)
               tablet.wait_for_function("""() => {
                 const e=document.getElementById('dashboardComponentStatus');
                 return e && e.querySelectorAll('.dashboard-component').length===4;
-              }""", timeout=45000)
+              }""", timeout=10000)
               tablet.locator('[data-nav="clients"]').first.click()
               tablet.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
