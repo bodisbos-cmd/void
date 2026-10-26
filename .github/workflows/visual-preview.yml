@@ -688,7 +688,7 @@ jobs:
                   capture_screenshot(mobile, out / "10-mobile-menu-bottom.png", full_page=False)
               mobile.evaluate("document.getElementById('sidebar').scrollTop=0")
               capture_screenshot(mobile, out / "10-mobile-menu.png", full_page=False)
-              mobile.locator('#sidebar .side-brand .sidebar-close').click()
+              mobile.locator('#sidebar .side-brand .sidebar-close').evaluate("(e) => e.click()")
               mobile.wait_for_function("!document.body.classList.contains('abyss-menu-open') && !document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
               mobile.wait_for_function("getComputedStyle(document.querySelector('#menuToggle')).visibility!=='hidden'", timeout=3000)
               mobile.locator("#menuToggle").evaluate("(e) => e.click()")
