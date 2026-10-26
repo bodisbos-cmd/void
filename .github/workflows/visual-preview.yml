@@ -168,7 +168,7 @@ jobs:
               capture_screenshot(page, out / "01-login-desktop.png", full_page=False)
               page.locator('input[name="username"]').fill("admin")
               page.locator('input[name="password"]').fill("admin")
-              page.locator("form button").last.click()
+              page.locator("form button").last.evaluate("(e) => e.click()")
               page.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=10000)
               # The dashboard finishes its status/metrics requests asynchronously; wait for health data, then allow another real telemetry sample for the graph.
               page.wait_for_function("""() => {
@@ -581,7 +581,7 @@ jobs:
               mobile.goto(base + "/login", wait_until="domcontentloaded")
               mobile.locator('input[name="username"]').fill("admin")
               mobile.locator('input[name="password"]').fill("admin")
-              mobile.locator("form button").last.click()
+              mobile.locator("form button").last.evaluate("(e) => e.click()")
               mobile.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=10000)
               mobile.wait_for_function("""async () => {
                 const canvas=document.getElementById('usageSparkline');
@@ -738,7 +738,7 @@ jobs:
               tablet.goto(base + "/login", wait_until="domcontentloaded")
               tablet.locator('input[name="username"]').fill("admin")
               tablet.locator('input[name="password"]').fill("admin")
-              tablet.locator("form button").last.click()
+              tablet.locator("form button").last.evaluate("(e) => e.click()")
               tablet.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=10000)
               tablet.wait_for_function("""() => {
                 const e=document.getElementById('dashboardComponentStatus');
