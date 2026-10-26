@@ -1,51 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
-  <title id="title">Void — Abyss Tunnel</title>
-  <desc id="desc">A black cosmic banner with restrained silver rays, particles and the Persian name of the Void panel.</desc>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#030303"/>
-      <stop offset=".52" stop-color="#0b0b0d"/>
-      <stop offset="1" stop-color="#151517"/>
-    </linearGradient>
-    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#7e7e83" stop-opacity=".1"/>
-      <stop offset=".45" stop-color="#f3f3f4" stop-opacity=".85"/>
-      <stop offset=".7" stop-color="#a7a7ad" stop-opacity=".4"/>
-      <stop offset="1" stop-color="#6b6b70" stop-opacity=".08"/>
-    </linearGradient>
-    <radialGradient id="halo">
-      <stop offset="0" stop-color="#d8d8dd" stop-opacity=".12"/>
-      <stop offset="1" stop-color="#d8d8dd" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="blur"><feGaussianBlur stdDeviation="15"/></filter>
-  </defs>
-  <rect width="1200" height="300" rx="25" fill="url(#bg)"/>
-  <ellipse cx="910" cy="148" rx="310" ry="190" fill="url(#halo)"/>
-  <g fill="none" stroke="url(#silver)">
-    <path d="M-20 244 L520 -30" stroke-width="1.1" opacity=".32"/>
-    <path d="M80 326 L750 -30" stroke-width=".9" opacity=".26"/>
-    <path d="M430 330 L990 -30" stroke-width=".8" opacity=".19"/>
-    <path d="M710 335 L1260 18" stroke-width="1" opacity=".29"/>
-    <path d="M30 170 L380 -18" stroke-width="2" opacity=".14"/>
-    <path d="M830 320 L1200 108" stroke-width="2" opacity=".15"/>
-  </g>
-  <ellipse cx="930" cy="150" rx="158" ry="77" fill="none" stroke="#d7d7dc" stroke-opacity=".23" stroke-width="1"/>
-  <ellipse cx="930" cy="150" rx="118" ry="61" fill="none" stroke="#ededf0" stroke-opacity=".14" stroke-width="1" transform="rotate(-19 930 150)"/>
-  <ellipse cx="930" cy="150" rx="75" ry="110" fill="none" stroke="#a6a6ad" stroke-opacity=".19" stroke-width="1" transform="rotate(31 930 150)"/>
-  <circle cx="930" cy="150" r="34" fill="#d5d5da" opacity=".09" filter="url(#blur)"/>
-  <circle cx="930" cy="150" r="3" fill="#f5f5f6" opacity=".8"/>
-  <g fill="#d8d8dc">
-    <circle cx="68" cy="48" r="1.3" opacity=".8"/><circle cx="141" cy="242" r="1" opacity=".5"/>
-    <circle cx="305" cy="67" r="1.2" opacity=".55"/><circle cx="450" cy="228" r="1.1" opacity=".7"/>
-    <circle cx="590" cy="61" r=".9" opacity=".6"/><circle cx="754" cy="247" r="1.2" opacity=".45"/>
-    <circle cx="1084" cy="54" r="1.1" opacity=".65"/><circle cx="1122" cy="221" r="1.4" opacity=".6"/>
-    <circle cx="1017" cy="267" r=".8" opacity=".65"/><circle cx="690" cy="156" r=".8" opacity=".45"/>
-  </g>
-  <g font-family="Vazirmatn,Tahoma,Arial,sans-serif" direction="rtl" unicode-bidi="plaintext">
-    <text x="75" y="122" fill="#f2f2f3" font-size="63" font-weight="800" letter-spacing="12">VOID</text>
-    <path d="M80 145 H380" stroke="url(#silver)" stroke-width="1.5"/>
-    <text x="80" y="181" fill="#c9c9ce" font-size="19" font-weight="600">Abyss Tunnel · I.T.A.</text>
-    <text x="80" y="218" fill="#99999f" font-size="16">پنل فارسی مدیریت سرویس‌های Xray</text>
-    <text x="80" y="252" fill="#73737a" font-size="12" letter-spacing="2">SELF-HOSTED · DOCKER · RAILWAY</text>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="250" viewBox="0 0 1200 250" role="img" aria-label="Void dark silver abstract header">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#020202"/><stop offset="1" stop-color="#161618"/></linearGradient><linearGradient id="beam"><stop stop-color="#8e8e96" stop-opacity="0"/><stop offset=".5" stop-color="#e5e5eb" stop-opacity=".7"/><stop offset="1" stop-color="#8e8e96" stop-opacity="0"/></linearGradient><radialGradient id="halo"><stop stop-color="#d7d7dd" stop-opacity=".15"/><stop offset="1" stop-color="#d7d7dd" stop-opacity="0"/></radialGradient></defs>
+<rect width="1200" height="250" rx="24" fill="url(#bg)"/><ellipse cx="890" cy="125" rx="310" ry="190" fill="url(#halo)"/>
+<g fill="none" stroke="url(#beam)"><path d="M-30 220 L530 -20" stroke-width="2"/><path d="M140 280 L790 -20"/><path d="M470 270 L1030 -20" stroke-width="1.2"/><path d="M780 280 L1250 15" stroke-width="2"/></g>
+<g fill="none" stroke="#d6d6dc" stroke-opacity=".2"><ellipse cx="900" cy="125" rx="160" ry="70"/><ellipse cx="900" cy="125" rx="110" ry="55" transform="rotate(-25 900 125)"/><ellipse cx="900" cy="125" rx="65" ry="105" transform="rotate(28 900 125)"/></g>
+<circle cx="900" cy="125" r="4" fill="#f5f5f6"/><g fill="#d8d8de"><circle cx="80" cy="45" r="1.5"/><circle cx="180" cy="202" r="1.2"/><circle cx="310" cy="70" r="1.2"/><circle cx="440" cy="187" r="1.4"/><circle cx="640" cy="40" r="1.2"/><circle cx="1080" cy="56" r="1.4"/><circle cx="1120" cy="206" r="1.1"/></g>
 </svg>
