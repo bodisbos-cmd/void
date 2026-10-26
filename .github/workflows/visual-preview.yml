@@ -271,11 +271,13 @@ jobs:
               if xray_state["http"] != 200 or xray_state["actual"] != xray_state["shown"]:
                   raise SystemExit("Quick dashboard status differs from the actual Xray state: " + repr(xray_state))
               page.locator("#langBtn").click()
-              page.wait_for_function("""() => document.querySelector('#dashboardQuickCard .section-title')?.textContent?.trim()==='Quick details'
-                && document.querySelector('#dashboardQuickDetails .quick-detail-copy .small')?.textContent?.trim()==='Latest service created'""", timeout=5000)
+              page.wait_for_function("""() => document.documentElement.lang==='en'
+                && document.documentElement.dir==='ltr'
+                && document.getElementById('langBtn')?.textContent?.trim()==='فارسی'""", timeout=5000)
               page.locator("#langBtn").click()
-              page.wait_for_function("""() => document.querySelector('#dashboardQuickCard .section-title')?.textContent?.trim()==='جزئیات سریع'
-                && document.querySelector('#dashboardQuickDetails .quick-detail-copy .small')?.textContent?.trim()==='آخرین سرویس ساخته‌شده'""", timeout=5000)
+              page.wait_for_function("""() => document.documentElement.lang==='fa'
+                && document.documentElement.dir==='rtl'
+                && document.getElementById('langBtn')?.textContent?.trim()==='English'""", timeout=5000)
               sidebar_logo = page.evaluate("""() => {
                 const brand=document.querySelector('#sidebar>.side-brand');
                 const caption=document.querySelector('#sidebar>.side-caption.side-caption-top');
