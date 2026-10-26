@@ -36,13 +36,7 @@
 
 ## پیش‌نمایش داشبورد
 
-<img src="docs/assets/dashboard-schematic.svg" alt="نمای شماتیک متحرک داشبورد تیرهٔ Void" width="100%">
-
-<div dir="rtl" align="right">
-
-این تصویر، پیش‌نمایش تزئینی برای نشان‌دادن حال‌وهوای داشبورد است؛ اسکرین‌شات زنده از اجرای برنامه نیست.
-
-</div>
+<img src="docs/assets/dashboard-preview.png" alt="اسکرین‌شات واقعی داشبورد Void" width="100%">
 
 ## امکانات
 
