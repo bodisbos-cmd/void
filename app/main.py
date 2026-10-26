@@ -2337,7 +2337,6 @@ html body main.app-shell>aside.sidebar>.abyss-utility-links{
  html body main.app-shell>.workspace>#dashboardUsageCard>.stats>.card .num{font-size:21px!important}
  html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:112px!important;max-height:112px!important;margin-top:3px!important}
  html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:4px!important}
- html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{display:none!important}
  html body main.app-shell>.workspace>#panelHealthCard #dashboardComponentStatus>*{min-height:31px!important;padding:5px 9px!important}
  html body main.app-shell>.workspace>#dashboardQuickCard{min-height:0!important}
  html body main.app-shell>.workspace>#dashboardQuickCard .quick-detail-row{padding:7px 9px!important}
@@ -2866,7 +2865,7 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
 html body main.app-shell>.workspace>#dashboardUsageCard .stats{display:none!important}
 html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{margin-top:12px!important}
 html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6px!important}
- @media(min-width:561px){html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:72px!important;max-height:72px!important;margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{display:none!important}}
+ @media(min-width:561px){html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:72px!important;max-height:72px!important;margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:0!important}}
 /* Reference match pass: tighten the header-to-metrics gap and deepen the raised black-glass finish. */
 @media(min-width:851px){
  html body main.app-shell>.workspace{padding-top:34px!important}
