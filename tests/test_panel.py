@@ -695,7 +695,8 @@ def test_subscription_diagnostics_only_probe_profiles_in_that_subscription(clien
     assert response.status_code == 200, response.text
     assert probed == ["ws"]
     assert [item["key"] for item in response.json()["route_checks"]] == ["ws"]
-    assert response.json()["enabled_profiles"] == ["ws"]
+    assert response.json()["checked_profiles"] == ["ws"]
+    assert "ws" in response.json()["enabled_profiles"]
 
 
 def _stub_profile_probe(monkeypatch, http_status):
