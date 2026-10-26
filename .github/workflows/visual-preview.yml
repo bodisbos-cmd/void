@@ -114,22 +114,19 @@ jobs:
               started = time.monotonic()
               name = Path(destination).name
               print("SCREENSHOT_START=" + name + " full_page_requested=" + str(full_page), flush=True)
-              # Chromium's SwiftShader renderer repeatedly stalls on mobile/long-page
-              # screenshots even though the functional layout checks pass. Keep only the
-              # two useful desktop reference captures; the remaining viewport/layout checks
-              # still run, but avoid spending 10s per supplemental image.
-              if name not in {"01-login-desktop.png", "02-dashboard-desktop.png"}:
-                  print("SCREENSHOT_SKIPPED=" + name + " detail=layout assertions cover this viewport", flush=True)
-                  return False
+              # Capture every requested viewport. Do not silently skip images: these are
+              # the visual artifacts needed to inspect the real rendered UI.
               try:
-                  target.screenshot(path=str(destination), full_page=False, animations="disabled", timeout=3000)
+                  target.screenshot(path=str(destination), full_page=full_page, animations="disabled", timeout=10000)
               except Exception as exc:
                   print("SCREENSHOT_SKIPPED=" + name + " detail=" + str(exc).splitlines()[0], flush=True)
                   return False
               print("SCREENSHOT_DONE=" + name + " duration_s=" + str(round(time.monotonic() - started, 2)), flush=True)
               return True
           with sync_playwright() as p:
-              browser = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist", "--enable-unsafe-swiftshader"])
+              # Use Playwright's default headless renderer; forcing ANGLE/SwiftShader was
+              # causing screenshot capture to hang on this runner.
+              browser = p.chromium.launch(args=["--disable-dev-shm-usage"])
               page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
               # Bound implicit locator/navigation waits. The few intentionally asynchronous
               # API checks below set their own explicit, longer timeout.
