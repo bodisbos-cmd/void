@@ -3596,6 +3596,7 @@ html body .sidebar .nav-item{position:relative!important}
 html body .login-layout>.card{position:relative!important;overflow:hidden!important}
 html body .login-layout>.card:before{content:"";position:absolute;top:0;right:12%;left:12%;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(236,238,244,.3),transparent)}
 @media(max-width:850px){html body .workspace #dashboardUsageCard{min-height:245px!important}html body .workspace #overviewStats>.card,html body .workspace #dashboardUsageCard,html body .workspace [data-section-page].card{backdrop-filter:none!important}}
+@media(min-width:1151px){html body main.app-shell>.workspace>#dashboardQuickCard{height:auto!important;min-height:250px!important;max-height:none!important;overflow:visible!important;padding:13px!important}html body main.app-shell>.workspace>#dashboardQuickDetails{gap:6px!important;margin-top:8px!important}html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-row{padding:7px 9px!important}html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-copy>.small{font-size:10px!important;line-height:1.3!important}html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-meta{font-size:9px!important;line-height:1.25!important}html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-row>strong{font-size:11px!important}}
 @media(prefers-reduced-motion:reduce){html body,html body *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>"""
 
