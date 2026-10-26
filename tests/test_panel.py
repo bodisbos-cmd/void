@@ -962,9 +962,13 @@ def test_profile_settings_update_xray_and_subscription(client):
     query_by_scheme = [urlsplit(line) for line in links if not line.startswith("vmess://")]
     httpupgrade_paths = [u for u in query_by_scheme if "type=httpupgrade" in u.query]
     assert httpupgrade_paths and all("ed=2560" not in u.query and "ed%3D2560" not in u.query for u in httpupgrade_paths)
-    ws = next(item for item in panel.make_xray_config()["inbounds"] if item["tag"] == "in-ws")
-    assert ws["streamSettings"]["wsSettings"]["maxEarlyData"] == 2560
-    assert ws["streamSettings"]["wsSettings"]["earlyDataHeaderName"] == "Sec-WebSocket-Protocol"
+    inbounds = {item["tag"]: item for item in panel.make_xray_config()["inbounds"]}
+    ws_settings = inbounds["in-ws"]["streamSettings"]["wsSettings"]
+    assert ws_settings["maxEarlyData"] == 2560
+    assert ws_settings["earlyDataHeaderName"] == "Sec-WebSocket-Protocol"
+    # The Shadowsocks v2ray-plugin URI does not send Xray's WebSocket Early Data header.
+    assert "maxEarlyData" not in inbounds["in-ss_ws"]["streamSettings"]["wsSettings"]
+    assert "ed=2560" not in next(line for line in links if "ss://" in line)
 
     rejected = client.patch(
         "/api/settings/profiles",
