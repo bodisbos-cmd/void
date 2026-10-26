@@ -3407,8 +3407,111 @@ html body main.app-shell>aside.sidebar>.side-brand .brand-name{
 
 
 
-LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + "</body>")
-DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + '</body>')
+
+# Progressive visual interaction layer inspired by GSAP, React Bits and 21st.dev.
+# Keep the existing FastAPI + HTML/CSS/JS architecture; no framework migration or build step.
+ABYSS_MOTION_CSS = r"""<style id="void-motion-toolkit">
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ html body main.app-shell button:not(.sidebar-close):not([disabled]),
+ html body main.app-shell a,
+ html body main.app-shell .card,
+ html body main.app-shell .panel,
+ html body main.app-shell .stat-card,
+ html body main.app-shell .metric-card{
+  transition:transform .22s cubic-bezier(.2,.75,.25,1),border-color .22s ease,box-shadow .22s ease,background-color .22s ease;
+ }
+ html body main.app-shell button:not(.sidebar-close):not([disabled]):hover,
+ html body main.app-shell a:hover{
+  transform:translateY(-1px);
+ }
+ html body main.app-shell .card:hover,
+ html body main.app-shell .panel:hover,
+ html body main.app-shell .stat-card:hover,
+ html body main.app-shell .metric-card:hover{
+  border-color:rgba(205,211,221,.22);
+ }
+}
+html body main.app-shell button:not(.sidebar-close):focus-visible,
+html body main.app-shell a:focus-visible,
+html body .login-layout button:focus-visible,
+html body .login-layout a:focus-visible{
+ outline:2px solid rgba(218,224,234,.78)!important;
+ outline-offset:3px!important;
+}
+html body main.app-shell .void-ripple-host{position:relative;isolation:isolate;overflow:hidden}
+.void-ripple{
+ position:absolute;pointer-events:none;border-radius:50%;z-index:2;
+ width:8px;height:8px;transform:translate(-50%,-50%) scale(0);
+ background:radial-gradient(circle,rgba(238,242,248,.24),rgba(238,242,248,.08) 55%,transparent 72%);
+ animation:void-ripple-out .58s ease-out forwards;
+}
+@keyframes void-ripple-out{to{transform:translate(-50%,-50%) scale(23);opacity:0}}
+@media(prefers-reduced-motion:reduce){
+ .void-ripple{display:none!important}
+ html body main.app-shell button,
+ html body main.app-shell a,
+ html body main.app-shell .card,
+ html body main.app-shell .panel,
+ html body main.app-shell .stat-card,
+ html body main.app-shell .metric-card{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>"""
+ABYSS_MOTION_JS = r"""<script id="void-motion-toolkit-controller">
+(()=> {
+ const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const root=document.querySelector('main.app-shell');
+ if(!root || reduce) return;
+ const finePointer=window.matchMedia&&window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+ const interactive='button:not(.sidebar-close):not([disabled]), a, [role="button"]';
+ // Delegation keeps the interaction layer cheap on pages that render many user/config rows.
+ root.addEventListener('pointerdown',event=>{
+   if(event.pointerType==='touch' || event.button!==0) return;
+   const target=event.target.closest(interactive);
+   if(!target || target.closest('.sidebar,.side-nav') && target.matches('a')) return;
+   if(target.matches('input,select,textarea') || target.querySelector('input,select,textarea')) return;
+   const rect=target.getBoundingClientRect();
+   if(!rect.width || !rect.height) return;
+   target.classList.add('void-ripple-host');
+   const ripple=document.createElement('span');
+   ripple.className='void-ripple';
+   ripple.setAttribute('aria-hidden','true');
+   ripple.style.left=(event.clientX-rect.left)+'px';
+   ripple.style.top=(event.clientY-rect.top)+'px';
+   const size=Math.max(rect.width,rect.height);
+   ripple.style.width=size+'px'; ripple.style.height=size+'px';
+   target.appendChild(ripple);
+   ripple.addEventListener('animationend',()=>ripple.remove(),{once:true});
+ },{passive:true});
+ // GSAP is an optional progressive enhancement, never a render-time dependency.
+ // If a CDN is blocked, CSS micro-interactions remain active without breaking the panel.
+ if(finePointer && navigator.onLine && !(navigator.connection&&navigator.connection.saveData)){
+   const script=document.createElement('script');
+   script.src='https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js';
+   script.async=true;
+   script.onload=()=>{
+     if(!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+     let active=null;
+     root.addEventListener('pointerover',event=>{
+       const el=event.target.closest(interactive);
+       if(!el || el.contains(event.relatedTarget) || el.disabled) return;
+       active=el;
+       window.gsap.to(el,{duration:.16,y:-1,scale:1.008,ease:'power2.out',overwrite:'auto'});
+     },{passive:true});
+     root.addEventListener('pointerout',event=>{
+       const el=event.target.closest(interactive);
+       if(!el || el.contains(event.relatedTarget)) return;
+       window.gsap.to(el,{duration:.2,y:0,scale:1,ease:'power2.out',overwrite:'auto'});
+       if(active===el) active=null;
+     },{passive:true});
+   };
+   script.onerror=()=>{};
+   document.head.appendChild(script);
+ }
+})();
+</script>"""
+
+LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + ABYSS_MOTION_CSS + ABYSS_MOTION_JS + "</body>")
+DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + ABYSS_MOTION_CSS + ABYSS_MOTION_JS + '</body>')
 
 @app.get("/dashboard.js",response_class=PlainTextResponse)
 async def dashboard_js():
