@@ -3567,14 +3567,14 @@ html body .login-layout button[type=submit]{min-height:47px!important;border-rad
 # Premium art direction layer: monochrome editorial design cues from Godly/Animos,
 # transition timing inspired by Transitions.dev, component polish adapted from 21st.dev,
 # and restrained visual feedback patterns inspired by React Bits. Existing DOM stays intact.
-VOID_SIGNATURE_CSS = r\"\"\"<style id=\"void-signature-layer\">
+VOID_SIGNATURE_CSS = r"""<style id="void-signature-layer">
 :root{--void-silver:#d9dbe1;--void-edge:rgba(222,225,233,.16);--void-soft-ease:cubic-bezier(.2,.72,.2,1)}
 html body{scroll-behavior:smooth}
 html body main.app-shell{position:relative!important;isolation:isolate!important}
-html body main.app-shell:before{content:\"\";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 78% 4%,rgba(175,179,190,.055),transparent 34%),radial-gradient(ellipse at 46% 62%,rgba(130,134,145,.035),transparent 42%),linear-gradient(135deg,rgba(255,255,255,.012),transparent 40%);opacity:.95}
+html body main.app-shell:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 78% 4%,rgba(175,179,190,.055),transparent 34%),radial-gradient(ellipse at 46% 62%,rgba(130,134,145,.035),transparent 42%),linear-gradient(135deg,rgba(255,255,255,.012),transparent 40%);opacity:.95}
 html body .workspace>.top .section-heading{font-size:clamp(26px,2.25vw,36px)!important;text-shadow:0 0 28px rgba(222,225,233,.06)}
 html body .workspace #dashboardUsageCard{min-height:270px!important;position:relative!important;overflow:hidden!important}
-html body .workspace #dashboardUsageCard:after{content:\"\";position:absolute;top:-100px;left:-130px;width:300px;height:300px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(210,214,224,.055),transparent 68%)}
+html body .workspace #dashboardUsageCard:after{content:"";position:absolute;top:-100px;left:-130px;width:300px;height:300px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(210,214,224,.055),transparent 68%)}
 html body .workspace #dashboardUsageCard canvas{filter:drop-shadow(0 0 8px rgba(224,228,237,.08))}
 html body .workspace #overviewStats>.card,html body .workspace #dashboardUsageCard,html body .workspace [data-section-page].card{backdrop-filter:blur(16px) saturate(108%)}
 html body .workspace #overviewStats>.card,html body .workspace #dashboardUsageCard,html body .workspace [data-section-page].card{transition:transform .28s var(--void-soft-ease),border-color .28s ease,box-shadow .28s ease!important}
@@ -3585,17 +3585,17 @@ html body .workspace #overviewStats>.card,html body .workspace #dashboardUsageCa
 html body .workspace .tools>button,html body .workspace .toolbar-icon,html body .workspace button.primary{transition:transform .22s var(--void-soft-ease),box-shadow .22s ease,background .22s ease!important}
 html body .workspace button:active{transform:translateY(1px) scale(.99)}
 html body .sidebar .brand-name{letter-spacing:.14em!important;text-shadow:0 0 24px rgba(230,232,239,.08)}
-html body .sidebar .nav-item.active:before{content:\"\";position:absolute;right:0;top:25%;bottom:25%;width:2px;border-radius:2px;background:linear-gradient(180deg,#f2f3f6,#777b85);box-shadow:0 0 14px rgba(220,223,232,.25)}
+html body .sidebar .nav-item.active:before{content:"";position:absolute;right:0;top:25%;bottom:25%;width:2px;border-radius:2px;background:linear-gradient(180deg,#f2f3f6,#777b85);box-shadow:0 0 14px rgba(220,223,232,.25)}
 html body .sidebar .nav-item{position:relative!important}
 html body .login-layout>.card{position:relative!important;overflow:hidden!important}
-html body .login-layout>.card:before{content:\"\";position:absolute;top:0;right:12%;left:12%;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(236,238,244,.3),transparent)}
+html body .login-layout>.card:before{content:"";position:absolute;top:0;right:12%;left:12%;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(236,238,244,.3),transparent)}
 @media(max-width:850px){html body .workspace #dashboardUsageCard{min-height:245px!important}html body .workspace #overviewStats>.card,html body .workspace #dashboardUsageCard,html body .workspace [data-section-page].card{backdrop-filter:none!important}}
 @media(prefers-reduced-motion:reduce){html body,html body *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-</style>\"\"\"
+</style>"""
 
 # Lenis is an optional, desktop-only enhancement for the document scroll. Nested
 # sidebars/tables/modals remain native; touch, reduced-motion and Save-Data keep native scrolling.
-VOID_LENIS_JS = r\"\"\"<script id=\"void-lenis-controller\">
+VOID_LENIS_JS = r"""<script id="void-lenis-controller">
 (()=>{
  const motion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const fine=window.matchMedia('(hover:hover) and (pointer:fine)').matches;
@@ -3606,7 +3606,7 @@ VOID_LENIS_JS = r\"\"\"<script id=\"void-lenis-controller\">
  };
  const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/lenis@1.3.8/dist/lenis.min.js';script.async=true;script.onload=start;script.onerror=()=>{};document.head.appendChild(script);
 })();
-</script>\"\"\"
+</script>"""
 
 LOGIN = LOGIN.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + ABYSS_MOTION_CSS + ABYSS_MOTION_JS + ABYSS_LUXE_CSS + VOID_SIGNATURE_CSS + VOID_LENIS_JS + "</body>")
 DASH = DASH.replace("<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>", ABYSS_THEME_CSS + ABYSS_THEME_POLISH_CSS + ABYSS_LAYOUT_REPAIR_CSS + "<style>html,body,button,input,select,textarea{font-family:'Vazirmatn',Tahoma,system-ui,sans-serif}</style></head>").replace("</body>", ABYSS_THEME_JS + ABYSS_LAYOUT_REPAIR_JS + ABYSS_FINAL_LAYOUT_CSS + ABYSS_TOUCH_RESPONSIVE_CSS + ABYSS_TOUCH_RESPONSIVE_JS + ABYSS_MOTION_CSS + ABYSS_MOTION_JS + ABYSS_LUXE_CSS + VOID_SIGNATURE_CSS + VOID_LENIS_JS + '</body>')
