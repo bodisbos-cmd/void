@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="190" viewBox="0 0 1200 190" role="img" aria-label="نمودار تزئینی متحرک مراحل انتشار پنل">
+<defs>
+ <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#050506"/><stop offset="1" stop-color="#17171a"/></linearGradient>
+ <linearGradient id="line"><stop stop-color="#777780" stop-opacity=".05"/><stop offset=".5" stop-color="#ededf2" stop-opacity=".9"/><stop offset="1" stop-color="#777780" stop-opacity=".05"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#eeeef5" stop-opacity=".18"/><stop offset="1" stop-color="#eeeef5" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1200" height="190" rx="22" fill="url(#bg)"/>
+<ellipse cx="600" cy="95" rx="520" ry="130" fill="url(#glow)"/>
+<path d="M110 95 H1090" stroke="url(#line)" stroke-width="2" stroke-dasharray="8 10"><animate attributeName="stroke-dashoffset" values="0;-72" dur="5s" repeatCount="indefinite"/></path>
+<g fill="#111113" stroke="#c9c9d1" stroke-opacity=".65" stroke-width="1.5">
+ <rect x="55" y="36" width="150" height="118" rx="20"/><rect x="290" y="36" width="150" height="118" rx="20"/><rect x="525" y="36" width="150" height="118" rx="20"/><rect x="760" y="36" width="150" height="118" rx="20"/><rect x="995" y="36" width="150" height="118" rx="20"/>
+</g>
+<g fill="none" stroke="#e3e3ea" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M100 73 h58 l15 15 v39 h-73z M158 73 v16 h15 M111 101 h47 M111 113 h36"/>
+ <path d="M327 68 h48 l16 16 v42 h-64z M375 68 v17 h16 M340 98 h37 M340 111 h25"/><path d="M342 55 l15 -9 15 9"/>
+ <path d="M571 69 h58 v48 h-58z M583 82 h34 M583 94 h34 M583 106 h21 M584 129 h31"/>
+ <rect x="804" y="62" width="62" height="62" rx="9"/><path d="M816 82 h38 M816 94 h38 M816 106 h25"/><path d="M823 136 h24"/>
+ <circle cx="1070" cy="95" r="31"/><path d="M1054 95 l11 11 22 -24"/>
+</g>
+<g fill="#eeeef5"><circle cx="230" cy="95" r="2"><animate attributeName="opacity" values=".1;1;.1" dur="2.4s" repeatCount="indefinite"/></circle><circle cx="465" cy="95" r="2"><animate attributeName="opacity" values="1;.2;1" dur="2.8s" repeatCount="indefinite"/></circle><circle cx="700" cy="95" r="2"><animate attributeName="opacity" values=".2;1;.2" dur="3s" repeatCount="indefinite"/></circle><circle cx="935" cy="95" r="2"><animate attributeName="opacity" values="1;.2;1" dur="3.2s" repeatCount="indefinite"/></circle></g>
+</svg>
