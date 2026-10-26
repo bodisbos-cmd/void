@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import html
+import json
 import os
 import re
 import shutil
@@ -8,6 +9,7 @@ import sqlite3
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 # Ensure the repository root is importable regardless of pytest's import mode.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -294,6 +296,14 @@ def test_system_metrics_exposes_traffic_history_for_dashboard_chart(client):
     assert {"at", "recorded_traffic_bytes"} <= set(history[-1])
 
 
+def test_dashboard_usage_chart_note_is_not_hidden(client):
+    admin_client(client)
+    response = client.get("/")
+    assert response.status_code == 200
+    assert 'id="chartNote"' in response.text
+    assert "#dashboardUsageCard #chartNote{display:none!important}" not in response.text
+
+
 def test_create_pause_subscription_and_revoke(client):
     csrf = admin_client(client)
     headers = {"X-CSRF-Token": csrf}
@@ -327,8 +337,8 @@ def test_create_pause_subscription_and_revoke(client):
     assert any("type=httpupgrade" in line for line in configs)
     httpupgrade_configs = [line for line in configs if "type=httpupgrade" in line]
     assert len(httpupgrade_configs) == 2
-    assert any("path=%2Fhttpupgrade%3Fed%3D2560" in line for line in httpupgrade_configs)
-    assert any("path=%2Fupgrade%3Fed%3D2560" in line for line in httpupgrade_configs)
+    assert any("path=%2Fhttpupgrade" in line and "ed%3D2560" not in line for line in httpupgrade_configs)
+    assert any("path=%2Fupgrade" in line and "ed%3D2560" not in line for line in httpupgrade_configs)
     websocket_configs = [line for line in configs if "type=ws" in line]
     assert len(websocket_configs) == 3
     assert any("path=%2Fws%3Fed%3D2560" in line for line in websocket_configs)
@@ -470,6 +480,11 @@ def test_xray_config_has_unique_inbounds_and_stats_api(client):
     assert config["api"]["services"] == ["StatsService"]
     assert config["policy"]["levels"]["0"]["statsUserUplink"] is True
     assert config["policy"]["levels"]["0"]["statsUserDownlink"] is True
+    by_tag = {item["tag"]: item for item in inbounds}
+    ws_settings = by_tag["in-ws"]["streamSettings"]["wsSettings"]
+    assert ws_settings["maxEarlyData"] == 2560
+    assert ws_settings["earlyDataHeaderName"] == "Sec-WebSocket-Protocol"
+    assert "maxEarlyData" not in by_tag["in-ss_ws"]["streamSettings"]["wsSettings"]
     xhttp = [item for item in inbounds if item.get("streamSettings", {}).get("network") == "xhttp"]
     assert {item["streamSettings"]["xhttpSettings"]["mode"] for item in xhttp} == {"auto", "packet-up"}
     assert len({item["streamSettings"]["xhttpSettings"]["path"] for item in xhttp}) == 2
@@ -665,6 +680,32 @@ def test_diagnostics_distinguish_local_route_from_real_tunnel(client):
         }
 
 
+def test_subscription_diagnostics_only_probe_profiles_in_that_subscription(client, monkeypatch):
+    csrf = admin_client(client)
+    headers = {"X-CSRF-Token": csrf}
+    created = client.post(
+        "/api/clients",
+        json={"name": "Single profile", "profiles": ["ws"]},
+        headers=headers,
+    )
+    assert created.status_code == 200, created.text
+    subscription = client.get(f"/api/clients/{created.json()['id']}/subscription")
+    token = subscription.json()["url"].rsplit("/sub/", 1)[1]
+    probed = []
+
+    def fake_probe(profile):
+        probed.append(profile["key"])
+        return {"key": profile["key"], "route_ok": True, "latency_ms": 1}
+
+    monkeypatch.setattr(extended, "_probe_profile", fake_probe)
+    response = client.get(f"/s/{token}/diagnostics")
+    assert response.status_code == 200, response.text
+    assert probed == ["ws"]
+    assert [item["key"] for item in response.json()["route_checks"]] == ["ws"]
+    assert response.json()["checked_profiles"] == ["ws"]
+    assert "ws" in response.json()["enabled_profiles"]
+
+
 def _stub_profile_probe(monkeypatch, http_status):
     observed = {}
 
@@ -770,8 +811,7 @@ def test_subscription_landing_page_and_qr_are_responsive_and_private(client):
     assert '.usage-detail b{direction:ltr!important;unicode-bidi:isolate!important;display:block!important;text-align:left!important}' in page.text
     assert 'id="abyss-theme-polish"' in page.text
     assert "Portal user" in page.text
-    assert "xhttp-auto" in page.text and "xhttp-packet-up" in page.text
-    assert "xhttp-auto" in page.text and "xhttp-packet-up" in page.text
+    assert "XHTTP" in page.text and "auto" in page.text and "packet-up" in page.text
     assert "stream-up" not in page.text and "stream-one" not in page.text
     assert page.headers["cache-control"] == "no-store"
     assert "noindex, nofollow" in page.headers["x-robots-tag"]
@@ -914,8 +954,23 @@ def test_profile_settings_update_xray_and_subscription(client):
     raw = client.get(info["url"].replace("https://testserver", "http://testserver"))
     links = base64.b64decode(raw.text).decode().splitlines()
     assert len(links) == 7
-    assert not any("#abysstunnel-Profile%20test-ws" in line for line in links)
+    # Config names must be stable across protocols: only the AbyssTunnel ID and location flag.
+    names = []
+    for line in links:
+        if line.startswith("vmess://"):
+            names.append(json.loads(base64.b64decode(line[len("vmess://"):]))["ps"])
+        else:
+            names.append(unquote(urlsplit(line).fragment))
+    assert names == ["abysstunnel 🇳🇱"] * len(links)
+    assert not any("Profile%20test" in line or "Profile test" in line for line in links)
     assert any("mode=auto" in line for line in links)
+    query_by_scheme = [urlsplit(line) for line in links if not line.startswith("vmess://")]
+    httpupgrade_paths = [u for u in query_by_scheme if "type=httpupgrade" in u.query]
+    assert httpupgrade_paths and all("ed=2560" not in u.query and "ed%3D2560" not in u.query for u in httpupgrade_paths)
+    inbounds = {item["tag"]: item for item in panel.make_xray_config()["inbounds"]}
+    # The Shadowsocks v2ray-plugin URI does not send Xray's WebSocket Early Data header.
+    assert "maxEarlyData" not in inbounds["in-ss_ws"]["streamSettings"]["wsSettings"]
+    assert "ed=2560" not in next(line for line in links if "ss://" in line)
 
     rejected = client.patch(
         "/api/settings/profiles",

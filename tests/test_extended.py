@@ -1,10 +1,12 @@
 import base64
 import html
+import json
 import os
 import re
 import sys
 import http.client
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 os.environ["DATA_DIR"] = "/tmp/abyss-panel-extended-test-import"
@@ -176,7 +178,7 @@ def test_subscription_diagnostics_help_and_official_downloads(client):
     assert page.status_code == 200
     assert "بررسی اتصال" in page.text
     assert "دانلود برنامه‌های رسمی" in page.text
-    assert "xhttp-auto" in page.text and "xhttp-packet-up" in page.text
+    assert "XHTTP" in page.text and "auto" in page.text and "packet-up" in page.text
     assert "xhttp-stream-up" not in page.text and "xhttp-stream-one" not in page.text
     assert "Trojan" in page.text and "VMess" in page.text and "Shadowsocks 2022" in page.text
     assert 'id="measureProfileLatency"' in page.text
@@ -379,7 +381,13 @@ def test_all_protocol_profiles_generate_distinct_valid_uri_schemes(client):
     assert sum(x.startswith("trojan://") for x in decoded) == 1
     assert sum(x.startswith("vmess://") for x in decoded) == 1
     assert sum(x.startswith("ss://") for x in decoded) == 1
-    assert all("abysstunnel-" in x or x.startswith("vmess://") for x in decoded)
+    names = []
+    for item in decoded:
+        if item.startswith("vmess://"):
+            names.append(json.loads(base64.b64decode(item[len("vmess://"):]))["ps"])
+        else:
+            names.append(unquote(urlsplit(item).fragment))
+    assert names == ["abysstunnel 🇳🇱"] * len(decoded)
     config = panel.make_xray_config()
     inbound = [x for x in config["inbounds"] if x.get("tag", "").startswith("in-")]
     assert len(inbound) == 9

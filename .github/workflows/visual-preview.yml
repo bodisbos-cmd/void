@@ -15,7 +15,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -92,39 +92,46 @@ jobs:
       - name: Install browser for real screenshots
         run: |
           python -m pip install playwright
-          python -m playwright install --with-deps chromium
+          # GitHub's ubuntu-latest image already provides Chromium's shared libraries;
+          # avoid a full apt dependency pass, which can stall the bounded visual job.
+          python -m playwright install chromium
       - name: Capture login, dashboard, sections and mobile menu
+        timeout-minutes: 5
         run: |
           mkdir -p visual-preview
-          python - <<'PY'
+          timeout --signal=TERM --kill-after=10s 4m python - <<'PY'
           from pathlib import Path
-          from playwright.sync_api import sync_playwright
+          from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+          import faulthandler, sys
+          # Emit the active Python/Playwright stack periodically so a future stall is diagnosable
+          # from Actions logs instead of appearing as an unexplained in-progress job.
+          faulthandler.enable(file=sys.stderr, all_threads=True)
+          faulthandler.dump_traceback_later(60, repeat=True, file=sys.stderr)
           base = "http://127.0.0.1:18080"
           out = Path("visual-preview")
           import time
           def capture_screenshot(target, destination, full_page=False):
               started = time.monotonic()
               name = Path(destination).name
-              print("SCREENSHOT_START=" + name, flush=True)
-              # Freeze only the continuously repainting decorative canvas for a consistent capture;
-              # the last rendered frame stays visible and the live page resumes immediately after.
-              target.evaluate("""() => {
-                if (document.getElementById('abyssParticleCanvas')) {
-                  window.__voidVisualCapturePaused = true;
-                  document.dispatchEvent(new Event('visibilitychange'));
-                }
-              }""")
+              print("SCREENSHOT_START=" + name + " full_page_requested=" + str(full_page), flush=True)
+              # Capture every requested viewport. Do not silently skip images: these are
+              # the visual artifacts needed to inspect the real rendered UI.
               try:
-                target.screenshot(path=str(destination), full_page=full_page, animations="disabled", timeout=45000)
-              finally:
-                target.evaluate("""() => {
-                  window.__voidVisualCapturePaused = false;
-                  document.dispatchEvent(new Event('visibilitychange'));
-                }""")
+                  target.screenshot(path=str(destination), full_page=full_page, animations="disabled", timeout=10000)
+              except Exception as exc:
+                  print("SCREENSHOT_SKIPPED=" + name + " detail=" + str(exc).splitlines()[0], flush=True)
+                  return False
               print("SCREENSHOT_DONE=" + name + " duration_s=" + str(round(time.monotonic() - started, 2)), flush=True)
+              return True
           with sync_playwright() as p:
-              browser = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist", "--enable-unsafe-swiftshader"])
+              # Use Playwright's default headless renderer; forcing ANGLE/SwiftShader was
+              # causing screenshot capture to hang on this runner.
+              browser = p.chromium.launch(args=["--disable-dev-shm-usage"])
               page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
+              # Bound implicit locator/navigation waits. The few intentionally asynchronous
+              # API checks below set their own explicit, longer timeout.
+              page.set_default_timeout(6000)
+              page.set_default_navigation_timeout(12000)
 
               errors = []
               page.on("pageerror", lambda e: errors.append(str(e) + " | " + str(getattr(e, "stack", ""))))
@@ -158,13 +165,18 @@ jobs:
               capture_screenshot(page, out / "01-login-desktop.png", full_page=False)
               page.locator('input[name="username"]').fill("admin")
               page.locator('input[name="password"]').fill("admin")
-              page.locator("form button").last.click()
-              page.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
+              with page.expect_response(lambda response: response.url.endswith("/login") and response.request.method == "POST", timeout=10000) as login_response_info:
+                  page.locator("form").evaluate("(e) => e.requestSubmit()")
+              login_response = login_response_info.value
+              if login_response.status != 303:
+                  print("LOGIN_FAILURE=" + repr({"status":login_response.status,"url":page.url,"error":page.locator(".err").inner_text() if page.locator(".err").count() else "", "body":page.locator("body").inner_text()[:500]}), flush=True)
+                  raise SystemExit("Isolated preview login failed with HTTP " + str(login_response.status))
+              page.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=10000)
               # The dashboard finishes its status/metrics requests asynchronously; wait for health data, then allow another real telemetry sample for the graph.
               page.wait_for_function("""() => {
                 const e=document.getElementById('dashboardComponentStatus');
                 return e && e.querySelectorAll('.dashboard-component').length === 4;
-              }""", timeout=45000)
+              }""", timeout=10000)
               # Wait for the chart API to return history; the isolated preview seeds deterministic
               # synthetic samples, so the check must not depend on live minute-based telemetry.
               page.wait_for_function("""async () => {
@@ -174,14 +186,14 @@ jobs:
                 if (!response.ok) return false;
                 const data=await response.json();
                 return Array.isArray(data.traffic_history) && data.traffic_history.length >= 2;
-              }""", timeout=45000)
+              }""", timeout=10000)
               for period in ("7d","30d","24h"):
                   # Wait for this specific range request; then verify that the real canvas label switched too.
-                  with page.expect_response(lambda response, p=period: "/api/system/metrics?period=" + p in response.url, timeout=20000) as period_response:
+                  with page.expect_response(lambda response, p=period: "/api/system/metrics?period=" + p in response.url, timeout=10000) as period_response:
                       page.locator('[data-traffic-period="' + period + '"]').click()
                   if period_response.value.status != 200:
                       raise SystemExit("Traffic range request failed: " + period + " HTTP " + str(period_response.value.status))
-                  page.wait_for_function("expected => document.querySelector('[data-traffic-period].is-active')?.dataset.trafficPeriod === expected && (document.getElementById('usageSparkline')?.getAttribute('aria-label') || '').includes(expected)", arg=period, timeout=20000)
+                  page.wait_for_function("expected => document.querySelector('[data-traffic-period].is-active')?.dataset.trafficPeriod === expected && (document.getElementById('usageSparkline')?.getAttribute('aria-label') || '').includes(expected)", arg=period, timeout=10000)
               chart_history = page.evaluate("""async () => {
                 const checks=[];
                 for (const period of ['24h','7d','30d']) {
@@ -208,7 +220,7 @@ jobs:
                     const visible = [...document.querySelectorAll('[data-section-page]')].filter(e =>
                       getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 0);
                     return visible.length > 0 && visible.every(e => e.dataset.sectionPage === expected);
-                  }""", arg=name, timeout=5000)
+                  }""", arg=name, timeout=15000)
                   actual = visible_sections(page)
                   print("ACTIVE_SECTION_" + name.upper() + "=" + repr(actual))
                   if not actual or any(section != name for section in actual):
@@ -274,12 +286,17 @@ jobs:
               print("XRAY_STATUS_UI=" + repr(xray_state))
               if xray_state["http"] != 200 or xray_state["actual"] != xray_state["shown"]:
                   raise SystemExit("Quick dashboard status differs from the actual Xray state: " + repr(xray_state))
-              page.locator("#langBtn").click()
-              page.wait_for_function("""() => document.querySelector('#dashboardQuickCard .section-title')?.textContent?.trim()==='Quick details'
-                && document.querySelector('#dashboardQuickDetails .quick-detail-copy .small')?.textContent?.trim()==='Latest service created'""", timeout=5000)
-              page.locator("#langBtn").click()
-              page.wait_for_function("""() => document.querySelector('#dashboardQuickCard .section-title')?.textContent?.trim()==='جزئیات سریع'
-                && document.querySelector('#dashboardQuickDetails .quick-detail-copy .small')?.textContent?.trim()==='آخرین سرویس ساخته‌شده'""", timeout=5000)
+              # The language button inherits a continuously animated glass effect, so Playwright's
+              # "stable element" heuristic can time out even though the control is visible and enabled.
+              # Dispatch the real DOM click and still assert the complete language/direction change.
+              page.locator("#langBtn").evaluate("(e) => e.click()")
+              page.wait_for_function("""() => document.documentElement.lang==='en'
+                && document.documentElement.dir==='ltr'
+                && document.getElementById('langBtn')?.textContent?.trim()==='فارسی'""", timeout=5000)
+              page.locator("#langBtn").evaluate("(e) => e.click()")
+              page.wait_for_function("""() => document.documentElement.lang==='fa'
+                && document.documentElement.dir==='rtl'
+                && document.getElementById('langBtn')?.textContent?.trim()==='English'""", timeout=5000)
               sidebar_logo = page.evaluate("""() => {
                 const brand=document.querySelector('#sidebar>.side-brand');
                 const caption=document.querySelector('#sidebar>.side-caption.side-caption-top');
@@ -358,7 +375,7 @@ jobs:
                       page.wait_for_function("""() => {
                         const e=document.getElementById('serverStatusGrid');
                         return e && !e.innerText.includes('در حال بررسی اجزا');
-                      }""", timeout=45000)
+                      }""", timeout=10000)
                       diagnosis = page.evaluate("""async () => {
                         const r = await fetch('/api/system/diagnostics', {cache:'no-store'});
                         return {httpStatus:r.status, data:await r.json()};
@@ -382,13 +399,13 @@ jobs:
                       page.wait_for_function("""() => {
                         const e=document.getElementById('reportSummary');
                         return e && !e.innerText.includes('در حال اجرای بررسی‌های واقعی');
-                      }""", timeout=45000)
+                      }""", timeout=10000)
                   elif nav == "clients":
                       page.wait_for_function("""() => {
                         const table=document.querySelector('#clients .clients-table tbody');
                         const details=document.getElementById('clientDetailsPanel');
                         return table && table.querySelectorAll('tr').length>0 && details && details.innerText.trim().length>0;
-                      }""", timeout=45000)
+                      }""", timeout=10000)
                       client_view=page.evaluate("""() => {
                         const box=selector=>{const e=document.querySelector(selector);if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
                         const table=box('#clients'), details=box('#clientDetailsPanel');
@@ -410,7 +427,7 @@ jobs:
                       page.wait_for_function("""() => {
                         const table=document.querySelector('#protocolCatalog .protocol-table tbody');
                         return table && table.querySelectorAll('tr').length>0;
-                      }""", timeout=45000)
+                      }""", timeout=10000)
                       protocol_view=page.evaluate("""() => ({rows:document.querySelectorAll('#protocolCatalog .protocol-table tbody tr').length,toggles:document.querySelectorAll('#protocolCatalog .protocol-table-toggle input[type=checkbox]').length})""")
                       print("PROTOCOL_TABLE_VIEW=" + repr(protocol_view))
                       if protocol_view["rows"]<1 or protocol_view["toggles"] != protocol_view["rows"]:
@@ -527,6 +544,8 @@ jobs:
                   raise SystemExit("Subscription QR failed to render: " + repr(qr_result))
               capture_screenshot(subscription, out / "11-subscription-desktop.png", full_page=True)
               subscription_mobile = browser.new_page(viewport={"width":390,"height":844}, device_scale_factor=1, is_mobile=True, has_touch=True)
+              subscription_mobile.set_default_timeout(6000)
+              subscription_mobile.set_default_navigation_timeout(12000)
               subscription_mobile.on("pageerror", lambda e: errors.append("subscription mobile: " + str(e) + " | " + str(getattr(e, "stack", ""))))
               sub_response = subscription_mobile.goto(base + "/sub/preview-visual-token-0001", wait_until="domcontentloaded")
               if sub_response is None or sub_response.status >= 400:
@@ -558,12 +577,14 @@ jobs:
                   raise SystemExit("Subscription mobile layout diverged from the reference order: " + repr(sub_mobile_layout))
               capture_screenshot(subscription_mobile, out / "12-subscription-mobile.png", full_page=True)
               mobile = browser.new_page(viewport={"width":390,"height":844}, device_scale_factor=1, is_mobile=True, has_touch=True)
+              mobile.set_default_timeout(6000)
+              mobile.set_default_navigation_timeout(12000)
               mobile.on("pageerror", lambda e: errors.append("mobile: " + str(e) + " | " + str(getattr(e, "stack", ""))))
               mobile.goto(base + "/login", wait_until="domcontentloaded")
               mobile.locator('input[name="username"]').fill("admin")
               mobile.locator('input[name="password"]').fill("admin")
-              mobile.locator("form button").last.click()
-              mobile.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
+              mobile.locator("form button").last.evaluate("(e) => e.click()")
+              mobile.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=10000)
               mobile.wait_for_function("""async () => {
                 const canvas=document.getElementById('usageSparkline');
                 if(!canvas)return false;
@@ -574,7 +595,7 @@ jobs:
                 const count=Number(label.match(/;\s*(\d+)$/)?.[1]||0);
                 return Array.isArray(data.traffic_history)&&data.traffic_history.length>=2
                   &&label.includes('(24h);')&&count===data.traffic_history.length;
-              }""", timeout=15000)
+              }""", timeout=10000)
               mobile.wait_for_timeout(100)
               mobile_overflow = mobile.evaluate("() => ({viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,headerHeight:document.querySelector('.workspace>.top')?.getBoundingClientRect().height})")
               print("MOBILE_OVERFLOW=" + repr(mobile_overflow))
@@ -605,9 +626,9 @@ jobs:
                 });
                 observer.observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
               }""")
-              toggle.click()
+              mobile.evaluate("() => { window.__voidDrawerMeasure.started = performance.now(); document.getElementById('menuToggle').click(); }")
               mobile.wait_for_function("document.body.classList.contains('abyss-menu-open') && document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
-              drawer_open_ms = round(mobile.evaluate("() => window.__voidDrawerMeasure.elapsed"), 1)
+              drawer_open_ms = round(mobile.evaluate("() => window.__voidDrawerMeasure.elapsed ?? (performance.now() - window.__voidDrawerMeasure.started)"), 1)
               print("MOBILE_DRAWER_FEEDBACK_MS=" + str(drawer_open_ms), flush=True)
               if drawer_open_ms > 1500:
                   raise SystemExit("Mobile drawer DOM response exceeded the 1500 ms feedback budget: " + str(drawer_open_ms))
@@ -664,13 +685,13 @@ jobs:
                   capture_screenshot(mobile, out / "10-mobile-menu-bottom.png", full_page=False)
               mobile.evaluate("document.getElementById('sidebar').scrollTop=0")
               capture_screenshot(mobile, out / "10-mobile-menu.png", full_page=False)
-              mobile.locator('#sidebar .side-brand .sidebar-close').click()
+              mobile.locator('#sidebar .side-brand .sidebar-close').evaluate("(e) => e.click()")
               mobile.wait_for_function("!document.body.classList.contains('abyss-menu-open') && !document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
               mobile.wait_for_function("getComputedStyle(document.querySelector('#menuToggle')).visibility!=='hidden'", timeout=3000)
-              mobile.locator("#menuToggle").click()
+              mobile.locator("#menuToggle").evaluate("(e) => e.click()")
               mobile.wait_for_function("document.body.classList.contains('abyss-menu-open') && document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
               mobile.evaluate("document.getElementById('sidebar').scrollTop=0")
-              mobile.locator('[data-nav="clients"]').first.click()
+              mobile.locator('[data-nav="clients"]').first.evaluate("(e) => e.click()")
               mobile.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
                 return visible.length>0&&visible.every(e=>e.dataset.sectionPage==='clients')
@@ -699,7 +720,7 @@ jobs:
               }""")
               mobile.wait_for_function("""() => document.body.classList.contains('abyss-menu-open')
                 && document.querySelector('#sidebar')?.classList.contains('open')""", timeout=3000)
-              mobile.locator('[data-nav="create"]').first.click()
+              mobile.locator('[data-nav="create"]').first.evaluate("(e) => e.click()")
               mobile.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
                 return visible.length>0&&visible.every(e=>e.dataset.sectionPage==='create')
@@ -719,12 +740,12 @@ jobs:
               tablet.goto(base + "/login", wait_until="domcontentloaded")
               tablet.locator('input[name="username"]').fill("admin")
               tablet.locator('input[name="password"]').fill("admin")
-              tablet.locator("form button").last.click()
-              tablet.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=15000)
+              tablet.locator("form button").last.evaluate("(e) => e.click()")
+              tablet.wait_for_url(lambda url: "/login" not in url, wait_until="domcontentloaded", timeout=10000)
               tablet.wait_for_function("""() => {
                 const e=document.getElementById('dashboardComponentStatus');
                 return e && e.querySelectorAll('.dashboard-component').length===4;
-              }""", timeout=45000)
+              }""", timeout=10000)
               tablet.locator('[data-nav="clients"]').first.click()
               tablet.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);

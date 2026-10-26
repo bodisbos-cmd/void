@@ -16,6 +16,8 @@ from starlette.datastructures import MutableHeaders
 from starlette.middleware.sessions import SessionMiddleware
 
 APP_NAME="Void"
+# Short location marker shown in client names. Override when deploying outside the Netherlands.
+ABYSS_LOCATION_FLAG=os.getenv("ABYSS_LOCATION_FLAG","🇳🇱").strip() or "🌐"
 PROFILES=[
     {"key":"ws","label":"WebSocket","network":"ws","path":"/ws","port":10001,"mode":None},
     {"key":"httpupgrade","label":"HTTPUpgrade","network":"httpupgrade","path":"/httpupgrade","port":10002,"mode":None},
@@ -284,7 +286,12 @@ def make_xray_config():
         stream={"network":network,"security":security}
         transport_settings={"ws":"wsSettings","httpupgrade":"httpupgradeSettings","xhttp":"xhttpSettings"}
         if network in transport_settings:
-            stream[transport_settings[network]]={"path":path,**({"mode":profile["mode"]} if profile["mode"] else {})}
+            transport_config={"path":path,**({"mode":profile["mode"]} if profile["mode"] else {})}
+            # Early data is a WebSocket feature: pair the client's ?ed=2560 path
+            # with the matching inbound limit/header so connection setup can save a round trip.
+            if network=="ws" and profile.get("protocol","vless") in {"vless","trojan","vmess"}:
+                transport_config.update({"maxEarlyData":2560,"earlyDataHeaderName":"Sec-WebSocket-Protocol"})
+            stream[transport_settings[network]]=transport_config
         elif network!="raw":
             raise ValueError("Unsupported Xray network: "+network)
         if security=="reality":
@@ -2337,7 +2344,6 @@ html body main.app-shell>aside.sidebar>.abyss-utility-links{
  html body main.app-shell>.workspace>#dashboardUsageCard>.stats>.card .num{font-size:21px!important}
  html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:112px!important;max-height:112px!important;margin-top:3px!important}
  html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:4px!important}
- html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{display:none!important}
  html body main.app-shell>.workspace>#panelHealthCard #dashboardComponentStatus>*{min-height:31px!important;padding:5px 9px!important}
  html body main.app-shell>.workspace>#dashboardQuickCard{min-height:0!important}
  html body main.app-shell>.workspace>#dashboardQuickCard .quick-detail-row{padding:7px 9px!important}
@@ -2866,7 +2872,7 @@ html body main.app-shell>.workspace>#overviewStats>.card:nth-child(4):before{
 html body main.app-shell>.workspace>#dashboardUsageCard .stats{display:none!important}
 html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{margin-top:12px!important}
 html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{margin-top:6px!important}
- @media(min-width:561px){html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:72px!important;max-height:72px!important;margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartNote{display:none!important}}
+ @media(min-width:561px){html body main.app-shell>.workspace>#dashboardUsageCard #usageSparkline{height:72px!important;max-height:72px!important;margin-top:0!important}html body main.app-shell>.workspace>#dashboardUsageCard #chartLegend{margin-top:0!important}}
 /* Reference match pass: tighten the header-to-metrics gap and deepen the raised black-glass finish. */
 @media(min-width:851px){
  html body main.app-shell>.workspace{padding-top:34px!important}
@@ -3658,7 +3664,10 @@ def make_subscription_links(client, r):
         proto=profile.get("protocol","vless")
         label=profile.get("subscription_label",profile["key"].replace("_","-"))
         uid=client["client_uuid"]
-        title=quote("abysstunnel-"+client["name"]+"-"+label)
+        # Client apps already display protocol/transport below each entry. Keep the visible
+        # name clean and append only the service brand plus deployment-location flag.
+        display_name="abysstunnel "+ABYSS_LOCATION_FLAG
+        title=quote(display_name)
         if profile.get("security")=="reality":
             reality=get_reality_tcp_settings()
             direct_host=profile["tcp_proxy_domain"]
@@ -3669,9 +3678,9 @@ def make_subscription_links(client, r):
             links.append({"key":profile["key"],"label":profile["label"],"url":url})
             continue
         client_path=path
-        # Xray HTTPUpgrade supports Early Data through a client-side `ed` path query.
-        # The server still matches the path component; the first payload can avoid an extra round trip.
-        if network in {"ws","httpupgrade"}: client_path+="?ed=2560"
+        # Xray WebSocket Early Data requires matching server-side maxEarlyData/header settings.
+        # Do not add the WebSocket-only query parameter to HTTPUpgrade profiles.
+        if network=="ws" and proto in {"vless","trojan","vmess"}: client_path+="?ed=2560"
         common=f"type={network}&security=tls&sni={host}&fp=chrome&host={host}&path={quote(client_path,safe='')}"
         if mode: common+=f"&mode={quote(mode,safe='')}"
         if proto=="vless":
@@ -3679,7 +3688,7 @@ def make_subscription_links(client, r):
         elif proto=="trojan":
             url=f"trojan://{uid}@{host}:443?{common}#{title}"
         elif proto=="vmess":
-            vmess={"v":"2","ps":"abysstunnel-"+client["name"]+"-"+label,"add":host,"port":"443","id":uid,"aid":"0","scy":"auto","net":"ws","type":"none","host":host,"path":path,"tls":"tls","sni":host,"alpn":""}
+            vmess={"v":"2","ps":display_name,"add":host,"port":"443","id":uid,"aid":"0","scy":"auto","net":"ws","type":"none","host":host,"path":client_path,"tls":"tls","sni":host,"alpn":""}
             url="vmess://"+base64.b64encode(json.dumps(vmess,separators=(",",":")).encode()).decode()
         elif proto=="shadowsocks":
             ss_password=base64.b64encode(hashlib.sha256(uid.encode()).digest()[:16]).decode()
