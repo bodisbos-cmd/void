@@ -12,7 +12,7 @@
 ## بهینه‌سازی جدید کانفیگ‌ها
 
 - نام import همهٔ پروفایل‌ها اکنون فقط `abysstunnel 🇳🇱` است؛ نوع پروتکل و نام کاربر به نام کانفیگ اضافه نمی‌شود. پرچم از `ABYSS_LOCATION_FLAG` می‌آید.
-- WebSocket اکنون در inbound سرور `maxEarlyData=2560` و `earlyDataHeaderName=Sec-WebSocket-Protocol` دارد تا با `?ed=2560` سمت کلاینت مطابقت داشته باشد. پارامتر `ed` از لینک‌های HTTPUpgrade حذف شده چون این بهینه‌سازی مختص WebSocket است.
+- پروفایل‌های VLESS/Trojan/VMess روی WebSocket در inbound سرور `maxEarlyData=2560` و `earlyDataHeaderName=Sec-WebSocket-Protocol` دارند تا با `?ed=2560` سمت کلاینت مطابقت داشته باشند. پارامتر `ed` از لینک‌های HTTPUpgrade حذف شده چون این بهینه‌سازی مختص WebSocket است؛ Shadowsocks/v2ray-plugin نیز عمداً از early data استفاده نمی‌کند.
 - این تغییر عمدتاً برای کاهش یک مرحله از برقراری اتصال است؛ زمان دانلود و آپلود را به‌تنهایی افزایش نمی‌دهد.
 
 ## تغییرات کم‌خطر در کد
