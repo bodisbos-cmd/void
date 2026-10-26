@@ -736,7 +736,11 @@ def install_extended(app, namespace):
         expires=client.get("expires_at"); expired=bool(expires and expires<=_utc())
         quota=client.get("quota_bytes"); used=int(client.get("used_bytes") or 0)
         remaining=None if quota is None else max(0,int(quota)-used)
-        selected=[x for x in p.PROFILES if flags[x["key"]]]
+        # Only probe profiles actually present in this client’s subscription. This avoids
+        # spending time on unrelated/disabled config variants and keeps the results aligned
+        # with the cards the user can open.
+        subscription_keys={item["key"] for item in links}
+        selected=[x for x in p.PROFILES if flags[x["key"]] and x["key"] in subscription_keys]
         route_checks=await asyncio.gather(*(asyncio.to_thread(_probe_profile,profile) for profile in selected))
         return {"ok":not expired and (remaining is None or remaining>0) and bool(links),
           "service_enabled":bool(client["enabled"]),"expiry_ok":not expired,"quota_ok":remaining is None or remaining>0,
