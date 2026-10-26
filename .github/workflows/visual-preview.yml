@@ -624,7 +624,7 @@ jobs:
                 });
                 observer.observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
               }""")
-              toggle.evaluate("(e) => e.click()")
+              mobile.evaluate("() => { window.__voidDrawerMeasure.started = performance.now(); document.getElementById('menuToggle').click(); }")
               mobile.wait_for_function("document.body.classList.contains('abyss-menu-open') && document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
               drawer_open_ms = round(mobile.evaluate("() => window.__voidDrawerMeasure.elapsed"), 1)
               print("MOBILE_DRAWER_FEEDBACK_MS=" + str(drawer_open_ms), flush=True)
