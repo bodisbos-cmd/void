@@ -294,6 +294,14 @@ def test_system_metrics_exposes_traffic_history_for_dashboard_chart(client):
     assert {"at", "recorded_traffic_bytes"} <= set(history[-1])
 
 
+def test_dashboard_usage_chart_note_is_not_hidden(client):
+    admin_client(client)
+    response = client.get("/")
+    assert response.status_code == 200
+    assert 'id="chartNote"' in response.text
+    assert "#dashboardUsageCard #chartNote{display:none!important}" not in response.text
+
+
 def test_create_pause_subscription_and_revoke(client):
     csrf = admin_client(client)
     headers = {"X-CSRF-Token": csrf}
