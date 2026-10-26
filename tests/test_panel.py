@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import html
+import json
 import os
 import re
 import shutil
@@ -8,6 +9,7 @@ import sqlite3
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 # Ensure the repository root is importable regardless of pytest's import mode.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -947,8 +949,22 @@ def test_profile_settings_update_xray_and_subscription(client):
     raw = client.get(info["url"].replace("https://testserver", "http://testserver"))
     links = base64.b64decode(raw.text).decode().splitlines()
     assert len(links) == 7
-    assert not any("#abysstunnel-Profile%20test-ws" in line for line in links)
+    # Config names must be stable across protocols: only the AbyssTunnel ID and location flag.
+    names = []
+    for line in links:
+        if line.startswith("vmess://"):
+            names.append(json.loads(base64.b64decode(line[len("vmess://"):]))["ps"])
+        else:
+            names.append(unquote(urlsplit(line).fragment))
+    assert names == ["abysstunnel 🇳🇱"] * len(links)
+    assert not any("Profile%20test" in line or "Profile test" in line for line in links)
     assert any("mode=auto" in line for line in links)
+    query_by_scheme = [urlsplit(line) for line in links if not line.startswith("vmess://")]
+    httpupgrade_paths = [u for u in query_by_scheme if "type=httpupgrade" in u.query]
+    assert httpupgrade_paths and all("ed=2560" not in u.query and "ed%3D2560" not in u.query for u in httpupgrade_paths)
+    ws = next(item for item in panel.make_xray_config()["inbounds"] if item["tag"] == "in-ws")
+    assert ws["streamSettings"]["wsSettings"]["maxEarlyData"] == 2560
+    assert ws["streamSettings"]["wsSettings"]["earlyDataHeaderName"] == "Sec-WebSocket-Protocol"
 
     rejected = client.patch(
         "/api/settings/profiles",
