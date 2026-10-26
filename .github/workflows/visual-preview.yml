@@ -15,7 +15,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -101,6 +101,11 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+          import faulthandler, sys
+          # Emit the active Python/Playwright stack periodically so a future stall is diagnosable
+          # from Actions logs instead of appearing as an unexplained in-progress job.
+          faulthandler.enable(file=sys.stderr, all_threads=True)
+          faulthandler.dump_traceback_later(60, repeat=True, file=sys.stderr)
           base = "http://127.0.0.1:18080"
           out = Path("visual-preview")
           import time
