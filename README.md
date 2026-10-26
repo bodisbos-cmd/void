@@ -4,6 +4,8 @@
 
 <img src="docs/assets/quick-connect.svg" alt="سه نماد تصویری برای مراحل اتصال؛ توضیح هر مرحله در متن پایین آمده است" width="100%">
 
+<p dir="rtl" align="center">۱. لینک اشتراک را بگیر　←　۲. لینک را داخل برنامه وارد کن　←　۳. اتصال را بزن</p>
+
 [![Tests](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/tests.yml?branch=main&label=%D8%AA%D8%B3%D8%AA%E2%80%8C%D9%87%D8%A7&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/tests.yml)
 [![Security](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/security.yml?branch=main&label=%D8%A7%D9%85%D9%86%DB%8C%D8%AA&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/security.yml)
 [![Visual preview](https://img.shields.io/github/actions/workflow/status/bodisbos-cmd/void/visual-preview.yml?branch=main&label=%D9%BE%DB%8C%D8%B4%E2%80%8C%D9%86%D9%85%D8%A7%DB%8C%D8%B4%20%D8%A8%D8%B5%D8%B1%DB%8C&style=for-the-badge&labelColor=09090b&color=9da0a7)](https://github.com/bodisbos-cmd/void/actions/workflows/visual-preview.yml)
@@ -13,7 +15,7 @@
 
 **پنل فارسی مدیریت سرویس‌های Xray با رابط واکنش‌گرا، اشتراک اختصاصی، سهمیه و پایش سرویس**
 
-[شروع سریع](#شروع-سریع) · [امکانات](#امکانات) · [نقشهٔ معماری](#نقشهٔ-معماری) · [راهنمای سرعت](docs/PERFORMANCE_FA.md) · [راهنمای نصب](docs/DEPLOY_FA.md) · [ماتریس امکانات](docs/FEATURE_MATRIX_FA.md)
+[شروع سریع](#شروع-سریع) · [راهنمای اتصال کاربران](docs/CONNECT_FA.md) · [راهنمای نصب ساده](docs/DEPLOY_FA.md) · [امکانات](#امکانات) · [نقشهٔ معماری](#نقشهٔ-معماری) · [راهنمای سرعت](docs/PERFORMANCE_FA.md) · [ماتریس امکانات](docs/FEATURE_MATRIX_FA.md)
 
 </div>
 
@@ -125,7 +127,7 @@ flowchart LR
 
 **اگر فقط می‌خواهی وصل شوی:** پنل را نصب نکن. از کسی که سرویس را در اختیارت گذاشته، لینک اشتراک بگیر؛ یک برنامهٔ سازگار نصب کن؛ لینک را در برنامه وارد کن و روی اتصال بزن. راهنمای تصویری لازم نیست؛ مراحل کامل و لینک دانلود برنامه‌ها در [راهنمای ساده اتصال](docs/CONNECT_FA.md) است.
 
-**اگر می‌خواهی خود پنل را روی Railway اجرا کنی:** این کار مخصوص مدیر سرور است. Railway باید کد پروژه را از GitHub دریافت کند، آن را بسازد و اجرا کند. برای راه‌اندازی مرحله‌به‌مرحله، [راهنمای نصب ساده‌شده](docs/DEPLOY_FA.md) را ببین.
+**اگر می‌خواهی خود پنل را روی Railway اجرا کنی:** این کار مخصوص مدیر سرور است. Railway باید کد پروژه را از GitHub دریافت کند، آن را بسازد و اجرا کند. برای راه‌اندازی مرحله‌به‌مرحله، [راهنمای نصب ساده‌شده](docs/DEPLOY_FA.md) را ببین. در آن، معنی هر گزینه را هم توضیح داده‌ام.
 
 </div>
 
