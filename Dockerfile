@@ -13,7 +13,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # than the image layer. Rebuilds can reuse them without inflating the image.
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
-    apt-get update \
+    rm -f /etc/apt/apt.conf.d/docker-clean \
+ && apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl nginx gosu \
  && rm -f /etc/nginx/sites-enabled/default
 
