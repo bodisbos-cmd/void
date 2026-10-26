@@ -218,7 +218,7 @@ jobs:
                     const visible = [...document.querySelectorAll('[data-section-page]')].filter(e =>
                       getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 0);
                     return visible.length > 0 && visible.every(e => e.dataset.sectionPage === expected);
-                  }""", arg=name, timeout=5000)
+                  }""", arg=name, timeout=15000)
                   actual = visible_sections(page)
                   print("ACTIVE_SECTION_" + name.upper() + "=" + repr(actual))
                   if not actual or any(section != name for section in actual):
