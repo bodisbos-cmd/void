@@ -97,6 +97,7 @@ jobs:
         run: |
           mkdir -p visual-preview
           python - <<'PY'
+          import base64
           from pathlib import Path
           from playwright.sync_api import sync_playwright
           base = "http://127.0.0.1:18080"
@@ -106,9 +107,29 @@ jobs:
               started = time.monotonic()
               name = Path(destination).name
               print("SCREENSHOT_START=" + name, flush=True)
-              # Keep capture deterministic without dispatching visibility events into the app.
-              # A hard timeout prevents a single animated canvas from stalling the whole visual suite.
-              target.screenshot(path=str(destination), full_page=full_page, animations="disabled", timeout=20000)
+              # Disable decorative motion without dispatching visibility events into the app.
+              # Capture through Chrome DevTools to avoid Playwright's font/animation screenshot waits,
+              # which stalled on the dense protocols screen in the hosted CI browser.
+              target.evaluate("""() => {
+                if (!document.getElementById('void-visual-capture-style')) {
+                  const style=document.createElement('style');
+                  style.id='void-visual-capture-style';
+                  style.textContent='*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;caret-color:transparent!important}';
+                  document.head.appendChild(style);
+                }
+              }""")
+              cdp = target.context.new_cdp_session(target)
+              try:
+                cdp.send("Page.enable")
+                options = {"format": "png", "fromSurface": True, "captureBeyondViewport": bool(full_page)}
+                if full_page:
+                  metrics = cdp.send("Page.getLayoutMetrics")
+                  size = metrics.get("cssContentSize") or metrics.get("contentSize")
+                  options["clip"] = {"x": 0, "y": 0, "width": size["width"], "height": size["height"], "scale": 1}
+                shot = cdp.send("Page.captureScreenshot", options)
+                Path(destination).write_bytes(base64.b64decode(shot["data"]))
+              finally:
+                cdp.detach()
               print("SCREENSHOT_DONE=" + name + " duration_s=" + str(round(time.monotonic() - started, 2)), flush=True)
           with sync_playwright() as p:
               browser = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist", "--enable-unsafe-swiftshader"])
