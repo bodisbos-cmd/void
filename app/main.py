@@ -286,7 +286,12 @@ def make_xray_config():
         stream={"network":network,"security":security}
         transport_settings={"ws":"wsSettings","httpupgrade":"httpupgradeSettings","xhttp":"xhttpSettings"}
         if network in transport_settings:
-            stream[transport_settings[network]]={"path":path,**({"mode":profile["mode"]} if profile["mode"] else {})}
+            transport_config={"path":path,**({"mode":profile["mode"]} if profile["mode"] else {})}
+            # Early data is a WebSocket feature: pair the client's ?ed=2560 path
+            # with the matching inbound limit/header so connection setup can save a round trip.
+            if network=="ws":
+                transport_config.update({"maxEarlyData":2560,"earlyDataHeaderName":"Sec-WebSocket-Protocol"})
+            stream[transport_settings[network]]=transport_config
         elif network!="raw":
             raise ValueError("Unsupported Xray network: "+network)
         if security=="reality":
@@ -3661,7 +3666,7 @@ def make_subscription_links(client, r):
         uid=client["client_uuid"]
         # Client apps already display protocol/transport below each entry. Keep the visible
         # name clean and append only the service brand plus deployment-location flag.
-        display_name="abysstunnel-"+client["name"]+" "+ABYSS_LOCATION_FLAG
+        display_name="abysstunnel "+ABYSS_LOCATION_FLAG
         title=quote(display_name)
         if profile.get("security")=="reality":
             reality=get_reality_tcp_settings()
@@ -3673,9 +3678,9 @@ def make_subscription_links(client, r):
             links.append({"key":profile["key"],"label":profile["label"],"url":url})
             continue
         client_path=path
-        # Xray HTTPUpgrade supports Early Data through a client-side `ed` path query.
-        # The server still matches the path component; the first payload can avoid an extra round trip.
-        if network in {"ws","httpupgrade"}: client_path+="?ed=2560"
+        # Xray WebSocket Early Data requires matching server-side maxEarlyData/header settings.
+        # Do not add the WebSocket-only query parameter to HTTPUpgrade profiles.
+        if network=="ws": client_path+="?ed=2560"
         common=f"type={network}&security=tls&sni={host}&fp=chrome&host={host}&path={quote(client_path,safe='')}"
         if mode: common+=f"&mode={quote(mode,safe='')}"
         if proto=="vless":
@@ -3683,7 +3688,7 @@ def make_subscription_links(client, r):
         elif proto=="trojan":
             url=f"trojan://{uid}@{host}:443?{common}#{title}"
         elif proto=="vmess":
-            vmess={"v":"2","ps":display_name,"add":host,"port":"443","id":uid,"aid":"0","scy":"auto","net":"ws","type":"none","host":host,"path":path,"tls":"tls","sni":host,"alpn":""}
+            vmess={"v":"2","ps":display_name,"add":host,"port":"443","id":uid,"aid":"0","scy":"auto","net":"ws","type":"none","host":host,"path":client_path,"tls":"tls","sni":host,"alpn":""}
             url="vmess://"+base64.b64encode(json.dumps(vmess,separators=(",",":")).encode()).decode()
         elif proto=="shadowsocks":
             ss_password=base64.b64encode(hashlib.sha256(uid.encode()).digest()[:16]).decode()
