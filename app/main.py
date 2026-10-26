@@ -289,7 +289,7 @@ def make_xray_config():
             transport_config={"path":path,**({"mode":profile["mode"]} if profile["mode"] else {})}
             # Early data is a WebSocket feature: pair the client's ?ed=2560 path
             # with the matching inbound limit/header so connection setup can save a round trip.
-            if network=="ws":
+            if network=="ws" and profile.get("protocol","vless") in {"vless","trojan","vmess"}:
                 transport_config.update({"maxEarlyData":2560,"earlyDataHeaderName":"Sec-WebSocket-Protocol"})
             stream[transport_settings[network]]=transport_config
         elif network!="raw":
@@ -3680,7 +3680,7 @@ def make_subscription_links(client, r):
         client_path=path
         # Xray WebSocket Early Data requires matching server-side maxEarlyData/header settings.
         # Do not add the WebSocket-only query parameter to HTTPUpgrade profiles.
-        if network=="ws": client_path+="?ed=2560"
+        if network=="ws" and proto in {"vless","trojan","vmess"}: client_path+="?ed=2560"
         common=f"type={network}&security=tls&sni={host}&fp=chrome&host={host}&path={quote(client_path,safe='')}"
         if mode: common+=f"&mode={quote(mode,safe='')}"
         if proto=="vless":
