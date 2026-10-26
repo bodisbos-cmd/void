@@ -1,10 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="180" viewBox="0 0 1200 180" role="img" aria-labelledby="title desc">
-<title id="title">Void — اتصال ساده</title><desc id="desc">نوار تیره با ذرات نقره‌ای متحرک و مراحل ساده اتصال.</desc>
-<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#030303"/><stop offset="1" stop-color="#171719"/></linearGradient><linearGradient id="shine"><stop stop-color="#88888f" stop-opacity="0"/><stop offset=".5" stop-color="#eeeeF2" stop-opacity=".8"/><stop offset="1" stop-color="#88888f" stop-opacity="0"/></linearGradient></defs>
-<rect width="1200" height="180" rx="22" fill="url(#bg)"/>
-<g fill="none" stroke="url(#shine)" stroke-width="1.2" opacity=".5"><path d="M-100 150 L340 -30"><animateTransform attributeName="transform" type="translate" values="0 0; 90 0; 0 0" dur="9s" repeatCount="indefinite"/></path><path d="M400 200 L850 -20"><animateTransform attributeName="transform" type="translate" values="0 0; -80 0; 0 0" dur="12s" repeatCount="indefinite"/></path><path d="M850 200 L1280 0"><animateTransform attributeName="transform" type="translate" values="0 0; -60 0; 0 0" dur="10s" repeatCount="indefinite"/></path></g>
-<g fill="#e5e5ea"><circle cx="110" cy="38" r="1.5"><animate attributeName="opacity" values=".2;1;.2" dur="3s" repeatCount="indefinite"/></circle><circle cx="340" cy="142" r="1.2"><animate attributeName="opacity" values=".8;.15;.8" dur="4s" repeatCount="indefinite"/></circle><circle cx="700" cy="36" r="1.4"><animate attributeName="opacity" values=".15;.9;.15" dur="3.6s" repeatCount="indefinite"/></circle><circle cx="1030" cy="135" r="1.3"><animate attributeName="opacity" values=".9;.2;.9" dur="4.5s" repeatCount="indefinite"/></circle></g>
-<g font-family="Vazirmatn,Tahoma,Arial,sans-serif" direction="rtl" unicode-bidi="plaintext"><text x="600" y="54" fill="#f0f0f2" font-size="25" font-weight="700" text-anchor="middle">شروع ساده با Void</text>
-<g transform="translate(255 86)"><rect width="210" height="54" rx="13" fill="#161618" stroke="#85858d" stroke-opacity=".6"/><circle cx="30" cy="27" r="15" fill="#d5d5dc" fill-opacity=".12" stroke="#c8c8cf"/><text x="30" y="32" fill="#f1f1f3" font-size="14" text-anchor="middle">۱</text><text x="128" y="32" fill="#e8e8eb" font-size="16" text-anchor="middle">لینک اشتراک</text></g>
-<g transform="translate(495 86)"><rect width="210" height="54" rx="13" fill="#161618" stroke="#85858d" stroke-opacity=".6"/><circle cx="30" cy="27" r="15" fill="#d5d5dc" fill-opacity=".12" stroke="#c8c8cf"/><text x="30" y="32" fill="#f1f1f3" font-size="14" text-anchor="middle">۲</text><text x="128" y="32" fill="#e8e8eb" font-size="16" text-anchor="middle">افزودن به برنامه</text></g>
-<g transform="translate(735 86)"><rect width="210" height="54" rx="13" fill="#161618" stroke="#85858d" stroke-opacity=".6"/><circle cx="30" cy="27" r="15" fill="#d5d5dc" fill-opacity=".12" stroke="#c8c8cf"/><text x="30" y="32" fill="#f1f1f3" font-size="14" text-anchor="middle">۳</text><text x="128" y="32" fill="#e8e8eb" font-size="16" text-anchor="middle">اتصال</text></g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="220" viewBox="0 0 1200 220" role="img" aria-label="سه مرحله اتصال">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#030303"/><stop offset="1" stop-color="#171719"/></linearGradient><linearGradient id="silver"><stop stop-color="#777780" stop-opacity=".1"/><stop offset=".5" stop-color="#eeeeF2" stop-opacity=".7"/><stop offset="1" stop-color="#777780" stop-opacity=".1"/></linearGradient></defs>
+<rect width="1200" height="220" rx="24" fill="url(#bg)"/>
+<g fill="none" stroke="url(#silver)" stroke-width="2"><path d="M365 110 H450"/><path d="M750 110 H835"/></g><g fill="#c8c8cf"><path d="M442 103 l10 7 -10 7z"/><path d="M827 103 l10 7 -10 7z"/></g>
+<g stroke="#bdbdc5" stroke-opacity=".7" fill="#151517">
+<rect x="90" y="40" width="275" height="140" rx="20"/><rect x="450" y="40" width="300" height="140" rx="20"/><rect x="835" y="40" width="275" height="140" rx="20"/>
+</g>
+<g stroke="#e1e1e7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<rect x="190" y="77" width="75" height="65" rx="9"/><path d="M208 96 H247 M208 109 H247 M208 122 H235"/><path d="M228 145 v10"/>
+<rect x="548" y="73" width="62" height="82" rx="11"/><path d="M563 88 h32 M563 100 h32 M563 112 h22"/><path d="M570 137 l9 8 17 -19"/>
+<circle cx="972" cy="109" r="34"/><path d="M955 109 l12 12 24 -27"/>
+</g>
+<g fill="#bfc0c8"><circle cx="130" cy="63" r="2"/><circle cx="1057" cy="151" r="2"/><circle cx="710" cy="62" r="1.5"/></g>
+</svg>
