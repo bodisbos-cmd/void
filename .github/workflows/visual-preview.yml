@@ -106,21 +106,9 @@ jobs:
               started = time.monotonic()
               name = Path(destination).name
               print("SCREENSHOT_START=" + name, flush=True)
-              # Freeze only the continuously repainting decorative canvas for a consistent capture;
-              # the last rendered frame stays visible and the live page resumes immediately after.
-              target.evaluate("""() => {
-                if (document.getElementById('abyssParticleCanvas')) {
-                  window.__voidVisualCapturePaused = true;
-                  document.dispatchEvent(new Event('visibilitychange'));
-                }
-              }""")
-              try:
-                target.screenshot(path=str(destination), full_page=full_page, animations="disabled", timeout=45000)
-              finally:
-                target.evaluate("""() => {
-                  window.__voidVisualCapturePaused = false;
-                  document.dispatchEvent(new Event('visibilitychange'));
-                }""")
+              # Keep capture deterministic without dispatching visibility events into the app.
+              # A hard timeout prevents a single animated canvas from stalling the whole visual suite.
+              target.screenshot(path=str(destination), full_page=full_page, animations="disabled", timeout=20000)
               print("SCREENSHOT_DONE=" + name + " duration_s=" + str(round(time.monotonic() - started, 2)), flush=True)
           with sync_playwright() as p:
               browser = p.chromium.launch(args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist", "--enable-unsafe-swiftshader"])
