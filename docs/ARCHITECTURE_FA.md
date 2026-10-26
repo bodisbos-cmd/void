@@ -21,9 +21,8 @@
 
 ## نمای کلی
 
-<div align="center"><img src="assets/deployment-map.svg" alt="نقشهٔ استقرار Void" width="100%"></div>
+نمودارهای زیر با متن قابل‌انتخاب نمایش داده می‌شوند تا نام بخش‌ها در تصویر ناخوانا یا بریده نشود.
 
-<div align="center"><img src="assets/connection-flow.svg" alt="مسیرهای اتصال پیش‌فرض و مستقیم اختیاری" width="100%"></div>
 
 ```mermaid
 flowchart TB
