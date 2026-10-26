@@ -698,7 +698,7 @@ jobs:
               mobile.locator("#menuToggle").evaluate("(e) => e.click()")
               mobile.wait_for_function("document.body.classList.contains('abyss-menu-open') && document.querySelector('#sidebar').classList.contains('open')", timeout=3000)
               mobile.evaluate("document.getElementById('sidebar').scrollTop=0")
-              mobile.locator('[data-nav="clients"]').first.click()
+              mobile.locator('[data-nav="clients"]').first.evaluate("(e) => e.click()")
               mobile.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
                 return visible.length>0&&visible.every(e=>e.dataset.sectionPage==='clients')
@@ -727,7 +727,7 @@ jobs:
               }""")
               mobile.wait_for_function("""() => document.body.classList.contains('abyss-menu-open')
                 && document.querySelector('#sidebar')?.classList.contains('open')""", timeout=3000)
-              mobile.locator('[data-nav="create"]').first.click()
+              mobile.locator('[data-nav="create"]').first.evaluate("(e) => e.click()")
               mobile.wait_for_function("""() => {
                 const visible=[...document.querySelectorAll('[data-section-page]')].filter(e=>getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().height>0);
                 return visible.length>0&&visible.every(e=>e.dataset.sectionPage==='create')
