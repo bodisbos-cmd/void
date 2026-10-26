@@ -3597,6 +3597,22 @@ html body .login-layout>.card{position:relative!important;overflow:hidden!import
 html body .login-layout>.card:before{content:"";position:absolute;top:0;right:12%;left:12%;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(236,238,244,.3),transparent)}
 @media(max-width:850px){html body .workspace #dashboardUsageCard{min-height:245px!important}html body .workspace #overviewStats>.card,html body .workspace #dashboardUsageCard,html body .workspace [data-section-page].card{backdrop-filter:none!important}}
 @media(min-width:1151px){html body main.app-shell>.workspace>#dashboardQuickCard{height:auto!important;min-height:250px!important;max-height:none!important;overflow:visible!important;padding:13px!important}html body main.app-shell>.workspace>#dashboardQuickDetails{gap:6px!important;margin-top:8px!important}html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-row{padding:7px 9px!important}html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-copy>.small{font-size:10px!important;line-height:1.3!important}html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-meta{font-size:9px!important;line-height:1.25!important}html body main.app-shell>.workspace>#dashboardQuickDetails .quick-detail-row>strong{font-size:11px!important}}
+@media(max-width:850px){
+ html body .workspace #overviewStats{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch!important}
+ html body .workspace #overviewStats>.card{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:7px!important;min-width:0!important;min-height:92px!important;padding:14px!important;overflow:hidden!important}
+ html body .workspace #overviewStats>.card>span{display:block!important;max-width:100%!important;line-height:1.5!important}
+ html body .workspace #overviewStats>.card .num{display:block!important;position:relative!important;z-index:1!important;max-width:100%!important;margin:0!important;padding:0!important;font-size:clamp(21px,5.8vw,27px)!important;line-height:1.25!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ html body .workspace #overviewStats>.card:after{opacity:.18!important}
+ html body .workspace #dashboardUsageCard{min-height:0!important}
+ html body .workspace #dashboardUsageCard>.stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ html body .workspace #dashboardUsageCard>.stats>.card{min-width:0!important;overflow:hidden!important}
+ html body .workspace #dashboardUsageCard>.stats>.card .num{font-size:clamp(15px,4vw,22px)!important;overflow-wrap:anywhere!important}
+}
+@media(max-width:380px){
+ html body .workspace #overviewStats{gap:8px!important}
+ html body .workspace #overviewStats>.card{padding:11px!important;min-height:84px!important}
+ html body .workspace #overviewStats>.card .num{font-size:21px!important}
+}
 @media(prefers-reduced-motion:reduce){html body,html body *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>"""
 
