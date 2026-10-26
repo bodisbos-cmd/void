@@ -665,6 +665,31 @@ def test_diagnostics_distinguish_local_route_from_real_tunnel(client):
         }
 
 
+def test_subscription_diagnostics_only_probe_profiles_in_that_subscription(client, monkeypatch):
+    csrf = admin_client(client)
+    headers = {"X-CSRF-Token": csrf}
+    created = client.post(
+        "/api/clients",
+        json={"name": "Single profile", "profiles": ["ws"]},
+        headers=headers,
+    )
+    assert created.status_code == 200, created.text
+    subscription = client.get(f"/api/clients/{created.json()['id']}/subscription")
+    token = subscription.json()["url"].rsplit("/sub/", 1)[1]
+    probed = []
+
+    def fake_probe(profile):
+        probed.append(profile["key"])
+        return {"key": profile["key"], "route_ok": True, "latency_ms": 1}
+
+    monkeypatch.setattr(extended, "_probe_profile", fake_probe)
+    response = client.get(f"/s/{token}/diagnostics")
+    assert response.status_code == 200, response.text
+    assert probed == ["ws"]
+    assert [item["key"] for item in response.json()["route_checks"]] == ["ws"]
+    assert response.json()["enabled_profiles"] == ["ws"]
+
+
 def _stub_profile_probe(monkeypatch, http_status):
     observed = {}
 
