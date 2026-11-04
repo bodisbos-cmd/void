@@ -1091,6 +1091,7 @@ def test_health_reports_running_process_with_unavailable_xray_api(client, monkey
 
 
 def test_health_details_reports_memory_metrics(client, monkeypatch):
+    monkeypatch.setattr(panel, "XRAY_BIN", "/missing/xray")
     monkeypatch.setattr(panel, "read_container_memory", lambda: {"used_bytes": 100, "limit_bytes": 200, "used_percent": 50.0, "xray_rss_bytes": 40})
     response = client.get("/health/details")
     assert response.status_code == 200
