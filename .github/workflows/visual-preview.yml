@@ -783,7 +783,7 @@ jobs:
               browser.close()
           PY
       - name: Publish real dashboard screenshot to README
-        if: success()
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           test -s visual-preview/02-dashboard-desktop.png
           mkdir -p docs/assets
