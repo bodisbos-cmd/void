@@ -11,6 +11,9 @@ def test_nginx_connection_capacity_is_bounded_and_above_default():
     assert "worker_connections 4096;" in config
     assert "keepalive_timeout 60s;" in config
     assert "keepalive_requests 10000;" in config
+    assert "access_log off;" in config
+    assert "map $http_upgrade $connection_upgrade" in config
+    assert "upstream panel_app" in config
     # Each request-based XHTTP inbound gets its own bounded upstream keepalive pool.
     for upstream in (
         "xray_xhttp_auto",
@@ -37,6 +40,8 @@ def test_nginx_xhttp_routes_use_matching_upstreams():
         assert f"location ^~ {route}" in config
         assert f"proxy_pass http://{upstream};" in config
     assert config.count("proxy_request_buffering off;") >= 6
+    assert config.count("proxy_set_header Connection $connection_upgrade;") == 7
+    assert "proxy_pass http://panel_app;" in config
     assert config.count('proxy_set_header Connection "";') >= 6
 
 
