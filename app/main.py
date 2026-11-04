@@ -1,5 +1,5 @@
 from __future__ import annotations
-import asyncio, base64, hashlib, hmac, io, json, logging, os, secrets, shutil, sqlite3, subprocess, time, uuid
+import asyncio, base64, hashlib, hmac, io, json, logging, os, secrets, shutil, socket, sqlite3, subprocess, time, uuid
 from contextlib import asynccontextmanager, contextmanager
 from datetime import datetime, timezone, timedelta
 from html import escape as html_escape
@@ -86,6 +86,8 @@ def inject_support_links(page):
 
 LOG=logging.getLogger("void"); logging.basicConfig(level=os.getenv("LOG_LEVEL","INFO").upper())
 xray_proc=None; xray_lock=asyncio.Lock(); restore_lock=asyncio.Lock()
+_XRAY_RESTART_FAILURES=0
+_XRAY_NEXT_RESTART_AT=0.0
 
 def utc_now(): return datetime.now(timezone.utc).isoformat(timespec="seconds")
 @contextmanager
@@ -319,19 +321,56 @@ def validate_and_write_xray():
     if Path(XRAY_BIN).exists():
         r=subprocess.run([XRAY_BIN,"run","-test","-config",str(XRAY_CONFIG)],capture_output=True,text=True,timeout=15)
         if r.returncode: raise RuntimeError("Xray configuration test failed: "+(r.stderr or r.stdout)[-1000:])
+def xray_api_ready(timeout=0.5):
+    try:
+        with socket.create_connection(("127.0.0.1",10085),timeout=timeout): return True
+    except OSError:
+        return False
+
+
+def read_container_memory():
+    """Return cgroup memory usage and Xray RSS when the container exposes them."""
+    def read_value(paths):
+        for path in paths:
+            try:
+                value=Path(path).read_text(encoding="ascii").strip()
+                if value and value != "max": return int(value)
+            except (OSError,ValueError):
+                continue
+        return None
+    used=read_value(("/sys/fs/cgroup/memory.current","/sys/fs/cgroup/memory/memory.usage_in_bytes"))
+    limit=read_value(("/sys/fs/cgroup/memory.max","/sys/fs/cgroup/memory/memory.limit_in_bytes"))
+    if limit is not None and limit >= (1<<60): limit=None
+    rss=0
+    for status in Path("/proc").glob("[0-9]*/status"):
+        try:
+            lines=status.read_text(encoding="ascii",errors="ignore").splitlines()
+            if not lines or not lines[0].startswith("Name:") or lines[0].split(":",1)[1].strip()!="xray": continue
+            for line in lines:
+                if line.startswith("VmRSS:"):
+                    rss=max(rss,int(line.split()[1])*1024); break
+        except (OSError,ValueError,IndexError):
+            continue
+    percent=round(used*100/limit,1) if used is not None and limit else None
+    return {"used_bytes":used,"limit_bytes":limit,"used_percent":percent,"xray_rss_bytes":rss}
+
+
 async def start_xray():
-    global xray_proc
+    global xray_proc, _XRAY_RESTART_FAILURES, _XRAY_NEXT_RESTART_AT
     async with xray_lock:
-        validate_and_write_xray()
+        await asyncio.to_thread(validate_and_write_xray)
         if not Path(XRAY_BIN).exists(): event("WARNING","Xray is not installed; control dashboard remains available."); return
         if xray_proc and xray_proc.poll() is None:
             # Flush counters before every Xray restart so client create/pause/edit
             # operations do not silently discard traffic accumulated since the last poll.
-            try: apply_xray_stats(read_xray_stats())
+            try:
+                pending=await asyncio.to_thread(read_xray_stats)
+                await asyncio.to_thread(apply_xray_stats,pending)
             except Exception as e: event("WARNING",f"Could not flush Xray usage before restart: {e}")
-            xray_proc.terminate()
-            try: xray_proc.wait(timeout=4)
-            except subprocess.TimeoutExpired: xray_proc.kill()
+            old_proc=xray_proc; old_proc.terminate()
+            try: await asyncio.to_thread(old_proc.wait,timeout=4)
+            except subprocess.TimeoutExpired:
+                old_proc.kill(); await asyncio.to_thread(old_proc.wait,timeout=2)
         err_path=DATA_DIR/"xray-stderr.log"
         try:
             # Keep the persistent volume bounded if a repeated upstream failure
@@ -347,8 +386,13 @@ async def start_xray():
         err=open(err_path,"ab")
         try: xray_proc=subprocess.Popen([XRAY_BIN,"run","-config",str(XRAY_CONFIG)],stdout=err,stderr=err)
         finally: err.close()
-        await asyncio.sleep(.25)
-        if xray_proc.poll() is not None: raise RuntimeError("Xray exited; inspect /data/xray-stderr.log")
+        for _ in range(15):
+            if xray_proc.poll() is not None: raise RuntimeError("Xray exited; inspect /data/xray-stderr.log")
+            if await asyncio.to_thread(xray_api_ready):
+                _XRAY_RESTART_FAILURES=0; _XRAY_NEXT_RESTART_AT=0.0
+                return
+            await asyncio.sleep(.2)
+        raise RuntimeError("Xray process started but its local API did not become ready")
 def read_xray_stats():
     if not Path(XRAY_BIN).exists(): return {}
     result=subprocess.run([XRAY_BIN,"api","statsquery","--server=127.0.0.1:10085","--pattern","user>>>client-","--reset"],capture_output=True,text=True,timeout=8)
@@ -445,8 +489,8 @@ async def enforce_client_limits():
     # Expiry and already-recorded quota enforcement must continue even while
     # Xray is down; only the live counter query depends on a running process.
     if Path(XRAY_BIN).exists() and xray_proc and xray_proc.poll() is None:
-        stats=read_xray_stats()
-        apply_xray_stats(stats)
+        stats=await asyncio.to_thread(read_xray_stats)
+        await asyncio.to_thread(apply_xray_stats,stats)
     try:
         record_client_usage_history()
     except Exception as e:
@@ -474,11 +518,28 @@ async def enforce_client_limits():
             event("ERROR",f"Could not apply automatically disabled clients to Xray: {e}")
 
 async def monitor():
+    global _XRAY_RESTART_FAILURES, _XRAY_NEXT_RESTART_AT
+    last_memory_warning=0.0
     while True:
         await asyncio.sleep(10)
-        if Path(XRAY_BIN).exists() and (xray_proc is None or xray_proc.poll() is not None):
-            try: event("WARNING","Restarting stopped Xray process."); await start_xray()
-            except Exception as e: event("ERROR",f"Xray recovery failed: {e}")
+        if Path(XRAY_BIN).exists():
+            stopped=xray_proc is None or xray_proc.poll() is not None
+            api_ready=False if stopped else await asyncio.to_thread(xray_api_ready)
+            if (stopped or not api_ready) and time.monotonic()>=_XRAY_NEXT_RESTART_AT:
+                try:
+                    event("WARNING","Xray watchdog is recovering an unavailable engine/API.")
+                    await start_xray()
+                except Exception as e:
+                    _XRAY_RESTART_FAILURES+=1
+                    delay=min(300,10*(2**min(_XRAY_RESTART_FAILURES-1,5)))
+                    _XRAY_NEXT_RESTART_AT=time.monotonic()+delay
+                    event("ERROR",f"Xray recovery failed; retry scheduled in {delay}s: {e}")
+        try:
+            memory=await asyncio.to_thread(read_container_memory)
+            if memory["used_percent"] is not None and memory["used_percent"]>=90 and time.monotonic()-last_memory_warning>=300:
+                last_memory_warning=time.monotonic()
+                event("WARNING",f"Container memory usage is high ({memory['used_percent']}%).")
+        except Exception as e: LOG.debug("Container memory metrics unavailable: %s",e)
         try: await enforce_client_limits()
         except Exception as e: event("ERROR",f"Client usage/expiry monitor failed: {e}")
 @asynccontextmanager
@@ -486,8 +547,19 @@ async def lifespan(app):
     init_db()
     try: await start_xray()
     except Exception as e: event("ERROR",f"Xray startup failed: {e}")
-    task=asyncio.create_task(monitor()); yield; task.cancel()
-    if xray_proc and xray_proc.poll() is None: xray_proc.terminate()
+    task=asyncio.create_task(monitor())
+    try:
+        yield
+    finally:
+        task.cancel()
+        try: await task
+        except asyncio.CancelledError: pass
+        if xray_proc and xray_proc.poll() is None and hasattr(xray_proc,"terminate"):
+            xray_proc.terminate()
+            if hasattr(xray_proc,"wait"):
+                try: await asyncio.to_thread(xray_proc.wait,timeout=4)
+                except subprocess.TimeoutExpired:
+                    xray_proc.kill(); await asyncio.to_thread(xray_proc.wait,timeout=2)
 app=FastAPI(title=APP_NAME,docs_url=None,redoc_url=None,openapi_url=None,lifespan=lifespan)
 
 @app.get("/brand-logo", include_in_schema=False)
@@ -3613,7 +3685,9 @@ async def reset_client_usage(cid:str,r:Request):
         row=c.execute("SELECT name FROM clients WHERE id=?",(cid,)).fetchone()
         if not row: raise HTTPException(404,"Client not found")
     if Path(XRAY_BIN).exists() and xray_proc and xray_proc.poll() is None:
-        try: apply_xray_stats(read_xray_stats())
+        try:
+            pending=await asyncio.to_thread(read_xray_stats)
+            await asyncio.to_thread(apply_xray_stats,pending)
         except Exception as e: raise HTTPException(503,"Could not synchronize live usage before resetting it") from e
     with db() as c: c.execute("UPDATE clients SET used_bytes=0 WHERE id=?",(cid,))
     event("INFO",f"Reset usage for client {row['name']!r} ({cid[:8]}).")
@@ -4154,14 +4228,24 @@ async def delete_reseller(rid:str,r:Request):
 
 @app.get("/health")
 async def health():
-    with db() as c:
-        c.execute("SELECT 1").fetchone()
-    # If Xray is part of this image, a healthy HTTP process alone is not
-    # sufficient: report unhealthy until the actual tunnel engine is running.
+    with db() as c: c.execute("SELECT 1").fetchone()
     xray_required=Path(XRAY_BIN).exists()
-    xray_running=bool(not xray_required or (xray_proc is not None and xray_proc.poll() is None))
-    payload={"ok":xray_running,"xray":"running" if xray_running else "stopped"}
-    return JSONResponse(payload,status_code=200 if xray_running else 503)
+    if not xray_required: xray_state="running"
+    elif xray_proc is None or xray_proc.poll() is not None: xray_state="stopped"
+    else: xray_state="running" if await asyncio.to_thread(xray_api_ready) else "api-unavailable"
+    healthy=xray_state=="running"
+    return JSONResponse({"ok":healthy,"xray":xray_state},status_code=200 if healthy else 503)
+
+
+@app.get("/health/details")
+async def health_details():
+    with db() as c: c.execute("SELECT 1").fetchone()
+    memory=await asyncio.to_thread(read_container_memory)
+    if not Path(XRAY_BIN).exists(): xray_state="not-installed"
+    elif xray_proc is None or xray_proc.poll() is not None: xray_state="stopped"
+    else: xray_state="running" if await asyncio.to_thread(xray_api_ready) else "api-unavailable"
+    healthy=xray_state in {"running","not-installed"}
+    return JSONResponse({"ok":healthy,"xray":xray_state,"memory":memory},status_code=200 if healthy else 503)
 @app.exception_handler(Exception)
 async def unhandled(r:Request,e:Exception):
     LOG.exception("Unhandled error: %s",e)

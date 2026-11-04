@@ -1077,6 +1077,34 @@ def test_health_endpoint(client):
     assert response.json() == {"ok": True, "xray": "running"}
 
 
+def test_health_reports_running_process_with_unavailable_xray_api(client, monkeypatch):
+    class RunningProcess:
+        def poll(self):
+            return None
+
+    monkeypatch.setattr(panel, "XRAY_BIN", "/bin/sh")
+    monkeypatch.setattr(panel, "xray_proc", RunningProcess())
+    monkeypatch.setattr(panel, "xray_api_ready", lambda: False)
+    response = client.get("/health")
+    assert response.status_code == 503
+    assert response.json() == {"ok": False, "xray": "api-unavailable"}
+
+
+def test_health_details_reports_memory_metrics(client, monkeypatch):
+    monkeypatch.setattr(panel, "XRAY_BIN", "/missing/xray")
+    monkeypatch.setattr(panel, "read_container_memory", lambda: {"used_bytes": 100, "limit_bytes": 200, "used_percent": 50.0, "xray_rss_bytes": 40})
+    response = client.get("/health/details")
+    assert response.status_code == 200
+    assert response.json()["memory"]["used_percent"] == 50.0
+
+
+def test_runtime_supervision_offloads_blocking_xray_work():
+    source = (Path(__file__).resolve().parents[1] / "app" / "main.py").read_text(encoding="utf-8")
+    assert "await asyncio.to_thread(validate_and_write_xray)" in source
+    assert "await asyncio.to_thread(read_xray_stats)" in source
+    assert "await asyncio.to_thread(apply_xray_stats,stats)" in source
+    assert "Xray watchdog is recovering an unavailable engine/API." in source
+
 def test_reseller_login_is_scoped_and_cannot_overallocate(client):
     csrf = admin_client(client)
     headers = {"X-CSRF-Token": csrf}
