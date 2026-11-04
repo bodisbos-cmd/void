@@ -11,8 +11,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # Keep package indexes and downloaded .deb files in BuildKit caches rather
 # than the image layer. Rebuilds can reuse them without inflating the image.
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+RUN --mount=type=cache,id=void-apt-archives,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,id=void-apt-lists,target=/var/lib/apt/lists,sharing=locked \
     rm -f /etc/apt/apt.conf.d/docker-clean \
  && apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl nginx gosu \
@@ -26,7 +26,7 @@ WORKDIR /app
 COPY requirements.txt ./requirements.txt
 # Runtime bytecode is disabled above, so compiling package bytecode during
 # install only adds build time and image size without being reused at runtime.
-RUN --mount=type=cache,target=/root/.cache/pip pip install --no-compile -r requirements.txt
+RUN --mount=type=cache,id=void-pip-cache,target=/root/.cache/pip pip install --no-compile -r requirements.txt
 COPY app ./app
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
