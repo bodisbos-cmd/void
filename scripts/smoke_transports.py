@@ -329,7 +329,6 @@ def main():
             if executable != "xray" and not ("run" in args and "/data/xray.json" in args):
                 raise RuntimeError("Xray PID file does not point to the server-side Xray process")
             os.kill(server_pid, 15)
-            killed = True
         except (OSError, ValueError, ProcessLookupError) as exc:
             raise RuntimeError("Could not stop the server-side Xray process for recovery test") from exc
 
