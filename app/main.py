@@ -554,11 +554,12 @@ async def lifespan(app):
         task.cancel()
         try: await task
         except asyncio.CancelledError: pass
-        if xray_proc and xray_proc.poll() is None:
+        if xray_proc and xray_proc.poll() is None and hasattr(xray_proc,"terminate"):
             xray_proc.terminate()
-            try: await asyncio.to_thread(xray_proc.wait,timeout=4)
-            except subprocess.TimeoutExpired:
-                xray_proc.kill(); await asyncio.to_thread(xray_proc.wait,timeout=2)
+            if hasattr(xray_proc,"wait"):
+                try: await asyncio.to_thread(xray_proc.wait,timeout=4)
+                except subprocess.TimeoutExpired:
+                    xray_proc.kill(); await asyncio.to_thread(xray_proc.wait,timeout=2)
 app=FastAPI(title=APP_NAME,docs_url=None,redoc_url=None,openapi_url=None,lifespan=lifespan)
 
 @app.get("/brand-logo", include_in_schema=False)
