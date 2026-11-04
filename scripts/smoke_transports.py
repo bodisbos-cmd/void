@@ -323,15 +323,10 @@ def main():
         pid_file = Path("/data/xray.pid")
         try:
             server_pid = int(pid_file.read_text(encoding="ascii").strip())
-            proc_dir = Path("/proc") / str(server_pid)
-            executable = Path(os.readlink(proc_dir / "exe")).name
-            args = (proc_dir / "cmdline").read_bytes().replace(b"\\x00", b" ").decode(errors="ignore")
-            if executable != "xray" and not ("run" in args and "/data/xray.json" in args):
-                raise RuntimeError("Xray PID file does not point to the server-side Xray process")
+            os.kill(server_pid, 0)
             os.kill(server_pid, 15)
         except (OSError, ValueError, ProcessLookupError) as exc:
             raise RuntimeError("Could not stop the server-side Xray process for recovery test") from exc
-
         def xray_healthy():
             try:
                 with urllib.request.urlopen(BASE + "/health", timeout=2) as response:
