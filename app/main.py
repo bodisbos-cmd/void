@@ -34,7 +34,7 @@ PROFILES=[
     {"key":"ss_ws","label":"Shadowsocks 2022 · WebSocket TLS","protocol":"shadowsocks","network":"ws","path":"/ss-ws","port":10009,"mode":None},
 ]
 DATA_DIR=Path(os.getenv("DATA_DIR") or os.getenv("RAILWAY_VOLUME_MOUNT_PATH") or "/data"); DATA_DIR.mkdir(parents=True,exist_ok=True)
-DB_PATH=DATA_DIR/"panel.sqlite3"; XRAY_CONFIG=DATA_DIR/"xray.json"
+DB_PATH=DATA_DIR/"panel.sqlite3"; XRAY_CONFIG=DATA_DIR/"xray.json"; XRAY_PID_FILE=DATA_DIR/"xray.pid"
 XRAY_BIN=os.getenv("XRAY_BIN","/usr/local/bin/xray"); PUBLIC_DOMAIN=os.getenv("RAILWAY_PUBLIC_DOMAIN","").strip()
 BASE_URL=os.getenv("BASE_URL","").strip().rstrip("/")
 
@@ -386,6 +386,7 @@ async def start_xray():
         err=open(err_path,"ab")
         try: xray_proc=subprocess.Popen([XRAY_BIN,"run","-config",str(XRAY_CONFIG)],stdout=err,stderr=err)
         finally: err.close()
+        XRAY_PID_FILE.write_text(str(xray_proc.pid),encoding="ascii")
         for _ in range(15):
             if xray_proc.poll() is not None: raise RuntimeError("Xray exited; inspect /data/xray-stderr.log")
             if await asyncio.to_thread(xray_api_ready):
@@ -560,6 +561,7 @@ async def lifespan(app):
                 try: await asyncio.to_thread(xray_proc.wait,timeout=4)
                 except subprocess.TimeoutExpired:
                     xray_proc.kill(); await asyncio.to_thread(xray_proc.wait,timeout=2)
+        XRAY_PID_FILE.unlink(missing_ok=True)
 app=FastAPI(title=APP_NAME,docs_url=None,redoc_url=None,openapi_url=None,lifespan=lifespan)
 
 @app.get("/brand-logo", include_in_schema=False)
