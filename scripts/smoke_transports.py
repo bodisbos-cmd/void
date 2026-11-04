@@ -321,11 +321,14 @@ def main():
         # Kill only the server-side Xray process and verify the app's watchdog
         # brings it back. Client Xray processes have already been terminated.
         killed = False
-        for cmdline in Path("/proc").glob("[0-9]*/cmdline"):
+        for proc_dir in Path("/proc").glob("[0-9]*"):
             try:
-                pid = int(cmdline.parent.name)
-                args = cmdline.read_bytes().replace(b"\x00", b" ").decode(errors="ignore")
-                if XRAY in args and "run" in args and "/data/xray.json" in args:
+                pid = int(proc_dir.name)
+                cmdline = proc_dir / "cmdline"
+                args = cmdline.read_bytes().replace(b"\\x00", b" ").decode(errors="ignore")
+                executable = Path(os.readlink(proc_dir / "exe")).name
+                is_xray = executable == "xray" or XRAY in args
+                if is_xray and "run" in args and "/data/xray.json" in args:
                     os.kill(pid, 15)
                     killed = True
                     break
