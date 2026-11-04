@@ -320,22 +320,18 @@ def main():
 
         # Kill only the server-side Xray process and verify the app's watchdog
         # brings it back. Client Xray processes have already been terminated.
-        killed = False
-        for proc_dir in Path("/proc").glob("[0-9]*"):
-            try:
-                pid = int(proc_dir.name)
-                cmdline = proc_dir / "cmdline"
-                args = cmdline.read_bytes().replace(b"\\x00", b" ").decode(errors="ignore")
-                executable = Path(os.readlink(proc_dir / "exe")).name
-                is_xray = executable == "xray" or XRAY in args
-                if is_xray and "run" in args and "/data/xray.json" in args:
-                    os.kill(pid, 15)
-                    killed = True
-                    break
-            except (OSError, ValueError, ProcessLookupError):
-                continue
-        if not killed:
-            raise RuntimeError("Could not locate the server-side Xray process for recovery test")
+        pid_file = Path("/data/xray.pid")
+        try:
+            server_pid = int(pid_file.read_text(encoding="ascii").strip())
+            proc_dir = Path("/proc") / str(server_pid)
+            executable = Path(os.readlink(proc_dir / "exe")).name
+            args = (proc_dir / "cmdline").read_bytes().replace(b"\\x00", b" ").decode(errors="ignore")
+            if executable != "xray" and not ("run" in args and "/data/xray.json" in args):
+                raise RuntimeError("Xray PID file does not point to the server-side Xray process")
+            os.kill(server_pid, 15)
+            killed = True
+        except (OSError, ValueError, ProcessLookupError) as exc:
+            raise RuntimeError("Could not stop the server-side Xray process for recovery test") from exc
 
         def xray_healthy():
             try:
