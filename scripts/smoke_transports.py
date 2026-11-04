@@ -320,20 +320,13 @@ def main():
 
         # Kill only the server-side Xray process and verify the app's watchdog
         # brings it back. Client Xray processes have already been terminated.
-        killed = False
-        for cmdline in Path("/proc").glob("[0-9]*/cmdline"):
-            try:
-                pid = int(cmdline.parent.name)
-                args = cmdline.read_bytes().replace(b"\x00", b" ").decode(errors="ignore")
-                if XRAY in args and "run" in args and "/data/xray.json" in args:
-                    os.kill(pid, 15)
-                    killed = True
-                    break
-            except (OSError, ValueError, ProcessLookupError):
-                continue
-        if not killed:
-            raise RuntimeError("Could not locate the server-side Xray process for recovery test")
-
+        pid_file = Path("/data/xray.pid")
+        try:
+            server_pid = int(pid_file.read_text(encoding="ascii").strip())
+            os.kill(server_pid, 0)
+            os.kill(server_pid, 15)
+        except (OSError, ValueError, ProcessLookupError) as exc:
+            raise RuntimeError("Could not stop the server-side Xray process for recovery test") from exc
         def xray_healthy():
             try:
                 with urllib.request.urlopen(BASE + "/health", timeout=2) as response:
