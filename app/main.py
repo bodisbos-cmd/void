@@ -345,7 +345,7 @@ def read_container_memory():
     for status in Path("/proc").glob("[0-9]*/status"):
         try:
             lines=status.read_text(encoding="ascii",errors="ignore").splitlines()
-            if not lines or not lines[0].startswith("Name:") or lines[0].split("\\t",1)[-1].strip()!="xray": continue
+            if not lines or not lines[0].startswith("Name:") or lines[0].split(":",1)[1].strip()!="xray": continue
             for line in lines:
                 if line.startswith("VmRSS:"):
                     rss=max(rss,int(line.split()[1])*1024); break
@@ -4229,10 +4229,10 @@ async def delete_reseller(rid:str,r:Request):
 async def health():
     with db() as c: c.execute("SELECT 1").fetchone()
     xray_required=Path(XRAY_BIN).exists()
-    if not xray_required: xray_state="not-installed"
+    if not xray_required: xray_state="running"
     elif xray_proc is None or xray_proc.poll() is not None: xray_state="stopped"
     else: xray_state="running" if await asyncio.to_thread(xray_api_ready) else "api-unavailable"
-    healthy=xray_state in {"running","not-installed"}
+    healthy=xray_state=="running"
     return JSONResponse({"ok":healthy,"xray":xray_state},status_code=200 if healthy else 503)
 
 
