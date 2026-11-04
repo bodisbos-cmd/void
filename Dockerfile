@@ -9,14 +9,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     XRAY_BIN=/usr/local/bin/xray \
     COOKIE_SECURE=1
 
-# Keep package indexes and downloaded .deb files in BuildKit caches rather
-# than the image layer. Rebuilds can reuse them without inflating the image.
-RUN --mount=type=cache,id=void-apt-archives,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,id=void-apt-lists,target=/var/lib/apt/lists,sharing=locked \
-    rm -f /etc/apt/apt.conf.d/docker-clean \
- && apt-get update \
+# Install system packages and remove package indexes from the image layer.
+RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl nginx gosu \
- && rm -f /etc/nginx/sites-enabled/default
+ && rm -f /etc/nginx/sites-enabled/default \
+ && rm -rf /var/lib/apt/lists/*
 
 # Copy the official Xray binary from the upstream, version-pinned image.
 COPY --from=xray /usr/local/bin/xray /usr/local/bin/xray
@@ -24,9 +21,8 @@ RUN /usr/local/bin/xray version
 
 WORKDIR /app
 COPY requirements.txt ./requirements.txt
-# Runtime bytecode is disabled above, so compiling package bytecode during
-# install only adds build time and image size without being reused at runtime.
-RUN --mount=type=cache,id=void-pip-cache,target=/root/.cache/pip pip install --no-compile -r requirements.txt
+# Runtime bytecode and pip's download cache are not needed in the final image.
+RUN pip install --no-cache-dir --no-compile -r requirements.txt
 COPY app ./app
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
