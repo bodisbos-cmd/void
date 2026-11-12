@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM ghcr.io/xtls/xray-core:26.9.8 AS xray
 
 FROM python:3.12-slim-bookworm
