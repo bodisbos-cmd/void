@@ -1,4 +1,4 @@
-FROM ghcr.io/xtls/xray-core:26.9.8 AS xray
+FROM ghcr.io/xtls/xray-core:26.10.31 AS xray
 
 # Docker Official Images are mirrored here by Docker's verified ECR account.
 # This avoids depending on Docker Hub for the Python base image pull.
