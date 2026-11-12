@@ -52,9 +52,12 @@ def test_railway_restarts_failed_or_stopped_service_and_waits_for_health():
     assert config["deploy"]["restartPolicyType"] == "ALWAYS"
 
 
-def test_docker_build_avoids_railway_invalid_cache_mount_ids_and_keeps_image_small():
+def test_docker_build_avoids_external_frontend_and_railway_invalid_cache_mount_ids():
     dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
-    assert "# syntax=docker/dockerfile:1" in dockerfile
+    # Do not pull docker/dockerfile:1 as an extra image before resolving the
+    # two actual runtime image dependencies. BuildKit bundles a Dockerfile
+    # frontend, so this project does not need an external syntax image.
+    assert not dockerfile.startswith("# syntax=")
     assert "pip install --no-cache-dir --no-compile -r requirements.txt" in dockerfile
     assert "apt-get update" in dockerfile
     assert "apt-get install -y --no-install-recommends" in dockerfile
